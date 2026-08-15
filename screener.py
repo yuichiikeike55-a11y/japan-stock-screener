@@ -991,7 +991,41 @@ def main():
             indent=2,
             allow_nan=False
         )
+reacceleration_latest = {
+    "strategy": "reacceleration_pullback",
+    "base_date": base_date.strftime(
+        "%Y-%m-%d"
+    ),
+    "generated_at": datetime.now(
+        timezone.utc
+    ).isoformat(),
+    "universe_count": universe_count,
+    "processed_count": processed_count,
+    "coverage_pct": round(
+        coverage_pct,
+        2
+    ),
+    "eligible_count": len(
+        reacceleration_result
+    ),
+    "results": safe_records(
+        reacceleration_result
+    )
+}
 
+with open(
+    OUTPUT_DIR / "reacceleration_latest.json",
+    "w",
+    encoding="utf-8"
+) as f:
+    json.dump(
+        reacceleration_latest,
+        f,
+        ensure_ascii=False,
+        indent=2,
+        allow_nan=False
+    )
+    
     # 9. health.json
     health = {
         "status": (
