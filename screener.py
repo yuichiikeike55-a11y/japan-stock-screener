@@ -670,6 +670,73 @@ def main():
         base_date.date()
     )
 
+    # Retry only tickers that do not reach base_date
+    retry_end_date = base_date + pd.Timedelta(days=1)
+    retry_start_date = (
+        retry_end_date - pd.Timedelta(days=LOOKBACK_DAYS)
+    )
+
+    stale_tickers = []
+
+    for ticker, ticker_df in price_data.items():
+        if ticker_df is None or ticker_df.empty:
+            continue
+
+        last_date = pd.Timestamp(
+            ticker_df.index[-1]
+        ).tz_localize(None)
+
+        if last_date < base_date:
+            stale_tickers.append(ticker)
+
+    print(
+        "Stale tickers to retry:",
+        len(stale_tickers)
+    )
+
+    for ticker in stale_tickers:
+        try:
+            retry_df = download_one(
+                ticker,
+                retry_start_date.strftime("%Y-%m-%d"),
+                retry_end_date.strftime("%Y-%m-%d"),
+            )
+
+            if retry_df is None or retry_df.empty:
+                continue
+
+            retry_df.index = pd.to_datetime(
+                retry_df.index
+            ).tz_localize(None)
+
+            required = {"High", "Close", "Volume"}
+
+            if not required.issubset(retry_df.columns):
+                continue
+
+            retry_df = retry_df[
+                ["High", "Close", "Volume"]
+            ].dropna(how="all")
+
+            if retry_df.empty:
+                continue
+
+            if retry_df.index[-1] >= base_date:
+                price_data[ticker] = retry_df
+
+                print(
+                    "Stale retry updated:",
+                    ticker,
+                    retry_df.index[-1].date()
+                )
+
+        except Exception as e:
+            print(
+                "Stale retry failed:",
+                ticker,
+                e
+            )
+
     # 4. Metrics
     metrics, metric_failures = (
         calculate_metrics(
