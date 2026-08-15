@@ -485,7 +485,10 @@ def calculate_metrics(
             / previous_volume
         )
 
-                delta = close.diff()
+        delta = close.diff()
+
+        gain = delta.clip(lower=0)
+        loss = -delta.clip(upper=0)
 
         gain = delta.clip(lower=0)
         loss = -delta.clip(upper=0)
