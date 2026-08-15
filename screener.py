@@ -485,31 +485,26 @@ def calculate_metrics(
             / previous_volume
         )
 
-        delta = close.diff()
+                delta = close.diff()
 
         gain = delta.clip(lower=0)
         loss = -delta.clip(upper=0)
 
-        avg_gain = gain.iloc[1:15].mean()
-        avg_loss = loss.iloc[1:15].mean()
+        gain_sum = gain.tail(14).sum()
+        loss_sum = loss.tail(14).sum()
 
-        for i in range(15, len(close)):
-            avg_gain = (
-                avg_gain * 13
-                + gain.iloc[i]
-            ) / 14
+        total_move = (
+            gain_sum
+            + loss_sum
+        )
 
-            avg_loss = (
-                avg_loss * 13
-                + loss.iloc[i]
-            ) / 14
-
-        if avg_loss == 0:
-            rsi14 = 100.0
+        if total_move == 0:
+            rsi14 = 50.0
         else:
-            rs = avg_gain / avg_loss
-            rsi14 = 100.0 - (
-                100.0 / (1.0 + rs)
+            rsi14 = (
+                gain_sum
+                / total_move
+                * 100.0
             )
         
         ma5 = float(
