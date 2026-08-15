@@ -1075,7 +1075,7 @@ print(
 )
 
 if not reacceleration_result.empty:
-    　　　　print()
+    print()
     　　　　print(
         　　　　reacceleration_result[
             　　　　[
