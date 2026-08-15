@@ -576,6 +576,9 @@ else:
             "high52_gap_pct": high52_gap,
             "avg_turnover_5d": avg_turnover_5d,
             "volume": current_volume,
+            "previous_volume": previous_volume,
+"volume_ratio_prev": volume_ratio_prev,
+"rsi14": rsi14,
             "volume_20d_ago": volume_20d_ago,
             "volume_ratio_20d": volume_ratio,
         })
