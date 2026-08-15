@@ -659,7 +659,7 @@ def main():
         )
     )
 
-    # 3. Base date
+        # 3. Base date
     base_date = choose_base_date(
         price_data,
         requested_date
@@ -682,9 +682,11 @@ def main():
         if ticker_df is None or ticker_df.empty:
             continue
 
-        last_date = pd.Timestamp(
-            ticker_df.index[-1]
+        ticker_df.index = pd.to_datetime(
+            ticker_df.index
         ).tz_localize(None)
+
+        last_date = ticker_df.index[-1]
 
         if last_date < base_date:
             stale_tickers.append(ticker)
@@ -709,9 +711,15 @@ def main():
                 retry_df.index
             ).tz_localize(None)
 
-            required = {"High", "Close", "Volume"}
+            required = {
+                "High",
+                "Close",
+                "Volume"
+            }
 
-            if not required.issubset(retry_df.columns):
+            if not required.issubset(
+                retry_df.columns
+            ):
                 continue
 
             retry_df = retry_df[
