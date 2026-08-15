@@ -591,6 +591,60 @@ def calculate_metrics(
 # ============================================================
 
 def apply_screen(metrics):
+  def apply_reacceleration_screen(metrics):
+    if metrics.empty:
+        return metrics.copy()
+
+    mask = (
+        metrics["close"].between(
+            700,
+            4000,
+            inclusive="both"
+        )
+        &
+        metrics["high52_gap_pct"].between(
+            -10,
+            -3,
+            inclusive="both"
+        )
+        &
+        (
+            metrics["avg_turnover_5d"]
+            >= 1_500_000_000
+        )
+        &
+        metrics["volume_ratio_prev"].between(
+            1.2,
+            2.5,
+            inclusive="both"
+        )
+        &
+        metrics["ma25_gap_pct"].between(
+            -3,
+            5,
+            inclusive="both"
+        )
+        &
+        metrics["rsi14"].between(
+            45,
+            60,
+            inclusive="both"
+        )
+        &
+        (
+            metrics["volume"]
+            >= 1_500_000
+        )
+    )
+
+    result = metrics[mask].copy()
+
+    result = result.sort_values(
+        "avg_turnover_5d",
+        ascending=False
+    )
+
+    return result
     if metrics.empty:
         return metrics.copy()
 
