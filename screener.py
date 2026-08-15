@@ -301,17 +301,44 @@ def download_prices(universe, base_date=None):
                     end_date.strftime("%Y-%m-%d"),
                 )
 
-            if ticker_df is None or ticker_df.empty:
-                failures.append({
-                    "ticker": ticker,
-                    "reason": "download_failed"
-                })
-            else:
-                ticker_df.index = pd.to_datetime(
-                    ticker_df.index
-                ).tz_localize(None)
+        if ticker_df is not None and not ticker_df.empty:
+    ticker_df.index = pd.to_datetime(
+        ticker_df.index
+    ).tz_localize(None)
 
-                all_data[ticker] = ticker_df
+    if (
+        base_date is not None
+        and ticker_df.index[-1].normalize()
+        < base_date
+    ):
+        print(
+            "Retry stale data:",
+            ticker,
+            "last_date:",
+            ticker_df.index[-1].date()
+        )
+
+        retry_df = download_one(
+            ticker,
+            start_date.strftime("%Y-%m-%d"),
+            end_date.strftime("%Y-%m-%d"),
+        )
+
+        if retry_df is not None and not retry_df.empty:
+            retry_df.index = pd.to_datetime(
+                retry_df.index
+            ).tz_localize(None)
+
+            if retry_df.index[-1] > ticker_df.index[-1]:
+                ticker_df = retry_df
+
+if ticker_df is None or ticker_df.empty:
+    failures.append({
+        "ticker": ticker,
+        "reason": "download_failed"
+    })
+else:
+    all_data[ticker] = ticker_df
 
         time.sleep(1)
 
