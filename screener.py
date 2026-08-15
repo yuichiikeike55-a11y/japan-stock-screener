@@ -470,6 +470,48 @@ def calculate_metrics(
         current_close = float(close.iloc[-1])
         current_volume = float(volume.iloc[-1])
 
+previous_volume = float(volume.iloc[-2])
+
+if previous_volume <= 0:
+    failures.append({
+        "code": code,
+        "name": name,
+        "reason": "invalid_previous_volume"
+    })
+    continue
+
+volume_ratio_prev = (
+    current_volume
+    / previous_volume
+)
+
+delta = close.diff()
+
+gain = delta.clip(lower=0)
+loss = -delta.clip(upper=0)
+
+avg_gain = gain.iloc[1:15].mean()
+avg_loss = loss.iloc[1:15].mean()
+
+for i in range(15, len(close)):
+    avg_gain = (
+        avg_gain * 13
+        + gain.iloc[i]
+    ) / 14
+
+    avg_loss = (
+        avg_loss * 13
+        + loss.iloc[i]
+    ) / 14
+
+if avg_loss == 0:
+    rsi14 = 100.0
+else:
+    rs = avg_gain / avg_loss
+    rsi14 = 100.0 - (
+        100.0 / (1.0 + rs)
+    )
+        
         ma5 = float(
             close.tail(5).mean()
         )
