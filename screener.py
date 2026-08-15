@@ -401,6 +401,7 @@ def calculate_metrics(
                 "code": code,
                 "name": name,
                 "reason": "base_date_missing"
+                "last_date": x.index[-1].strftime("%Y-%m-%d")
             })
             continue
 
