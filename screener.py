@@ -591,7 +591,56 @@ def calculate_metrics(
 # ============================================================
 
 def apply_screen(metrics):
-  def apply_reacceleration_screen(metrics):
+    if metrics.empty:
+        return metrics.copy()
+
+    mask = (
+        metrics["close"].between(
+            PRICE_MIN,
+            PRICE_MAX,
+            inclusive="both"
+        )
+        &
+        metrics["high52_gap_pct"].between(
+            HIGH52_GAP_MIN,
+            HIGH52_GAP_MAX,
+            inclusive="both"
+        )
+        &
+        (
+            metrics["avg_turnover_5d"]
+            >= AVG_TURNOVER_5D_MIN
+        )
+        &
+        metrics["volume_ratio_20d"].between(
+            VOLUME_RATIO_MIN,
+            VOLUME_RATIO_MAX,
+            inclusive="both"
+        )
+        &
+        (
+            metrics["ma5_gap_pct"]
+            >= MA5_GAP_MIN
+        )
+        &
+        metrics["ma25_gap_pct"].between(
+            MA25_GAP_MIN,
+            MA25_GAP_MAX,
+            inclusive="both"
+        )
+    )
+
+    result = metrics[mask].copy()
+
+    result = result.sort_values(
+        "avg_turnover_5d",
+        ascending=False
+    )
+
+    return result.head(10)
+
+
+def apply_reacceleration_screen(metrics):
     if metrics.empty:
         return metrics.copy()
 
@@ -645,54 +694,6 @@ def apply_screen(metrics):
     )
 
     return result
-    if metrics.empty:
-        return metrics.copy()
-
-    mask = (
-        metrics["close"].between(
-            PRICE_MIN,
-            PRICE_MAX,
-            inclusive="both"
-        )
-        &
-        metrics["high52_gap_pct"].between(
-            HIGH52_GAP_MIN,
-            HIGH52_GAP_MAX,
-            inclusive="both"
-        )
-        &
-        (
-            metrics["avg_turnover_5d"]
-            >= AVG_TURNOVER_5D_MIN
-        )
-        &
-        metrics["volume_ratio_20d"].between(
-            VOLUME_RATIO_MIN,
-            VOLUME_RATIO_MAX,
-            inclusive="both"
-        )
-        &
-        (
-            metrics["ma5_gap_pct"]
-            >= MA5_GAP_MIN
-        )
-        &
-        metrics["ma25_gap_pct"].between(
-            MA25_GAP_MIN,
-            MA25_GAP_MAX,
-            inclusive="both"
-        )
-    )
-
-    result = metrics[mask].copy()
-
-    result = result.sort_values(
-        "avg_turnover_5d",
-        ascending=False
-    )
-
-    return result.head(10)
-
 
 # ============================================================
 # JSON用
