@@ -1095,5 +1095,37 @@ def main():
                 index=False
             )
         )
+    debug_codes = [
+        "7186",
+        "9143",
+        "7267",
+        "8593",
+    ]
+
+    debug_result = metrics[
+        metrics["code"].isin(debug_codes)
+    ].copy()
+
+    print()
+    print("=== Reacceleration Debug ===")
+
+    print(
+        debug_result[
+            [
+                "code",
+                "name",
+                "close",
+                "high52_gap_pct",
+                "avg_turnover_5d",
+                "volume",
+                "previous_volume",
+                "volume_ratio_prev",
+                "ma25_gap_pct",
+                "rsi14",
+            ]
+        ].to_string(
+            index=False
+        )
+    )
 if __name__ == "__main__":
     main()
