@@ -698,18 +698,48 @@ def main():
 
     for ticker in stale_tickers:
         try:
+            print(
+                "Retrying stale ticker:",
+                ticker,
+                retry_start_date.date(),
+                retry_end_date.date()
+            )
+
             retry_df = download_one(
                 ticker,
                 retry_start_date.strftime("%Y-%m-%d"),
                 retry_end_date.strftime("%Y-%m-%d"),
             )
 
-            if retry_df is None or retry_df.empty:
+            if retry_df is None:
+                print(
+                    "Retry result is None:",
+                    ticker
+                )
+                continue
+
+            if retry_df.empty:
+                print(
+                    "Retry result is empty:",
+                    ticker
+                )
                 continue
 
             retry_df.index = pd.to_datetime(
                 retry_df.index
             ).tz_localize(None)
+
+            print(
+                "Retry last date:",
+                ticker,
+                retry_df.index[-1].date()
+            )
+
+            print(
+                "Retry columns:",
+                ticker,
+                list(retry_df.columns)
+            )
 
             required = {
                 "High",
@@ -720,6 +750,10 @@ def main():
             if not required.issubset(
                 retry_df.columns
             ):
+                print(
+                    "Retry missing columns:",
+                    ticker
+                )
                 continue
 
             retry_df = retry_df[
@@ -727,6 +761,10 @@ def main():
             ].dropna(how="all")
 
             if retry_df.empty:
+                print(
+                    "Retry empty after dropna:",
+                    ticker
+                )
                 continue
 
             if retry_df.index[-1] >= base_date:
@@ -737,12 +775,18 @@ def main():
                     ticker,
                     retry_df.index[-1].date()
                 )
+            else:
+                print(
+                    "Stale retry still old:",
+                    ticker,
+                    retry_df.index[-1].date()
+                )
 
         except Exception as e:
             print(
                 "Stale retry failed:",
                 ticker,
-                e
+                repr(e)
             )
 
     # 4. Metrics
