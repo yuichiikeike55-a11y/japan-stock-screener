@@ -899,6 +899,7 @@ def main():
 
     # 5. Screen
     result = apply_screen(metrics)
+    reacceleration_result = apply_reacceleration_screen(metrics)
 
     # 6. Failure table
     failure_rows = []
@@ -1067,6 +1068,32 @@ def main():
             )
         )
 
+print()
+print(
+    "Reacceleration Eligible:",
+    len(reacceleration_result)
+)
+
+if not reacceleration_result.empty:
+    print()
+    print(
+        reacceleration_result[
+            [
+                "code",
+                "name",
+                "close",
+                "high52_gap_pct",
+                "avg_turnover_5d",
+                "volume",
+                "previous_volume",
+                "volume_ratio_prev",
+                "ma25_gap_pct",
+                "rsi14",
+            ]
+        ].to_string(
+            index=False
+        )
+    )
 
 if __name__ == "__main__":
     main()
