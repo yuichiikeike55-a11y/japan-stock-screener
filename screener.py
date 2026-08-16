@@ -692,6 +692,55 @@ def apply_reacceleration_screen(metrics):
     )
 
     return result
+def apply_initial_breakout_screen(metrics):
+    if metrics.empty:
+        return metrics.copy()
+
+    mask = (
+        metrics["close"].between(
+            1000,
+            5000,
+            inclusive="both"
+        )
+        &
+        metrics["high52_gap_pct"].between(
+            -6,
+            1,
+            inclusive="both"
+        )
+        &
+        (
+            metrics["avg_turnover_5d"]
+            >= 1_500_000_000
+        )
+        &
+        metrics["volume_ratio_prev"].between(
+            1.3,
+            2.5,
+            inclusive="both"
+        )
+        &
+        metrics["ma25_gap_pct"].between(
+            0,
+            8,
+            inclusive="both"
+        )
+        &
+        metrics["rsi14"].between(
+            50,
+            65,
+            inclusive="both"
+        )
+    )
+
+    result = metrics[mask].copy()
+
+    result = result.sort_values(
+        "avg_turnover_5d",
+        ascending=False
+    )
+
+    return result
 
 # ============================================================
 # JSON用
@@ -899,7 +948,8 @@ def main():
     # 5. Screen
     result = apply_screen(metrics)
     reacceleration_result = apply_reacceleration_screen(metrics)
-
+    initial_breakout_result = apply_initial_breakout_screen(metrics)
+    
     # 6. Failure table
     failure_rows = []
 
@@ -1024,7 +1074,41 @@ def main():
             ensure_ascii=False,
             indent=2,
             allow_nan=False
+        )    
+        initial_breakout_latest = {
+        "strategy": "initial_breakout_pullback",
+        "base_date": base_date.strftime(
+            "%Y-%m-%d"
+        ),
+        "generated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+        "universe_count": universe_count,
+        "processed_count": processed_count,
+        "coverage_pct": round(
+            coverage_pct,
+            2
+        ),
+        "eligible_count": len(
+            initial_breakout_result
+        ),
+        "results": safe_records(
+            initial_breakout_result
         )
+    }
+
+    with open(
+        OUTPUT_DIR / "initial_breakout_latest.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+        json.dump(
+            initial_breakout_latest,
+            f,
+            ensure_ascii=False,
+            indent=2,
+            allow_nan=False
+        )    
     
     # 9. health.json
     health = {
@@ -1127,6 +1211,32 @@ def main():
                 index=False
             )
         )
+        print()
+    print(
+        "Initial Breakout Eligible:",
+        len(initial_breakout_result)
+    )
+
+    if not initial_breakout_result.empty:
+        print()
+        print(
+            initial_breakout_result[
+                [
+                    "code",
+                    "name",
+                    "close",
+                    "high52_gap_pct",
+                    "avg_turnover_5d",
+                    "volume",
+                    "previous_volume",
+                    "volume_ratio_prev",
+                    "ma25_gap_pct",
+                    "rsi14",
+                ]
+            ].to_string(
+                index=False
+            )
+        )    
     debug_codes = [
         "7186",
         "9143",
