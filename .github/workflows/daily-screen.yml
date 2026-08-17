@@ -2,6 +2,11 @@ name: Daily Japan Stock Screener
 
 on:
   workflow_dispatch:
+    inputs:
+      base_date:
+        description: "Base date YYYY-MM-DD"
+        required: false
+        type: string
 
   schedule:
     # 平日 17:30 JST = 08:30 UTC
