@@ -704,7 +704,7 @@ def apply_initial_breakout_screen(metrics):
         )
         &
         metrics["high52_gap_pct"].between(
-            -7,
+            -6,
             1,
             inclusive="both"
         )
