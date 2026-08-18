@@ -742,6 +742,60 @@ def apply_initial_breakout_screen(metrics):
 
     return result
 
+def apply_volume_initial_screen(metrics):
+    if metrics.empty:
+        return metrics.copy()
+
+    mask = (
+        metrics["close"].between(
+            700,
+            4000,
+            inclusive="both"
+        )
+        &
+        metrics["high52_gap_pct"].between(
+            -5,
+            2,
+            inclusive="both"
+        )
+        &
+        (
+            metrics["avg_turnover_5d"]
+            >= 1_500_000_000
+        )
+        &
+        (
+            metrics["volume_ratio_prev"]
+            >= 0.8
+        )
+        &
+        metrics["ma25_gap_pct"].between(
+            0,
+            3,
+            inclusive="both"
+        )
+        &
+        metrics["rsi14"].between(
+            45,
+            55,
+            inclusive="both"
+        )
+        &
+        (
+            metrics["volume"]
+            >= 1_500_000
+        )
+    )
+
+    result = metrics[mask].copy()
+
+    result = result.sort_values(
+        "avg_turnover_5d",
+        ascending=False
+    )
+
+    return result
+
 # ============================================================
 # JSON用
 # ============================================================
@@ -949,6 +1003,7 @@ def main():
     result = apply_screen(metrics)
     reacceleration_result = apply_reacceleration_screen(metrics)
     initial_breakout_result = apply_initial_breakout_screen(metrics)
+    volume_initial_result = apply_volume_initial_screen(metrics)
     
     # 6. Failure table
     failure_rows = []
@@ -1109,7 +1164,42 @@ def main():
             indent=2,
             allow_nan=False
         )    
-    
+
+        volume_initial_latest = {
+        "strategy": "volume_initial_catch",
+        "base_date": base_date.strftime(
+            "%Y-%m-%d"
+        ),
+        "generated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+        "universe_count": universe_count,
+        "processed_count": processed_count,
+        "coverage_pct": round(
+            coverage_pct,
+            2
+        ),
+        "eligible_count": len(
+            volume_initial_result
+        ),
+        "results": safe_records(
+            volume_initial_result
+        )
+    }
+
+    with open(
+        OUTPUT_DIR / "volume_initial_latest.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+        json.dump(
+            volume_initial_latest,
+            f,
+            ensure_ascii=False,
+            indent=2,
+            allow_nan=False
+        )
+        
     # 9. health.json
     health = {
         "status": (
@@ -1236,7 +1326,34 @@ def main():
             ].to_string(
                 index=False
             )
-        )    
+        ) 
+    print()
+    print(
+        "Volume Initial Eligible:",
+        len(volume_initial_result)
+    )
+
+    if not volume_initial_result.empty:
+        print()
+        print(
+            volume_initial_result[
+                [
+                    "code",
+                    "name",
+                    "close",
+                    "high52_gap_pct",
+                    "avg_turnover_5d",
+                    "volume",
+                    "previous_volume",
+                    "volume_ratio_prev",
+                    "ma25_gap_pct",
+                    "rsi14",
+                ]
+            ].to_string(
+                index=False
+            )
+        )
+        
     debug_codes = [
         "7186",
         "9143",
