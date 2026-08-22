@@ -182,7 +182,6 @@ def calc_rsi(close, period=14):
     return rsi
 
 
-def download_history(symbol):
 def validate_ohlcv(df, symbol):
     """
     OHLCVの明らかな異常値を検出・除外する。
@@ -309,6 +308,71 @@ def validate_ohlcv(df, symbol):
     )
 
     return x, flags
+def download_history(symbol):
+    df = yf.download(
+        symbol,
+        period="2y",
+        interval="1d",
+        auto_adjust=False,
+        progress=False,
+        threads=False,
+    )
+
+    if df.empty:
+        return pd.DataFrame()
+
+    # yfinance MultiIndex対策
+    if isinstance(
+        df.columns,
+        pd.MultiIndex,
+    ):
+        df.columns = (
+            df.columns
+            .get_level_values(0)
+        )
+
+    required = [
+        "Open",
+        "High",
+        "Low",
+        "Close",
+        "Volume",
+    ]
+
+    missing = [
+        col
+        for col in required
+        if col not in df.columns
+    ]
+
+    if missing:
+        raise ValueError(
+            f"{symbol}: missing columns "
+            f"{missing}"
+        )
+
+    df = df[required].copy()
+
+    df = df.dropna(
+        subset=["Close"]
+    )
+
+    df.index = pd.to_datetime(
+        df.index
+    )
+
+    # OHLCV異常値チェック
+    df, quality_flags = validate_ohlcv(
+        df,
+        symbol,
+    )
+
+    # build_latest_recordへ警告を渡す
+    df.attrs[
+        "data_quality_flags"
+    ] = quality_flags
+
+    return df    
     df = yf.download(
         symbol,
         period="2y",
