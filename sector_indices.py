@@ -231,10 +231,22 @@ def download_history(symbol):
         subset=["Close"]
     )
 
-    # 日本時間の日付だけ保存
     df.index = pd.to_datetime(
         df.index
     )
+
+    # OHLCV異常値チェック
+    df, quality_flags = (
+        validate_ohlcv(
+            df,
+            symbol,
+        )
+    )
+
+    # 後でlatest JSONへ渡す
+    df.attrs[
+        "data_quality_flags"
+    ] = quality_flags
 
     return df
 
@@ -296,6 +308,12 @@ def build_latest_record(
     df,
 ):
     x = calculate_metrics(df)
+    quality_flags = list(
+        df.attrs.get(
+            "data_quality_flags",
+            []
+        )
+    )
 
     if len(x) < 75:
         raise ValueError(
@@ -348,6 +366,42 @@ def build_latest_record(
 
     low52 = safe_float(
         current["low52"]
+    # =========================================
+    # 52週高値・安値の異常値チェック
+    # =========================================
+
+    if (
+        close is not None
+        and high52 is not None
+    ):
+        if high52 < close:
+            quality_flags.append(
+                "invalid_high52_below_close"
+            )
+            high52 = None
+
+    if (
+        close is not None
+        and low52 is not None
+    ):
+        if low52 > close:
+            quality_flags.append(
+                "invalid_low52_above_close"
+            )
+            low52 = None
+
+        elif low52 < close * 0.10:
+            quality_flags.append(
+                "invalid_low52_extreme_outlier"
+            )
+            low52 = None
+
+    # 警告の重複を削除
+    quality_flags = list(
+        dict.fromkeys(
+            quality_flags
+        )
+    )
     )
 
     volume = safe_float(
@@ -455,6 +509,13 @@ def build_latest_record(
         ],
         "source": "yfinance",
         "base_date": base_date,
+        "data_quality_status":
+            "warning"
+            if quality_flags
+            else "ok",
+
+        "data_quality_flags":
+            quality_flags,    
 
         "open": safe_float(
             current["Open"]
