@@ -1270,6 +1270,39 @@ def main():
         encoding="utf-8-sig"
     )
 
+    # 全銘柄の指標をJSON保存
+    all_metrics_latest = {
+        "strategy": "all_metrics",
+        "base_date": base_date.strftime(
+            "%Y-%m-%d"
+        ),
+        "generated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+        "universe_count": universe_count,
+        "processed_count": processed_count,
+        "coverage_pct": round(
+            coverage_pct,
+            2
+        ),
+        "results": safe_records(
+            metrics
+        )
+    }
+
+    with open(
+        OUTPUT_DIR / "all_metrics.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+        json.dump(
+            all_metrics_latest,
+            f,
+            ensure_ascii=False,
+            indent=2,
+            allow_nan=False
+        )
+
     # 全銘柄の指標をJSONでも保存
     all_metrics_latest = {
         "strategy": "all_metrics",
