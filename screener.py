@@ -1302,7 +1302,50 @@ def main():
             indent=2,
             allow_nan=False
         )
+    # 銘柄ごとの個別JSONを保存
+    stocks_dir = OUTPUT_DIR / "stocks"
 
+    stocks_dir.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    for record in safe_records(metrics):
+        code = str(
+            record.get(
+                "code",
+                ""
+            )
+        ).strip()
+
+        if not code:
+            continue
+
+        stock_data = {
+            "strategy": "individual_stock_metrics",
+            "base_date": base_date.strftime(
+                "%Y-%m-%d"
+            ),
+            "generated_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
+            "code": code,
+            "data": record
+        }
+
+        with open(
+            stocks_dir / f"{code}.json",
+            "w",
+            encoding="utf-8"
+        ) as f:
+            json.dump(
+                stock_data,
+                f,
+                ensure_ascii=False,
+                indent=2,
+                allow_nan=False
+            )
+    
     # 全銘柄の指標をJSONでも保存
     all_metrics_latest = {
         "strategy": "all_metrics",
