@@ -205,13 +205,24 @@ def download_one(ticker, start, end):
                 if isinstance(df.columns, pd.MultiIndex):
                     df.columns = df.columns.get_level_values(0)
 
-                required = {"High", "Close", "Volume"}
+                required = {
+                    "Open",
+                    "High",
+                    "Low",
+                    "Close",
+                    "Volume",
+                }
 
                 if required.issubset(df.columns):
                     return df[
-                        ["High", "Close", "Volume"]
+                        [
+                            "Open",
+                            "High",
+                            "Low",
+                            "Close",
+                            "Volume",
+                        ]
                     ].copy()
-
         except Exception as e:
             print(
                 f"{ticker} attempt {attempt + 1} error:",
@@ -276,14 +287,26 @@ def download_prices(universe, base_date=None):
                         ticker_df = data.copy()
 
                 if ticker_df is not None:
-                    required = {"High", "Close", "Volume"}
+                    required = {
+                        "Open",
+                        "High",
+                        "Low",
+                        "Close",
+                        "Volume",
+                    }
 
                     if not required.issubset(ticker_df.columns):
                         ticker_df = None
 
                 if ticker_df is not None:
                     ticker_df = ticker_df[
-                        ["High", "Close", "Volume"]
+                        [
+                            "Open",
+                            "High",
+                            "Low",
+                            "Close",
+                            "Volume",
+                        ]
                     ].dropna(how="all")
 
                     if ticker_df.empty:
@@ -385,6 +408,49 @@ def choose_base_date(price_data, requested=None):
 # ============================================================
 # 指標計算
 # ============================================================
+def calculate_rci(series, period):
+    values = pd.to_numeric(
+        series.tail(period),
+        errors="coerce"
+    )
+
+    if len(values) < period or values.isna().any():
+        return np.nan
+
+    n = len(values)
+
+    date_rank = np.arange(
+        n,
+        0,
+        -1,
+        dtype=float
+    )
+
+    price_rank = values.rank(
+        ascending=False,
+        method="average"
+    ).to_numpy(dtype=float)
+
+    d = date_rank - price_rank
+
+    denominator = (
+        n
+        * (n ** 2 - 1)
+    )
+
+    if denominator == 0:
+        return np.nan
+
+    rci = (
+        1.0
+        - (
+            6.0
+            * np.sum(d ** 2)
+            / denominator
+        )
+    ) * 100.0
+
+    return float(rci)
 
 def calculate_metrics(
     universe,
@@ -440,13 +506,23 @@ def calculate_metrics(
             })
             continue
 
-        close = pd.to_numeric(
-            x["Close"],
+        open_price = pd.to_numeric(
+            x["Open"],
             errors="coerce"
         )
 
         high = pd.to_numeric(
             x["High"],
+            errors="coerce"
+        )
+
+        low = pd.to_numeric(
+            x["Low"],
+            errors="coerce"
+        )
+
+        close = pd.to_numeric(
+            x["Close"],
             errors="coerce"
         )
 
@@ -456,8 +532,10 @@ def calculate_metrics(
         )
 
         if (
-            close.tail(25).isna().any()
+            open_price.tail(2).isna().any()
             or high.tail(252).isna().any()
+            or low.tail(20).isna().any()
+            or close.tail(75).isna().any()
             or volume.tail(21).isna().any()
         ):
             failures.append({
@@ -467,10 +545,45 @@ def calculate_metrics(
             })
             continue
 
-        current_close = float(close.iloc[-1])
-        current_volume = float(volume.iloc[-1])
+        current_open = float(
+            open_price.iloc[-1]
+        )
 
-        previous_volume = float(volume.iloc[-2])
+        current_high = float(
+            high.iloc[-1]
+        )
+
+        current_low = float(
+            low.iloc[-1]
+        )
+
+        current_close = float(
+            close.iloc[-1]
+        )
+
+        current_volume = float(
+            volume.iloc[-1]
+        )
+
+        previous_open = float(
+            open_price.iloc[-2]
+        )
+
+        previous_high = float(
+            high.iloc[-2]
+        )
+
+        previous_low = float(
+            low.iloc[-2]
+        )
+
+        previous_close = float(
+            close.iloc[-2]
+        )
+
+        previous_volume = float(
+            volume.iloc[-2]
+        )
 
         if previous_volume <= 0:
             failures.append({
@@ -486,9 +599,6 @@ def calculate_metrics(
         )
 
         delta = close.diff()
-
-        gain = delta.clip(lower=0)
-        loss = -delta.clip(upper=0)
 
         gain = delta.clip(lower=0)
         loss = -delta.clip(upper=0)
@@ -509,7 +619,7 @@ def calculate_metrics(
                 / total_move
                 * 100.0
             )
-        
+
         ma5 = float(
             close.tail(5).mean()
         )
@@ -518,8 +628,46 @@ def calculate_metrics(
             close.tail(25).mean()
         )
 
+        ma75 = float(
+            close.tail(75).mean()
+        )
+
+        ma25_previous = float(
+            close.iloc[:-1].tail(25).mean()
+        )
+
+        ma25_slope = (
+            ma25
+            - ma25_previous
+        )
+
+        if ma25_slope > 0:
+            ma25_direction = "up"
+        elif ma25_slope < 0:
+            ma25_direction = "down"
+        else:
+            ma25_direction = "flat"
+
+        rci9 = calculate_rci(
+            close,
+            9
+        )
+
+        rci27 = calculate_rci(
+            close,
+            27
+        )
+
         high52 = float(
             high.tail(252).max()
+        )
+
+        high20 = float(
+            high.tail(20).max()
+        )
+
+        low20 = float(
+            low.tail(20).min()
         )
 
         volume_20d_ago = float(
@@ -544,15 +692,27 @@ def calculate_metrics(
         )
 
         ma5_gap = (
-            current_close / ma5 - 1
+            current_close
+            / ma5
+            - 1
         ) * 100
 
         ma25_gap = (
-            current_close / ma25 - 1
+            current_close
+            / ma25
+            - 1
         ) * 100
 
         high52_gap = (
-            current_close / high52 - 1
+            current_close
+            / high52
+            - 1
+        ) * 100
+
+        high20_gap = (
+            current_close
+            / high20
+            - 1
         ) * 100
 
         volume_ratio = (
@@ -560,23 +720,62 @@ def calculate_metrics(
             / volume_20d_ago
         )
 
+        touched_ma25 = bool(
+            current_low <= ma25
+            <= current_high
+        )
+
+        recovered_ma25 = bool(
+            current_low < ma25
+            and current_close >= ma25
+        )
+
         metrics.append({
             "code": code,
             "name": str(name),
             "market": str(market),
             "base_date": base_date.strftime("%Y-%m-%d"),
+
+            "open": current_open,
+            "high": current_high,
+            "low": current_low,
             "close": current_close,
+
+            "previous_open": previous_open,
+            "previous_high": previous_high,
+            "previous_low": previous_low,
+            "previous_close": previous_close,
+
             "ma5": ma5,
             "ma25": ma25,
+            "ma75": ma75,
+
+            "ma25_previous": ma25_previous,
+            "ma25_slope": ma25_slope,
+            "ma25_direction": ma25_direction,
+
+            "rci9": rci9,
+            "rci27": rci27,
+            "rsi14": rsi14,
+
             "high52": high52,
+            "high20": high20,
+            "low20": low20,
+
             "ma5_gap_pct": ma5_gap,
             "ma25_gap_pct": ma25_gap,
             "high52_gap_pct": high52_gap,
+            "high20_gap_pct": high20_gap,
+
+            "touched_ma25": touched_ma25,
+            "recovered_ma25": recovered_ma25,
+
             "avg_turnover_5d": avg_turnover_5d,
+
             "volume": current_volume,
             "previous_volume": previous_volume,
-"volume_ratio_prev": volume_ratio_prev,
-"rsi14": rsi14,
+            "volume_ratio_prev": volume_ratio_prev,
+
             "volume_20d_ago": volume_20d_ago,
             "volume_ratio_20d": volume_ratio,
         })
@@ -943,9 +1142,11 @@ def main():
             )
 
             required = {
+                "Open",
                 "High",
+                "Low",
                 "Close",
-                "Volume"
+                "Volume",
             }
 
             if not required.issubset(
@@ -958,7 +1159,13 @@ def main():
                 continue
 
             retry_df = retry_df[
-                ["High", "Close", "Volume"]
+                [
+                    "Open",
+                    "High",
+                    "Low",
+                    "Close",
+                    "Volume",
+                ]
             ].dropna(how="all")
 
             if retry_df.empty:
@@ -1078,7 +1285,9 @@ def main():
             coverage_pct,
             2
         ),
-        "eligible_count": len(result),
+        "eligible_count": len(
+            result
+        ),
         "results": safe_records(
             result
         )
@@ -1096,6 +1305,7 @@ def main():
             indent=2,
             allow_nan=False
         )
+
     reacceleration_latest = {
         "strategy": "reacceleration_pullback",
         "base_date": base_date.strftime(
@@ -1129,8 +1339,9 @@ def main():
             ensure_ascii=False,
             indent=2,
             allow_nan=False
-        )    
-        initial_breakout_latest = {
+        )
+
+    initial_breakout_latest = {
         "strategy": "initial_breakout_pullback",
         "base_date": base_date.strftime(
             "%Y-%m-%d"
@@ -1163,9 +1374,9 @@ def main():
             ensure_ascii=False,
             indent=2,
             allow_nan=False
-        )    
+        )
 
-        volume_initial_latest = {
+    volume_initial_latest = {
         "strategy": "volume_initial_catch",
         "base_date": base_date.strftime(
             "%Y-%m-%d"
