@@ -403,7 +403,6 @@ def build_latest_record(
             quality_flags
         )
     )
-    )
 
     volume = safe_float(
         current["Volume"]
