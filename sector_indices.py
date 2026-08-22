@@ -183,6 +183,132 @@ def calc_rsi(close, period=14):
 
 
 def download_history(symbol):
+def validate_ohlcv(df, symbol):
+    """
+    OHLCVの明らかな異常値を検出・除外する。
+    異常値をMA・RSI・高安値計算へ混入させない。
+    """
+    x = df.copy()
+    flags = []
+
+    price_cols = [
+        "Open",
+        "High",
+        "Low",
+        "Close",
+    ]
+
+    # 1. 価格が0以下、infなど
+    for col in price_cols:
+        bad = (
+            ~np.isfinite(x[col])
+            | (x[col] <= 0)
+        )
+
+        if bad.any():
+            flags.append(
+                f"{col.lower()}_non_positive_or_invalid"
+            )
+
+            x.loc[
+                bad,
+                price_cols
+            ] = np.nan
+
+    # 2. OHLCの論理矛盾
+    bad_ohlc = (
+        (x["High"] < x["Low"])
+        | (x["High"] < x["Open"])
+        | (x["High"] < x["Close"])
+        | (x["Low"] > x["Open"])
+        | (x["Low"] > x["Close"])
+    )
+
+    if bad_ohlc.any():
+        flags.append(
+            "ohlc_inconsistency"
+        )
+
+        x.loc[
+            bad_ohlc,
+            price_cols
+        ] = np.nan
+
+    # 3. 前日比±40%以上を検出
+    close_ratio = (
+        x["Close"]
+        / x["Close"].shift(1)
+    )
+
+    extreme_move = (
+        (close_ratio > 1.40)
+        | (close_ratio < 0.60)
+    )
+
+    if extreme_move.any():
+        flags.append(
+            "extreme_daily_price_move_detected"
+        )
+
+    # 4. 周辺価格から極端に離れた単発値
+    rolling_median = (
+        x["Close"]
+        .rolling(
+            21,
+            center=True,
+            min_periods=5,
+        )
+        .median()
+    )
+
+    for col in price_cols:
+        ratio = (
+            x[col]
+            / rolling_median
+        )
+
+        bad_outlier = (
+            (ratio < 0.20)
+            | (ratio > 5.00)
+        )
+
+        if bad_outlier.any():
+            flags.append(
+                f"{col.lower()}_extreme_outlier"
+            )
+
+            x.loc[
+                bad_outlier,
+                col
+            ] = np.nan
+
+    # 5. 出来高の異常
+    bad_volume = (
+        ~np.isfinite(x["Volume"])
+        | (x["Volume"] < 0)
+    )
+
+    if bad_volume.any():
+        flags.append(
+            "invalid_volume"
+        )
+
+        x.loc[
+            bad_volume,
+            "Volume"
+        ] = np.nan
+
+    # Closeが無効になった行は除外
+    x = x.dropna(
+        subset=["Close"]
+    )
+
+    # 警告の重複を削除
+    flags = list(
+        dict.fromkeys(flags)
+    )
+
+    return x, flags
     df = yf.download(
         symbol,
         period="2y",
