@@ -854,60 +854,6 @@ def build_history_records(df):
 def main():
     requested_base_date = os.environ.get("BASE_DATE", "").strip()
 
-    if requested_base_date:
-        requested_base_date = pd.Timestamp(
-            requested_base_date
-        ).normalize()
-
-        print(
-            "Requested BASE_DATE:",
-            requested_base_date.date()
-        )
-    print(
-        "=== Sector Index "
-        "Downloader ==="
-    )
-
-    latest_results = []
-    failures = []
-
-    for item in SECTORS:
-        symbol = item["symbol"]
-
-        print(
-            "Downloading:",
-            symbol,
-            item["sector"],
-        )
-
-        try:
-            df = download_history(
-                symbol
-            )
-
-            if df.empty:
-                raise ValueError(
-                    "empty dataframe"
-                )
-        if requested_base_date is not None:
-        expected_date = requested_base_date.strftime(
-            "%Y-%m-%d"
-        )
-
-        wrong_dates = [
-            x
-            for x in latest_results
-            if x["base_date"] != expected_date
-        ]
-
-        if failures or wrong_dates or len(latest_results) != len(SECTORS):
-            raise RuntimeError(
-                f"Sector data for {expected_date} is not ready. "
-                f"processed={len(latest_results)}/{len(SECTORS)}, "
-                f"failures={len(failures)}, "
-                f"wrong_dates={len(wrong_dates)}. "
-                f"Previous trading day will NOT be published."
-            )
             # BASE_DATEが指定されている場合、
             # yfinanceの最新日が要求日と一致することを必須にする
             if requested_base_date is not None:
@@ -1001,7 +947,23 @@ def main():
                         str(e),
                 }
             )
-
+        if requested_base_date is not None:
+        expected_date = requested_base_date.strftime(
+            "%Y-%m-%d"
+        )
+        wrong_dates = [
+            x
+            for x in latest_results
+            if x["base_date"] != expected_date
+        ]
+        if failures or wrong_dates or len(latest_results) != len(SECTORS):
+            raise RuntimeError(
+                f"Sector data for {expected_date} is not ready. "
+                f"processed={len(latest_results)}/{len(SECTORS)}, "
+                f"failures={len(failures)}, "
+                f"wrong_dates={len(wrong_dates)}. "
+                f"Previous trading day will NOT be published."
+            )
     base_dates = [
         x["base_date"]
         for x in latest_results
