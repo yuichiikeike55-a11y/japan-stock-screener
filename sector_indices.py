@@ -373,75 +373,7 @@ def download_history(symbol):
         "data_quality_flags"
     ] = quality_flags
 
-    return df    
-    df = yf.download(
-        symbol,
-        period="2y",
-        interval="1d",
-        auto_adjust=False,
-        progress=False,
-        threads=False,
-    )
-
-    if df.empty:
-        return pd.DataFrame()
-
-    # yfinance MultiIndex対策
-    if isinstance(
-        df.columns,
-        pd.MultiIndex,
-    ):
-        df.columns = (
-            df.columns
-            .get_level_values(0)
-        )
-
-    required = [
-        "Open",
-        "High",
-        "Low",
-        "Close",
-        "Volume",
-    ]
-
-    missing = [
-        col
-        for col in required
-        if col not in df.columns
-    ]
-
-    if missing:
-        raise ValueError(
-            f"{symbol}: missing columns "
-            f"{missing}"
-        )
-
-    df = df[required].copy()
-
-    df = df.dropna(
-        subset=["Close"]
-    )
-
-    df.index = pd.to_datetime(
-        df.index
-    )
-
-    # OHLCV異常値チェック
-    df, quality_flags = (
-        validate_ohlcv(
-            df,
-            symbol,
-        )
-    )
-
-    # 後でlatest JSONへ渡す
-    df.attrs[
-        "data_quality_flags"
-    ] = quality_flags
-
     return df
-
-
 def calculate_metrics(df):
     x = df.copy()
 
@@ -852,14 +784,48 @@ def build_history_records(df):
 
 
 def main():
-    requested_base_date = os.environ.get("BASE_DATE", "").strip()
+    requested_base_date_raw = os.environ.get(
+        "BASE_DATE",
+        "",
+    ).strip()
 
+    requested_base_date = None
+
+    if requested_base_date_raw:
+        requested_base_date = pd.Timestamp(
+            requested_base_date_raw
+        ).normalize()
+    latest_results = []
+    failures = []
+
+    for item in SECTORS:
+        symbol = item["symbol"]
+
+        try:
+            print(
+                "Downloading:",
+                symbol,
+                item["sector"],
+            )
+
+            df = download_history(
+                symbol
+            )
+
+            if df.empty:
+                raise RuntimeError(
+                    f"{symbol}: no data"
+                )
             # BASE_DATEが指定されている場合、
             # yfinanceの最新日が要求日と一致することを必須にする
             if requested_base_date is not None:
-                actual_base_date = pd.Timestamp(
-                    df.index[-1]
-                ).tz_localize(None).normalize()
+                actual_base_date = (
+                    pd.Timestamp(
+                        df.index[-1]
+                    )
+                    .tz_localize(None)
+                    .normalize()
+                )
 
                 if actual_base_date != requested_base_date:
                     raise RuntimeError(
@@ -947,23 +913,34 @@ def main():
                         str(e),
                 }
             )
-        if requested_base_date is not None:
+    # =========================================
+    # BASE_DATE 最終整合性チェック
+    # 18セクターすべてが指定日に揃っていなければ
+    # latest JSONを公開しない
+    # =========================================
+    if requested_base_date is not None:
         expected_date = requested_base_date.strftime(
             "%Y-%m-%d"
         )
+
         wrong_dates = [
             x
             for x in latest_results
             if x["base_date"] != expected_date
         ]
-        if failures or wrong_dates or len(latest_results) != len(SECTORS):
+
+        if (
+            failures
+            or wrong_dates
+            or len(latest_results) != len(SECTORS)
+        ):
             raise RuntimeError(
                 f"Sector data for {expected_date} is not ready. "
                 f"processed={len(latest_results)}/{len(SECTORS)}, "
                 f"failures={len(failures)}, "
                 f"wrong_dates={len(wrong_dates)}. "
                 f"Previous trading day will NOT be published."
-            )
+            )      
     base_dates = [
         x["base_date"]
         for x in latest_results
