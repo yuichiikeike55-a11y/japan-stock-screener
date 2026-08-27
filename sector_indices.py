@@ -914,10 +914,40 @@ def main():
                 }
             )
     # =========================================
-    # BASE_DATE 最終整合性チェック
-    # 18セクターすべてが指定日に揃っていなければ
-    # latest JSONを公開しない
+    # 最終整合性チェック
+    # 18セクターすべてが揃い、
+    # 基準日も一致している場合のみ
+    # latest JSONを公開する
     # =========================================
+
+    # 取得件数・失敗件数チェック
+    if (
+        failures
+        or len(latest_results) != len(SECTORS)
+    ):
+        raise RuntimeError(
+            "Sector data is not complete. "
+            f"processed={len(latest_results)}/{len(SECTORS)}, "
+            f"failures={len(failures)}. "
+            "Incomplete sector data will NOT be published."
+        )
+
+    # 18セクターのbase_dateが
+    # すべて同じ日かチェック
+    result_base_dates = {
+        x["base_date"]
+        for x in latest_results
+    }
+
+    if len(result_base_dates) != 1:
+        raise RuntimeError(
+            "Sector base dates are inconsistent. "
+            f"base_dates={sorted(result_base_dates)}. "
+            "Mixed-date sector data will NOT be published."
+        )
+
+    # BASE_DATEが指定されている場合は、
+    # 18セクターすべてが要求日と一致することを確認
     if requested_base_date is not None:
         expected_date = requested_base_date.strftime(
             "%Y-%m-%d"
@@ -929,18 +959,12 @@ def main():
             if x["base_date"] != expected_date
         ]
 
-        if (
-            failures
-            or wrong_dates
-            or len(latest_results) != len(SECTORS)
-        ):
+        if wrong_dates:
             raise RuntimeError(
                 f"Sector data for {expected_date} is not ready. "
-                f"processed={len(latest_results)}/{len(SECTORS)}, "
-                f"failures={len(failures)}, "
                 f"wrong_dates={len(wrong_dates)}. "
-                f"Previous trading day will NOT be published."
-            )      
+                "Previous trading day will NOT be published."
+            )
     base_dates = [
         x["base_date"]
         for x in latest_results
