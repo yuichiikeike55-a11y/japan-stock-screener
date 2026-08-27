@@ -2,10 +2,15 @@ name: Update Sector Indices
 
 on:
   workflow_dispatch:
+    inputs:
+      base_date:
+        description: "Base date YYYY-MM-DD"
+        required: false
+        type: string
 
   schedule:
-    # 平日 18:30 JST = 09:30 UTC
-    - cron: "30 9 * * 1-5"
+    # JST 17:30 / 18:30 / 19:30 / 20:30 / 21:30
+    - cron: "30 8,9,10,11,12 * * 1-5"
 
 permissions:
   contents: write
@@ -28,7 +33,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas numpy yfinance
 
+      - name: Determine base date
+        id: date
+        env:
+          MANUAL_BASE_DATE: ${{ github.event.inputs.base_date }}
+        run: |
+          if [ -n "$MANUAL_BASE_DATE" ]; then
+            BASE_DATE="$MANUAL_BASE_DATE"
+          else
+            BASE_DATE=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+          fi
+
+          echo "base_date=$BASE_DATE" >> "$GITHUB_OUTPUT"
+          echo "Target BASE_DATE: $BASE_DATE"
+
       - name: Run sector index downloader
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: |
           python sector_indices.py
 
