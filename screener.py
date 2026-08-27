@@ -1069,7 +1069,42 @@ def main():
         "Base date:",
         base_date.date()
     )
+    # Requested base date must actually exist in enough stocks.
+    if requested_date is not None:
+        available_count = 0
 
+        for ticker_df in price_data.values():
+            if ticker_df is None or ticker_df.empty:
+                continue
+
+            dates = pd.to_datetime(
+                ticker_df.index
+            ).tz_localize(None).normalize()
+
+            if requested_date in dates:
+                available_count += 1
+
+        requested_coverage = (
+            available_count
+            / universe_count
+            if universe_count
+            else 0.0
+        )
+
+        print(
+            "Requested date coverage:",
+            f"{available_count}/{universe_count}",
+            f"({requested_coverage * 100:.2f}%)"
+        )
+
+        if requested_coverage < 0.90:
+            raise RuntimeError(
+                f"Requested base date "
+                f"{requested_date.date()} is not ready: "
+                f"{available_count}/{universe_count} "
+                f"({requested_coverage * 100:.2f}%). "
+                f"Do not fall back to previous trading day."
+            )
     # Retry only tickers that do not reach base_date
     retry_end_date = base_date + pd.Timedelta(days=1)
     retry_start_date = (
