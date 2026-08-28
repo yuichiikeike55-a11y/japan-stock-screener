@@ -9,29 +9,96 @@ on:
         type: string
 
   schedule:
-    # JST 17:30 / 18:30 / 19:30 / 20:30 / 21:30
-    - cron: "30 8,9,10,11,12 * * 1-5"
+    # JST 16:30
+    - cron: "30 7 * * 1-5"
+
+    # JST 17:00
+    - cron: "0 8 * * 1-5"
+
+    # JST 17:30
+    - cron: "30 8 * * 1-5"
+
+    # JST 18:00
+    - cron: "0 9 * * 1-5"
+
+    # JST 18:30
+    - cron: "30 9 * * 1-5"
+
+    # JST 19:00
+    - cron: "0 10 * * 1-5"
+
+    # JST 19:30
+    - cron: "30 10 * * 1-5"
+
+    # JST 19:40
+    - cron: "40 10 * * 1-5"
+
+    # JST 19:50
+    - cron: "50 10 * * 1-5"
+
+    # JST 19:55
+    - cron: "55 10 * * 1-5"
+
+    # 20時を過ぎても未取得の場合の回復用
+    # JST 20:10
+    - cron: "10 11 * * 1-5"
+
+    # JST 20:30
+    - cron: "30 11 * * 1-5"
+
 
 permissions:
   contents: write
+
+
+# 複数ジョブが同時にoutputを更新するのを防止
+concurrency:
+  group: daily-japan-stock-screener
+  cancel-in-progress: false
+
 
 jobs:
   screen:
     runs-on: ubuntu-latest
 
     steps:
+      # ========================================
+      # Repository
+      # ========================================
+
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+
+      # ========================================
+      # Python
+      # ========================================
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas numpy yfinance openpyxl xlrd requests beautifulsoup4 lxml
+          pip install \
+            pandas \
+            numpy \
+            yfinance \
+            openpyxl \
+            xlrd \
+            requests \
+            beautifulsoup4 \
+            lxml
+
+
+      # ========================================
+      # BASE_DATE
+      # ========================================
 
       - name: Determine base date
         id: date
@@ -40,29 +107,230 @@ jobs:
         run: |
           if [ -n "$MANUAL_BASE_DATE" ]; then
             BASE_DATE="$MANUAL_BASE_DATE"
+            MANUAL_RUN="true"
           else
             BASE_DATE=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+            MANUAL_RUN="false"
           fi
 
           echo "base_date=$BASE_DATE" >> "$GITHUB_OUTPUT"
-          echo "Target BASE_DATE: $BASE_DATE"
+          echo "manual_run=$MANUAL_RUN" >> "$GITHUB_OUTPUT"
+
+          echo "========================================"
+          echo "Target BASE_DATE : $BASE_DATE"
+          echo "Manual run       : $MANUAL_RUN"
+          echo "JST time         : $(TZ=Asia/Tokyo date)"
+          echo "========================================"
+
+
+      # ========================================
+      # 当日分が完成済みなら
+      # 定期実行ではスキップ
+      #
+      # 手動実行は常に再実行可能
+      # ========================================
+
+      - name: Check existing screening result
+        id: existing
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+          MANUAL_RUN: ${{ steps.date.outputs.manual_run }}
+        run: |
+          SHOULD_RUN="true"
+
+          if [ "$MANUAL_RUN" = "false" ]; then
+
+            if [ -f "output/screening_health.json" ]; then
+
+              python - <<'PY'
+          import json
+          import os
+          import sys
+
+          base_date = os.environ["BASE_DATE"]
+
+          try:
+              with open(
+                  "output/screening_health.json",
+                  "r",
+                  encoding="utf-8",
+              ) as f:
+                  data = json.load(f)
+
+              existing_date = data.get("base_date")
+              status = data.get("status")
+              coverage = data.get("coverage_pct")
+
+              print("Existing base_date :", existing_date)
+              print("Existing status    :", status)
+              print("Existing coverage  :", coverage)
+
+              if (
+                  existing_date == base_date
+                  and status == "ok"
+                  and coverage is not None
+                  and float(coverage) >= 99.0
+              ):
+                  print(
+                      "Today's screening is already complete."
+                  )
+                  sys.exit(0)
+
+              print(
+                  "Today's screening is not complete yet."
+              )
+              sys.exit(1)
+
+          except Exception as e:
+              print(
+                  "Could not validate existing health:",
+                  repr(e),
+              )
+              sys.exit(1)
+          PY
+
+              if [ $? -eq 0 ]; then
+                SHOULD_RUN="false"
+              fi
+
+            fi
+
+          fi
+
+          echo "should_run=$SHOULD_RUN" >> "$GITHUB_OUTPUT"
+
+          echo "========================================"
+          echo "Should run screener: $SHOULD_RUN"
+          echo "========================================"
+
+
+      # ========================================
+      # Screener
+      # ========================================
 
       - name: Run stock screener
+        if: steps.existing.outputs.should_run == 'true'
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: |
+          echo "========================================"
+          echo "Stock screener START"
+          echo "Target date : $BASE_DATE"
+          echo "JST time    : $(TZ=Asia/Tokyo date)"
+          echo "========================================"
+
           python screener.py
 
+          echo "========================================"
+          echo "Stock screener COMPLETE"
+          echo "JST time : $(TZ=Asia/Tokyo date)"
+          echo "========================================"
+
+
+      # ========================================
+      # 結果確認
+      # ========================================
+
+      - name: Verify screening result
+        if: steps.existing.outputs.should_run == 'true'
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+
+          base_date = os.environ["BASE_DATE"]
+
+          path = "output/screening_health.json"
+
+          if not os.path.exists(path):
+              print(
+                  "ERROR: screening_health.json not found."
+              )
+              sys.exit(1)
+
+          with open(
+              path,
+              "r",
+              encoding="utf-8",
+          ) as f:
+              data = json.load(f)
+
+          actual_date = data.get("base_date")
+          status = data.get("status")
+          coverage = data.get("coverage_pct")
+
+          print("Target base_date :", base_date)
+          print("Actual base_date :", actual_date)
+          print("Status           :", status)
+          print("Coverage         :", coverage)
+
+          if actual_date != base_date:
+              print(
+                  "ERROR: screening result is not "
+                  "for the requested BASE_DATE."
+              )
+              sys.exit(1)
+
+          if coverage is None:
+              print(
+                  "ERROR: coverage_pct is missing."
+              )
+              sys.exit(1)
+
+          if float(coverage) < 99.0:
+              print(
+                  "ERROR: coverage is below 99%."
+              )
+              sys.exit(1)
+
+          print(
+              "Screening result verification OK."
+          )
+          PY
+
+
+      # ========================================
+      # Commit
+      # ========================================
+
       - name: Commit screening results
+        if: steps.existing.outputs.should_run == 'true'
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add output/
 
           if git diff --cached --quiet; then
+
             echo "No changes to commit."
+
           else
-            git commit -m "Update stock screening results"
-            git push
+
+            git commit \
+              -m "Update stock screening results ${{ steps.date.outputs.base_date }}"
+
+            # 最新mainを取り込んでからpush
+            git pull --rebase origin main
+
+            git push origin main
+
           fi
+
+
+      # ========================================
+      # 完成済みスキップ時
+      # ========================================
+
+      - name: Already completed
+        if: steps.existing.outputs.should_run == 'false'
+        run: |
+          echo "========================================"
+          echo "Today's screening is already complete."
+          echo "No additional Yahoo Finance request."
+          echo "No additional commit."
+          echo "========================================"
