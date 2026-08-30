@@ -9,8 +9,32 @@ on:
         type: string
 
   schedule:
-    # JST 17:30 / 18:30 / 19:30 / 20:30 / 21:30
-    - cron: "30 8,9,10,11,12 * * 1-5"
+    # ============================================================
+    # 平日定期実行
+    # UTC → JST
+    # 08:30 UTC = 17:30 JST
+    # 09:30 UTC = 18:30 JST
+    # 10:30 UTC = 19:30 JST
+    # 11:30 UTC = 20:30 JST
+    # 12:30 UTC = 21:30 JST
+    # ============================================================
+    - cron: "30 8 * * 1-5"
+    - cron: "30 9 * * 1-5"
+    - cron: "30 10 * * 1-5"
+    - cron: "30 11 * * 1-5"
+    - cron: "30 12 * * 1-5"
+
+    # ============================================================
+    # 土日回復実行
+    #
+    # 金曜日のETFデータが yfinance に遅れて反映された場合に
+    # 自動で金曜日分を再取得する。
+    #
+    # 01:30 UTC = 10:30 JST
+    # 09:30 UTC = 18:30 JST
+    # ============================================================
+    - cron: "30 1 * * 6,0"
+    - cron: "30 9 * * 6,0"
 
 permissions:
   contents: write
@@ -20,48 +44,144 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ==========================================================
+      # Repository checkout
+      # ==========================================================
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ==========================================================
+      # Python
+      # ==========================================================
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      # ==========================================================
+      # Dependencies
+      # ==========================================================
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pandas numpy yfinance
 
-      - name: Determine base date
-        id: date
-        env:
-          MANUAL_BASE_DATE: ${{ github.event.inputs.base_date }}
+      # ==========================================================
+      # BASE_DATE
+      #
+      # 優先順位:
+      #
+      # 1. workflow_dispatch で base_date が指定されていれば
+      #    その日付を使用
+      #
+      # 2. 土曜日なら前日の金曜日
+      #
+      # 3. 日曜日なら2日前の金曜日
+      #
+      # 4. 平日はJST当日
+      #
+      # これにより土日に
+      # BASE_DATE=土曜日/日曜日
+      # となることを防止する。
+      # ==========================================================
+      - name: Set BASE_DATE
+        id: base_date
+        shell: bash
         run: |
+          MANUAL_BASE_DATE="${{ github.event.inputs.base_date }}"
+
           if [ -n "$MANUAL_BASE_DATE" ]; then
+
             BASE_DATE="$MANUAL_BASE_DATE"
+
+            echo "Manual BASE_DATE specified."
+            echo "BASE_DATE=$BASE_DATE"
+
           else
-            BASE_DATE=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+
+            JST_DATE=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+            JST_DOW=$(TZ=Asia/Tokyo date +%u)
+
+            echo "JST_DATE=$JST_DATE"
+            echo "JST_DOW=$JST_DOW"
+
+            # Saturday
+            if [ "$JST_DOW" = "6" ]; then
+
+              BASE_DATE=$(TZ=Asia/Tokyo date -d "1 day ago" +%Y-%m-%d)
+
+              echo "Saturday recovery run."
+              echo "Using previous Friday."
+
+            # Sunday
+            elif [ "$JST_DOW" = "7" ]; then
+
+              BASE_DATE=$(TZ=Asia/Tokyo date -d "2 days ago" +%Y-%m-%d)
+
+              echo "Sunday recovery run."
+              echo "Using previous Friday."
+
+            # Monday-Friday
+            else
+
+              BASE_DATE="$JST_DATE"
+
+              echo "Weekday run."
+              echo "Using current JST date."
+
+            fi
           fi
 
-          echo "base_date=$BASE_DATE" >> "$GITHUB_OUTPUT"
-          echo "Target BASE_DATE: $BASE_DATE"
+          echo "FINAL BASE_DATE=$BASE_DATE"
 
+          echo "base_date=$BASE_DATE" >> "$GITHUB_OUTPUT"
+
+      # ==========================================================
+      # Run sector downloader
+      #
+      # sector_indices.py 側で
+      # ・18/18 完全取得
+      # ・BASE_DATE一致
+      # を確認する。
+      #
+      # 1セクターでも不足していれば exit 1 となり、
+      # latest JSON は公開しない。
+      # ==========================================================
       - name: Run sector index downloader
         env:
-          BASE_DATE: ${{ steps.date.outputs.base_date }}
+          BASE_DATE: ${{ steps.base_date.outputs.base_date }}
         run: |
+          echo "Running sector_indices.py"
+          echo "BASE_DATE=$BASE_DATE"
+
           python sector_indices.py
 
+      # ==========================================================
+      # Output確認
+      # ==========================================================
       - name: Show generated files
         run: |
-          echo "=== sector_indices_latest.json ==="
-          ls -lh output/sector_indices_latest.json
+          echo "=== output ==="
+          ls -lah output || true
 
-          echo "=== sector_history ==="
-          ls -lh output/sector_history | head -30
+          echo ""
+          echo "=== sector history ==="
+          ls -lah output/sector_history || true
 
-      - name: Commit updated sector data
+          echo ""
+          echo "=== latest sector JSON ==="
+          if [ -f output/sector_indices_latest.json ]; then
+            head -n 40 output/sector_indices_latest.json
+          else
+            echo "sector_indices_latest.json not found"
+            exit 1
+          fi
+
+      # ==========================================================
+      # Commit & Push
+      # ==========================================================
+      - name: Commit and push sector data
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -70,8 +190,11 @@ jobs:
           git add output/sector_history/
 
           if git diff --cached --quiet; then
-            echo "No sector data changes."
-          else
-            git commit -m "Update sector index data"
-            git push
+            echo "No changes to commit."
+            exit 0
           fi
+
+          git commit -m "Update sector indices ${{ steps.base_date.outputs.base_date }}"
+
+          git pull --rebase origin main
+          git push origin main
