@@ -532,8 +532,11 @@ def calculate_metrics(
             errors="coerce"
         )
 
+
         volume = pd.to_numeric(
             x["Volume"],
+            errors="coerce"
+        )
 
         required_nan = (
             open_price.tail(2).isna().any()
