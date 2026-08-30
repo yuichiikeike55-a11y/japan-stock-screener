@@ -1,50 +1,12 @@
 {
   "strategy": "initial_breakout_pullback",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-28T12:21:41.632456+00:00",
+  "generated_at": "2026-08-30T11:01:58.772657+00:00",
   "universe_count": 1532,
   "processed_count": 1528,
   "coverage_pct": 99.74,
   "eligible_count": 6,
   "results": [
-    {
-      "code": "6178",
-      "name": "日本郵政",
-      "market": "プライム（内国株式）",
-      "base_date": "2026-08-28",
-      "open": 2375.0,
-      "high": 2442.0,
-      "low": 2370.5,
-      "close": 2432.5,
-      "previous_open": 2416.0,
-      "previous_high": 2436.0,
-      "previous_low": 2412.0,
-      "previous_close": 2425.0,
-      "ma5": 2395.7,
-      "ma25": 2390.7,
-      "ma75": 2268.826666666667,
-      "ma25_previous": 2391.82,
-      "ma25_slope": -1.1200000000003456,
-      "ma25_direction": "down",
-      "rci9": 65.0,
-      "rci27": -43.956043956043956,
-      "rsi14": 52.46338215712384,
-      "high52": 2539.5,
-      "high20": 2442.0,
-      "low20": 2267.5,
-      "ma5_gap_pct": 1.5360854864966411,
-      "ma25_gap_pct": 1.7484418789476042,
-      "high52_gap_pct": -4.2134278401260055,
-      "high20_gap_pct": -0.3890253890253881,
-      "touched_ma25": true,
-      "recovered_ma25": true,
-      "avg_turnover_5d": 9130611400.0,
-      "volume": 5605900.0,
-      "previous_volume": 4289300.0,
-      "volume_ratio_prev": 1.3069498519571958,
-      "volume_20d_ago": 5753000.0,
-      "volume_ratio_20d": 0.9744307317921085
-    },
     {
       "code": "2503",
       "name": "キリンホールディングス",
@@ -81,7 +43,26 @@
       "previous_volume": 1796500.0,
       "volume_ratio_prev": 1.4566100751461175,
       "volume_20d_ago": 17227600.0,
-      "volume_ratio_20d": 0.15189579511945947
+      "volume_ratio_20d": 0.15189579511945947,
+      "base_grade": "S",
+      "strategy_score": 100,
+      "condition_flags": {
+        "ma25_up": true,
+        "above_ma25": true,
+        "ma25_above_ma75": true,
+        "near_high20": true,
+        "near_high52": true,
+        "volume_ok": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "20日高値接近 -2.52%",
+        "52週高値接近 -3.42%",
+        "25MA上向き",
+        "終値25MA以上",
+        "25MA > 75MA",
+        "前日比出来高 1.46倍"
+      ]
     },
     {
       "code": "8331",
@@ -119,7 +100,26 @@
       "previous_volume": 2463500.0,
       "volume_ratio_prev": 1.4344225695149178,
       "volume_20d_ago": 2304600.0,
-      "volume_ratio_20d": 1.5333246550377506
+      "volume_ratio_20d": 1.5333246550377506,
+      "base_grade": "S",
+      "strategy_score": 100,
+      "condition_flags": {
+        "ma25_up": true,
+        "above_ma25": true,
+        "ma25_above_ma75": true,
+        "near_high20": true,
+        "near_high52": true,
+        "volume_ok": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "20日高値接近 -2.70%",
+        "52週高値接近 -2.70%",
+        "25MA上向き",
+        "終値25MA以上",
+        "25MA > 75MA",
+        "前日比出来高 1.43倍"
+      ]
     },
     {
       "code": "6724",
@@ -157,7 +157,26 @@
       "previous_volume": 1108500.0,
       "volume_ratio_prev": 1.632295895354082,
       "volume_20d_ago": 1831100.0,
-      "volume_ratio_20d": 0.9881491999344656
+      "volume_ratio_20d": 0.9881491999344656,
+      "base_grade": "S",
+      "strategy_score": 100,
+      "condition_flags": {
+        "ma25_up": true,
+        "above_ma25": true,
+        "ma25_above_ma75": true,
+        "near_high20": true,
+        "near_high52": true,
+        "volume_ok": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "20日高値接近 -2.78%",
+        "52週高値接近 -2.78%",
+        "25MA上向き",
+        "終値25MA以上",
+        "25MA > 75MA",
+        "前日比出来高 1.63倍"
+      ]
     },
     {
       "code": "4912",
@@ -195,7 +214,26 @@
       "previous_volume": 1293900.0,
       "volume_ratio_prev": 1.7540768220109746,
       "volume_20d_ago": 3053900.0,
-      "volume_ratio_20d": 0.7431808507154786
+      "volume_ratio_20d": 0.7431808507154786,
+      "base_grade": "S",
+      "strategy_score": 100,
+      "condition_flags": {
+        "ma25_up": true,
+        "above_ma25": true,
+        "ma25_above_ma75": true,
+        "near_high20": true,
+        "near_high52": true,
+        "volume_ok": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "20日高値接近 -2.90%",
+        "52週高値接近 -2.90%",
+        "25MA上向き",
+        "終値25MA以上",
+        "25MA > 75MA",
+        "前日比出来高 1.75倍"
+      ]
     },
     {
       "code": "5830",
@@ -233,7 +271,82 @@
       "previous_volume": 546300.0,
       "volume_ratio_prev": 1.3091707852828116,
       "volume_20d_ago": 1059800.0,
-      "volume_ratio_20d": 0.6748443102472165
+      "volume_ratio_20d": 0.6748443102472165,
+      "base_grade": "S",
+      "strategy_score": 100,
+      "condition_flags": {
+        "ma25_up": true,
+        "above_ma25": true,
+        "ma25_above_ma75": true,
+        "near_high20": true,
+        "near_high52": true,
+        "volume_ok": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "20日高値接近 -3.21%",
+        "52週高値接近 -3.21%",
+        "25MA上向き",
+        "終値25MA以上",
+        "25MA > 75MA",
+        "前日比出来高 1.31倍"
+      ]
+    },
+    {
+      "code": "6178",
+      "name": "日本郵政",
+      "market": "プライム（内国株式）",
+      "base_date": "2026-08-28",
+      "open": 2375.0,
+      "high": 2442.0,
+      "low": 2370.5,
+      "close": 2432.5,
+      "previous_open": 2416.0,
+      "previous_high": 2436.0,
+      "previous_low": 2412.0,
+      "previous_close": 2425.0,
+      "ma5": 2395.7,
+      "ma25": 2390.7,
+      "ma75": 2268.826666666667,
+      "ma25_previous": 2391.82,
+      "ma25_slope": -1.1200000000003456,
+      "ma25_direction": "down",
+      "rci9": 65.0,
+      "rci27": -43.956043956043956,
+      "rsi14": 52.46338215712384,
+      "high52": 2539.5,
+      "high20": 2442.0,
+      "low20": 2267.5,
+      "ma5_gap_pct": 1.5360854864966411,
+      "ma25_gap_pct": 1.7484418789476042,
+      "high52_gap_pct": -4.2134278401260055,
+      "high20_gap_pct": -0.3890253890253881,
+      "touched_ma25": true,
+      "recovered_ma25": true,
+      "avg_turnover_5d": 9130611400.0,
+      "volume": 5605900.0,
+      "previous_volume": 4289300.0,
+      "volume_ratio_prev": 1.3069498519571958,
+      "volume_20d_ago": 5753000.0,
+      "volume_ratio_20d": 0.9744307317921085,
+      "base_grade": "A",
+      "strategy_score": 80,
+      "condition_flags": {
+        "ma25_up": false,
+        "above_ma25": true,
+        "ma25_above_ma75": true,
+        "near_high20": true,
+        "near_high52": true,
+        "volume_ok": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "20日高値接近 -0.39%",
+        "52週高値接近 -4.21%",
+        "終値25MA以上",
+        "25MA > 75MA",
+        "前日比出来高 1.31倍"
+      ]
     }
   ]
 }

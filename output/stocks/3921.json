@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-28T12:21:41.347906+00:00",
+  "generated_at": "2026-08-30T11:01:58.481013+00:00",
   "code": "3921",
   "data": {
     "code": "3921",
@@ -9,7 +9,7 @@
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
     "open": 1641.0,
-    "high": 1695.0,
+    "high": 1696.0,
     "low": 1641.0,
     "close": 1679.0,
     "previous_open": 1640.0,

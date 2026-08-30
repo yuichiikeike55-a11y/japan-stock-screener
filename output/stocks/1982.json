@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-28T12:21:41.296365+00:00",
+  "generated_at": "2026-08-30T11:01:58.423178+00:00",
   "code": "1982",
   "data": {
     "code": "1982",
@@ -10,7 +10,7 @@
     "base_date": "2026-08-28",
     "open": 3015.0,
     "high": 3020.0,
-    "low": 2969.0,
+    "low": 2965.0,
     "close": 2976.0,
     "previous_open": 3020.0,
     "previous_high": 3040.0,

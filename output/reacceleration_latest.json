@@ -1,7 +1,7 @@
 {
   "strategy": "reacceleration_pullback",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-28T12:21:41.629512+00:00",
+  "generated_at": "2026-08-30T11:01:58.768873+00:00",
   "universe_count": 1532,
   "processed_count": 1528,
   "coverage_pct": 99.74,
@@ -43,7 +43,28 @@
       "previous_volume": 28822400.0,
       "volume_ratio_prev": 1.2828737370933718,
       "volume_20d_ago": 46700500.0,
-      "volume_ratio_20d": 0.7917581182214323
+      "volume_ratio_20d": 0.7917581182214323,
+      "base_grade": "A",
+      "strategy_score": 80,
+      "condition_flags": {
+        "touched_ma25": true,
+        "recovered_ma25": true,
+        "ma25_up": false,
+        "near_ma25": true,
+        "above_ma25": true,
+        "above_ma75": true,
+        "volume_ok": true,
+        "momentum_ok": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "25MA回復",
+        "25MA近辺 1.83%",
+        "終値25MA以上",
+        "終値75MA以上",
+        "前日比出来高 1.28倍",
+        "RSI 56.2"
+      ]
     },
     {
       "code": "6178",
@@ -81,7 +102,28 @@
       "previous_volume": 4289300.0,
       "volume_ratio_prev": 1.3069498519571958,
       "volume_20d_ago": 5753000.0,
-      "volume_ratio_20d": 0.9744307317921085
+      "volume_ratio_20d": 0.9744307317921085,
+      "base_grade": "A",
+      "strategy_score": 80,
+      "condition_flags": {
+        "touched_ma25": true,
+        "recovered_ma25": true,
+        "ma25_up": false,
+        "near_ma25": true,
+        "above_ma25": true,
+        "above_ma75": true,
+        "volume_ok": true,
+        "momentum_ok": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "25MA回復",
+        "25MA近辺 1.75%",
+        "終値25MA以上",
+        "終値75MA以上",
+        "前日比出来高 1.31倍",
+        "RSI 52.5"
+      ]
     },
     {
       "code": "2503",
@@ -119,7 +161,28 @@
       "previous_volume": 1796500.0,
       "volume_ratio_prev": 1.4566100751461175,
       "volume_20d_ago": 17227600.0,
-      "volume_ratio_20d": 0.15189579511945947
+      "volume_ratio_20d": 0.15189579511945947,
+      "base_grade": "A",
+      "strategy_score": 80,
+      "condition_flags": {
+        "touched_ma25": false,
+        "recovered_ma25": false,
+        "ma25_up": true,
+        "near_ma25": true,
+        "above_ma25": true,
+        "above_ma75": true,
+        "volume_ok": true,
+        "momentum_ok": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "25MA上向き",
+        "25MA近辺 1.52%",
+        "終値25MA以上",
+        "終値75MA以上",
+        "前日比出来高 1.46倍",
+        "RSI 51.6"
+      ]
     },
     {
       "code": "7276",
@@ -157,7 +220,28 @@
       "previous_volume": 852900.0,
       "volume_ratio_prev": 2.0474850510024623,
       "volume_20d_ago": 1885100.0,
-      "volume_ratio_20d": 0.9263699538486022
+      "volume_ratio_20d": 0.9263699538486022,
+      "base_grade": "A",
+      "strategy_score": 80,
+      "condition_flags": {
+        "touched_ma25": false,
+        "recovered_ma25": false,
+        "ma25_up": true,
+        "near_ma25": true,
+        "above_ma25": true,
+        "above_ma75": true,
+        "volume_ok": true,
+        "momentum_ok": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "25MA上向き",
+        "25MA近辺 1.03%",
+        "終値25MA以上",
+        "終値75MA以上",
+        "前日比出来高 2.05倍",
+        "RSI 49.4"
+      ]
     }
   ]
 }

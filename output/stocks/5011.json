@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-28T12:21:41.384043+00:00",
+  "generated_at": "2026-08-30T11:01:58.520806+00:00",
   "code": "5011",
   "data": {
     "code": "5011",
@@ -10,7 +10,7 @@
     "base_date": "2026-08-28",
     "open": 2270.0,
     "high": 2270.0,
-    "low": 2232.0,
+    "low": 2230.0,
     "close": 2251.0,
     "previous_open": 2293.0,
     "previous_high": 2299.0,

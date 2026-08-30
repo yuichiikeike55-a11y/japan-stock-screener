@@ -1,7 +1,7 @@
 {
   "strategy": "25MA_pullback",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-28T12:21:41.626003+00:00",
+  "generated_at": "2026-08-30T11:01:58.765042+00:00",
   "universe_count": 1532,
   "processed_count": 1528,
   "coverage_pct": 99.74,
@@ -43,7 +43,25 @@
       "previous_volume": 6397200.0,
       "volume_ratio_prev": 2.9506815481773274,
       "volume_20d_ago": 12620000.0,
-      "volume_ratio_20d": 1.495729001584786
+      "volume_ratio_20d": 1.495729001584786,
+      "base_grade": "S",
+      "strategy_score": 100,
+      "condition_flags": {
+        "touched_ma25": true,
+        "recovered_ma25": true,
+        "ma25_up": true,
+        "near_ma25": true,
+        "strong_near_ma25": true,
+        "volume_expansion": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "25MAタッチ",
+        "25MA回復",
+        "25MA上向き",
+        "25MA乖離良好 0.59%",
+        "出来高増加"
+      ]
     },
     {
       "code": "4188",
@@ -81,7 +99,24 @@
       "previous_volume": 5432700.0,
       "volume_ratio_prev": 2.1239899129346367,
       "volume_20d_ago": 6749200.0,
-      "volume_ratio_20d": 1.7096841107094174
+      "volume_ratio_20d": 1.7096841107094174,
+      "base_grade": "A",
+      "strategy_score": 80,
+      "condition_flags": {
+        "touched_ma25": true,
+        "recovered_ma25": true,
+        "ma25_up": false,
+        "near_ma25": true,
+        "strong_near_ma25": true,
+        "volume_expansion": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "25MAタッチ",
+        "25MA回復",
+        "25MA乖離良好 0.82%",
+        "出来高増加"
+      ]
     },
     {
       "code": "7951",
@@ -119,7 +154,23 @@
       "previous_volume": 2020300.0,
       "volume_ratio_prev": 1.7132109092709003,
       "volume_20d_ago": 2387300.0,
-      "volume_ratio_20d": 1.449838729945964
+      "volume_ratio_20d": 1.449838729945964,
+      "base_grade": "C",
+      "strategy_score": 60,
+      "condition_flags": {
+        "touched_ma25": false,
+        "recovered_ma25": false,
+        "ma25_up": true,
+        "near_ma25": true,
+        "strong_near_ma25": true,
+        "volume_expansion": true,
+        "overheated": false
+      },
+      "grade_reasons": [
+        "25MA上向き",
+        "25MA乖離良好 1.96%",
+        "出来高増加"
+      ]
     },
     {
       "code": "9744",
@@ -157,7 +208,24 @@
       "previous_volume": 543900.0,
       "volume_ratio_prev": 1.0952380952380953,
       "volume_20d_ago": 368600.0,
-      "volume_ratio_20d": 1.6161150298426479
+      "volume_ratio_20d": 1.6161150298426479,
+      "base_grade": "D",
+      "strategy_score": 37,
+      "condition_flags": {
+        "touched_ma25": false,
+        "recovered_ma25": false,
+        "ma25_up": true,
+        "near_ma25": true,
+        "strong_near_ma25": false,
+        "volume_expansion": true,
+        "overheated": true
+      },
+      "grade_reasons": [
+        "25MA上向き",
+        "25MA乖離許容 2.75%",
+        "出来高増加",
+        "RSI過熱"
+      ]
     }
   ]
 }
