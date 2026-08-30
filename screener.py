@@ -498,13 +498,19 @@ def calculate_metrics(
             })
             continue
 
-        if len(x) < 252:
+        # ここは各銘柄を処理している for ループの中
+
+        history_days = len(x)
+
+        if history_days < 75:
             failures.append({
                 "code": code,
                 "name": name,
-                "reason": f"insufficient_history_{len(x)}"
+                "reason": f"insufficient_history_{history_days}"
             })
             continue
+
+        high52_available = history_days >= 252
 
         open_price = pd.to_numeric(
             x["Open"],
@@ -528,16 +534,22 @@ def calculate_metrics(
 
         volume = pd.to_numeric(
             x["Volume"],
-            errors="coerce"
-        )
 
-        if (
+        required_nan = (
             open_price.tail(2).isna().any()
-            or high.tail(252).isna().any()
+            or high.tail(20).isna().any()
             or low.tail(20).isna().any()
             or close.tail(75).isna().any()
             or volume.tail(21).isna().any()
-        ):
+        )
+
+        if high52_available:
+            required_nan = (
+                required_nan
+                or high.tail(252).isna().any()
+            )
+
+        if required_nan:
             failures.append({
                 "code": code,
                 "name": name,
@@ -658,8 +670,15 @@ def calculate_metrics(
             27
         )
 
-        high52 = float(
-            high.tail(252).max()
+        if high52_available:
+            high52 = float(
+                high.tail(252).max()
+            )
+        else:
+            high52 = np.nan
+
+        high20 = float(
+            high.tail(20).max()
         )
 
         high20 = float(
@@ -703,11 +722,14 @@ def calculate_metrics(
             - 1
         ) * 100
 
-        high52_gap = (
-            current_close
-            / high52
-            - 1
-        ) * 100
+        if high52_available:
+            high52_gap = (
+                current_close
+                / high52
+                - 1
+            ) * 100
+        else:
+            high52_gap = np.nan
 
         high20_gap = (
             current_close
@@ -735,7 +757,8 @@ def calculate_metrics(
             "name": str(name),
             "market": str(market),
             "base_date": base_date.strftime("%Y-%m-%d"),
-
+            "history_days": history_days,
+            "high52_available": high52_available,
             "open": current_open,
             "high": current_high,
             "low": current_low,
