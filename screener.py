@@ -49,6 +49,39 @@ JPX_PAGES = [
 # 共通関数
 # ============================================================
 
+def make_json_safe(obj):
+    if isinstance(obj, dict):
+        return {
+            key: make_json_safe(value)
+            for key, value in obj.items()
+        }
+
+    if isinstance(obj, list):
+        return [
+            make_json_safe(value)
+            for value in obj
+        ]
+
+    if isinstance(obj, tuple):
+        return [
+            make_json_safe(value)
+            for value in obj
+        ]
+
+    if isinstance(obj, (float, np.floating)):
+        if not np.isfinite(obj):
+            return None
+        return float(obj)
+
+    if isinstance(obj, np.integer):
+        return int(obj)
+
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+
+    return obj
+
+
 def clean_code(value):
     s = str(value).strip()
 
