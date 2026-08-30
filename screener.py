@@ -994,7 +994,611 @@ def apply_volume_initial_screen(metrics):
     )
 
     return result
+# ============================================================
+# 戦略別 S/A/B/C/D/E 評価
+# ============================================================
 
+GRADE_ORDER = ("S", "A", "B", "C", "D", "E")
+
+
+def _num(row, key, default=None):
+    value = row.get(key, default)
+
+    if value is None:
+        return default
+
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return default
+
+    if np.isnan(value) or np.isinf(value):
+        return default
+
+    return value
+
+
+def _bool(row, key):
+    value = row.get(key, False)
+
+    if value is None:
+        return False
+
+    return bool(value)
+
+
+def _score_to_grade(score):
+    if score >= 90:
+        return "S"
+    if score >= 80:
+        return "A"
+    if score >= 65:
+        return "B"
+    if score >= 50:
+        return "C"
+    if score >= 35:
+        return "D"
+
+    return "E"
+
+
+def _finish_grade(score, flags, reasons, s_required=None):
+    score = max(0, min(100, int(round(score))))
+    grade = _score_to_grade(score)
+
+    # Sは点数だけでは付けない。
+    # 各戦略の必須条件を全部満たした場合だけ許可する。
+    if grade == "S" and s_required is not None:
+        if not all(s_required):
+            grade = "A"
+
+    return {
+        "base_grade": grade,
+        "strategy_score": score,
+        "condition_flags": flags,
+        "grade_reasons": reasons,
+    }
+
+
+# ------------------------------------------------------------
+# 1. 25MA押し待ち
+# ------------------------------------------------------------
+
+def grade_25ma_pullback(row):
+    score = 0
+    flags = {}
+    reasons = []
+
+    gap = _num(row, "ma25_gap_pct")
+    vol_prev = _num(row, "volume_ratio_prev")
+    vol_20d = _num(row, "volume_ratio_20d")
+    rsi = _num(row, "rsi14")
+
+    touched = _bool(row, "touched_ma25")
+    recovered = _bool(row, "recovered_ma25")
+    ma25_up = row.get("ma25_direction") == "up"
+
+    near_ma25 = (
+        gap is not None
+        and 0 <= gap <= 3
+    )
+
+    strong_near_ma25 = (
+        gap is not None
+        and 0 <= gap <= 2
+    )
+
+    volume_expansion = (
+        (vol_prev is not None and vol_prev >= 1.5)
+        or
+        (vol_20d is not None and vol_20d >= 1.3)
+    )
+
+    overheated = (
+        rsi is not None
+        and rsi >= 75
+    )
+
+    flags["touched_ma25"] = touched
+    flags["recovered_ma25"] = recovered
+    flags["ma25_up"] = ma25_up
+    flags["near_ma25"] = near_ma25
+    flags["strong_near_ma25"] = strong_near_ma25
+    flags["volume_expansion"] = volume_expansion
+    flags["overheated"] = overheated
+
+    if touched:
+        score += 20
+        reasons.append("25MAタッチ")
+
+    if recovered:
+        score += 20
+        reasons.append("25MA回復")
+
+    if ma25_up:
+        score += 20
+        reasons.append("25MA上向き")
+
+    if gap is not None:
+        if 0 <= gap <= 2:
+            score += 20
+            reasons.append(
+                f"25MA乖離良好 {gap:.2f}%"
+            )
+        elif 2 < gap <= 3:
+            score += 12
+            reasons.append(
+                f"25MA乖離許容 {gap:.2f}%"
+            )
+        elif -1 <= gap < 0:
+            score += 8
+            reasons.append(
+                f"25MA直下 {gap:.2f}%"
+            )
+
+    if volume_expansion:
+        score += 20
+        reasons.append("出来高増加")
+
+    if overheated:
+        score -= 15
+        reasons.append("RSI過熱")
+
+    return _finish_grade(
+        score,
+        flags,
+        reasons,
+        s_required=[
+            touched,
+            recovered,
+            ma25_up,
+            strong_near_ma25,
+            volume_expansion,
+            not overheated,
+        ],
+    )
+
+
+# ------------------------------------------------------------
+# 2. 再加速押し目
+# ------------------------------------------------------------
+
+def grade_reacceleration(row):
+    score = 0
+    flags = {}
+    reasons = []
+
+    close = _num(row, "close")
+    ma25 = _num(row, "ma25")
+    ma75 = _num(row, "ma75")
+    gap = _num(row, "ma25_gap_pct")
+    vol_prev = _num(row, "volume_ratio_prev")
+    rsi = _num(row, "rsi14")
+
+    recovered = _bool(row, "recovered_ma25")
+    touched = _bool(row, "touched_ma25")
+    ma25_up = row.get("ma25_direction") == "up"
+
+    near_ma25 = (
+        gap is not None
+        and -1 <= gap <= 3
+    )
+
+    above_ma25 = (
+        close is not None
+        and ma25 is not None
+        and close >= ma25
+    )
+
+    above_ma75 = (
+        close is not None
+        and ma75 is not None
+        and close >= ma75
+    )
+
+    volume_ok = (
+        vol_prev is not None
+        and vol_prev >= 1.2
+    )
+
+    momentum_ok = (
+        rsi is not None
+        and 48 <= rsi <= 65
+    )
+
+    overheated = (
+        rsi is not None
+        and rsi >= 70
+    )
+
+    flags["touched_ma25"] = touched
+    flags["recovered_ma25"] = recovered
+    flags["ma25_up"] = ma25_up
+    flags["near_ma25"] = near_ma25
+    flags["above_ma25"] = above_ma25
+    flags["above_ma75"] = above_ma75
+    flags["volume_ok"] = volume_ok
+    flags["momentum_ok"] = momentum_ok
+    flags["overheated"] = overheated
+
+    if recovered:
+        score += 20
+        reasons.append("25MA回復")
+    elif touched:
+        score += 12
+        reasons.append("25MAタッチ")
+
+    if ma25_up:
+        score += 20
+        reasons.append("25MA上向き")
+
+    if near_ma25:
+        score += 15
+        reasons.append(
+            f"25MA近辺 {gap:.2f}%"
+        )
+
+    if above_ma25:
+        score += 10
+        reasons.append("終値25MA以上")
+
+    if above_ma75:
+        score += 10
+        reasons.append("終値75MA以上")
+
+    if volume_ok:
+        score += 15
+        reasons.append(
+            f"前日比出来高 {vol_prev:.2f}倍"
+        )
+
+    if momentum_ok:
+        score += 10
+        reasons.append(
+            f"RSI {rsi:.1f}"
+        )
+
+    if overheated:
+        score -= 15
+        reasons.append("過熱警戒")
+
+    return _finish_grade(
+        score,
+        flags,
+        reasons,
+        s_required=[
+            recovered,
+            ma25_up,
+            near_ma25,
+            above_ma25,
+            above_ma75,
+            volume_ok,
+            momentum_ok,
+            not overheated,
+        ],
+    )
+
+
+# ------------------------------------------------------------
+# 3. 初動ブレイク押し待ち
+# ------------------------------------------------------------
+
+def grade_initial_breakout(row):
+    score = 0
+    flags = {}
+    reasons = []
+
+    close = _num(row, "close")
+    ma25 = _num(row, "ma25")
+    ma75 = _num(row, "ma75")
+    high20_gap = _num(row, "high20_gap_pct")
+    high52_gap = _num(row, "high52_gap_pct")
+    vol_prev = _num(row, "volume_ratio_prev")
+    rsi = _num(row, "rsi14")
+
+    ma25_up = row.get("ma25_direction") == "up"
+
+    above_ma25 = (
+        close is not None
+        and ma25 is not None
+        and close > ma25
+    )
+
+    ma25_above_ma75 = (
+        ma25 is not None
+        and ma75 is not None
+        and ma25 > ma75
+    )
+
+    near_high20 = (
+        high20_gap is not None
+        and -4 <= high20_gap <= 1
+    )
+
+    near_high52 = (
+        high52_gap is not None
+        and -6 <= high52_gap <= 1
+    )
+
+    volume_ok = (
+        vol_prev is not None
+        and vol_prev >= 1.3
+    )
+
+    overheated = (
+        rsi is not None
+        and rsi >= 70
+    )
+
+    flags["ma25_up"] = ma25_up
+    flags["above_ma25"] = above_ma25
+    flags["ma25_above_ma75"] = ma25_above_ma75
+    flags["near_high20"] = near_high20
+    flags["near_high52"] = near_high52
+    flags["volume_ok"] = volume_ok
+    flags["overheated"] = overheated
+
+    if near_high20:
+        score += 20
+        reasons.append(
+            f"20日高値接近 {high20_gap:.2f}%"
+        )
+
+    if near_high52:
+        score += 15
+        reasons.append(
+            f"52週高値接近 {high52_gap:.2f}%"
+        )
+
+    if ma25_up:
+        score += 20
+        reasons.append("25MA上向き")
+
+    if above_ma25:
+        score += 10
+        reasons.append("終値25MA以上")
+
+    if ma25_above_ma75:
+        score += 15
+        reasons.append("25MA > 75MA")
+
+    if volume_ok:
+        score += 20
+        reasons.append(
+            f"前日比出来高 {vol_prev:.2f}倍"
+        )
+
+    if overheated:
+        score -= 15
+        reasons.append("過熱警戒")
+
+    return _finish_grade(
+        score,
+        flags,
+        reasons,
+        s_required=[
+            near_high20,
+            near_high52,
+            ma25_up,
+            above_ma25,
+            ma25_above_ma75,
+            volume_ok,
+            not overheated,
+        ],
+    )
+
+
+# ------------------------------------------------------------
+# 4. 出来高初動キャッチ
+# ------------------------------------------------------------
+
+def grade_volume_initial(row):
+    score = 0
+    flags = {}
+    reasons = []
+
+    close = _num(row, "close")
+    previous_close = _num(
+        row,
+        "previous_close"
+    )
+    ma25 = _num(row, "ma25")
+    ma75 = _num(row, "ma75")
+    vol_prev = _num(
+        row,
+        "volume_ratio_prev"
+    )
+    vol_20d = _num(
+        row,
+        "volume_ratio_20d"
+    )
+    rsi = _num(row, "rsi14")
+
+    price_up = (
+        close is not None
+        and previous_close is not None
+        and close > previous_close
+    )
+
+    ma25_up = (
+        row.get("ma25_direction") == "up"
+    )
+
+    above_ma25 = (
+        close is not None
+        and ma25 is not None
+        and close >= ma25
+    )
+
+    above_ma75 = (
+        close is not None
+        and ma75 is not None
+        and close >= ma75
+    )
+
+    strong_volume = (
+        (vol_prev is not None and vol_prev >= 1.5)
+        or
+        (vol_20d is not None and vol_20d >= 1.5)
+    )
+
+    volume_ok = (
+        (vol_prev is not None and vol_prev >= 1.2)
+        or
+        (vol_20d is not None and vol_20d >= 1.2)
+    )
+
+    overheated = (
+        rsi is not None
+        and rsi >= 70
+    )
+
+    flags["price_up"] = price_up
+    flags["ma25_up"] = ma25_up
+    flags["above_ma25"] = above_ma25
+    flags["above_ma75"] = above_ma75
+    flags["volume_ok"] = volume_ok
+    flags["strong_volume"] = strong_volume
+    flags["overheated"] = overheated
+
+    if strong_volume:
+        score += 30
+        reasons.append("出来高急増")
+    elif volume_ok:
+        score += 20
+        reasons.append("出来高増加")
+
+    if price_up:
+        score += 20
+        reasons.append("株価上昇")
+
+    if ma25_up:
+        score += 15
+        reasons.append("25MA上向き")
+
+    if above_ma25:
+        score += 15
+        reasons.append("終値25MA以上")
+
+    if above_ma75:
+        score += 15
+        reasons.append("終値75MA以上")
+
+    if not overheated:
+        score += 5
+    else:
+        score -= 15
+        reasons.append("過熱警戒")
+
+    return _finish_grade(
+        score,
+        flags,
+        reasons,
+        s_required=[
+            strong_volume,
+            price_up,
+            ma25_up,
+            above_ma25,
+            above_ma75,
+            not overheated,
+        ],
+    )
+
+
+# ------------------------------------------------------------
+# 共通入口
+# ------------------------------------------------------------
+
+def grade_candidate(row, strategy):
+    graders = {
+        "25MA_pullback":
+            grade_25ma_pullback,
+
+        "reacceleration_pullback":
+            grade_reacceleration,
+
+        "initial_breakout_pullback":
+            grade_initial_breakout,
+
+        "volume_initial_catch":
+            grade_volume_initial,
+    }
+
+    if strategy not in graders:
+        raise ValueError(
+            f"Unknown strategy: {strategy}"
+        )
+
+    return graders[strategy](row)
+
+
+def attach_grades(df, strategy):
+    if df.empty:
+        result = df.copy()
+
+        result["base_grade"] = pd.Series(
+            dtype="object"
+        )
+        result["strategy_score"] = pd.Series(
+            dtype="int64"
+        )
+        result["condition_flags"] = pd.Series(
+            dtype="object"
+        )
+        result["grade_reasons"] = pd.Series(
+            dtype="object"
+        )
+
+        return result
+
+    rows = []
+
+    for _, row in df.iterrows():
+        item = row.to_dict()
+
+        grade_data = grade_candidate(
+            item,
+            strategy
+        )
+
+        item.update(grade_data)
+        rows.append(item)
+
+    result = pd.DataFrame(rows)
+
+    grade_rank = {
+        "S": 0,
+        "A": 1,
+        "B": 2,
+        "C": 3,
+        "D": 4,
+        "E": 5,
+    }
+
+    result["_grade_rank"] = (
+        result["base_grade"]
+        .map(grade_rank)
+        .fillna(99)
+    )
+
+    result = result.sort_values(
+        [
+            "_grade_rank",
+            "strategy_score",
+            "avg_turnover_5d",
+        ],
+        ascending=[
+            True,
+            False,
+            False,
+        ],
+    )
+
+    result = result.drop(
+        columns=["_grade_rank"]
+    )
+
+    return result.reset_index(drop=True)
 # ============================================================
 # JSON用
 # ============================================================
@@ -1246,7 +1850,26 @@ def main():
     reacceleration_result = apply_reacceleration_screen(metrics)
     initial_breakout_result = apply_initial_breakout_screen(metrics)
     volume_initial_result = apply_volume_initial_screen(metrics)
-    
+    # 5-2. 戦略別評価を付与
+    result = attach_grades(
+        result,
+        "25MA_pullback"
+    )
+
+    reacceleration_result = attach_grades(
+        reacceleration_result,
+        "reacceleration_pullback"
+    )
+
+    initial_breakout_result = attach_grades(
+        initial_breakout_result,
+        "initial_breakout_pullback"
+    )
+
+    volume_initial_result = attach_grades(
+        volume_initial_result,
+        "volume_initial_catch"
+    )
     # 6. Failure table
     failure_rows = []
 
