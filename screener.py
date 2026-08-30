@@ -2013,7 +2013,9 @@ def main():
         encoding="utf-8"
     ) as f:
         json.dump(
-            all_metrics_latest,
+            make_json_safe(
+                all_metrics_latest
+            ),
             f,
             ensure_ascii=False,
             indent=2,
@@ -2056,7 +2058,9 @@ def main():
             encoding="utf-8"
         ) as f:
             json.dump(
-                stock_data,
+                make_json_safe(
+                    stock_data
+                ),
                 f,
                 ensure_ascii=False,
                 indent=2,
@@ -2089,7 +2093,9 @@ def main():
         encoding="utf-8"
     ) as f:
         json.dump(
-            all_metrics_latest,
+            make_json_safe(
+                all_metrics_latest
+            ),
             f,
             ensure_ascii=False,
             indent=2,
@@ -2125,7 +2131,9 @@ def main():
         encoding="utf-8"
     ) as f:
         json.dump(
-            latest,
+            make_json_safe(
+                latest
+            ),
             f,
             ensure_ascii=False,
             indent=2,
@@ -2160,7 +2168,9 @@ def main():
         encoding="utf-8"
     ) as f:
         json.dump(
-            reacceleration_latest,
+            make_json_safe(
+                reacceleration_latest
+            ),
             f,
             ensure_ascii=False,
             indent=2,
@@ -2195,7 +2205,9 @@ def main():
         encoding="utf-8"
     ) as f:
         json.dump(
-            initial_breakout_latest,
+            make_json_safe(
+                initial_breakout_latest
+            ),
             f,
             ensure_ascii=False,
             indent=2,
@@ -2230,7 +2242,9 @@ def main():
         encoding="utf-8"
     ) as f:
         json.dump(
-            volume_initial_latest,
+            make_json_safe(
+                volume_initial_latest
+            ),
             f,
             ensure_ascii=False,
             indent=2,
@@ -2266,7 +2280,9 @@ def main():
         encoding="utf-8"
     ) as f:
         json.dump(
-            health,
+            make_json_safe(
+                health
+            ),
             f,
             ensure_ascii=False,
             indent=2,
