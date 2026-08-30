@@ -678,7 +678,7 @@ def calculate_metrics(
                 high.tail(252).max()
             )
         else:
-            high52 = np.nan
+            high52 = None
 
         high20 = float(
             high.tail(20).max()
@@ -732,7 +732,7 @@ def calculate_metrics(
                 - 1
             ) * 100
         else:
-            high52_gap = np.nan
+            high52_gap = None
 
         high20_gap = (
             current_close
