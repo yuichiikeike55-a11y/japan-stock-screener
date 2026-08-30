@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.623794+00:00",
+  "generated_at": "2026-08-30T22:38:24.941074+00:00",
   "code": "8001",
   "data": {
     "code": "8001",
     "name": "伊藤忠商事",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2100.0,
     "high": 2132.0,
     "low": 2096.0,

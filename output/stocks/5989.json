@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.539370+00:00",
+  "generated_at": "2026-08-30T22:38:24.838696+00:00",
   "code": "5989",
   "data": {
     "code": "5989",
     "name": "エイチワン",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1519.0,
     "high": 1539.0,
     "low": 1515.0,

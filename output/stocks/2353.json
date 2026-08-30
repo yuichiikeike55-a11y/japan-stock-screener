@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.434294+00:00",
+  "generated_at": "2026-08-30T22:38:24.699165+00:00",
   "code": "2353",
   "data": {
     "code": "2353",
     "name": "日本駐車場開発",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 271.0,
     "high": 273.0,
     "low": 268.0,

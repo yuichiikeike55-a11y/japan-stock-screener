@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.413253+00:00",
+  "generated_at": "2026-08-30T22:38:24.667771+00:00",
   "code": "1812",
   "data": {
     "code": "1812",
     "name": "鹿島建設",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 4798.0,
     "high": 4851.0,
     "low": 4771.0,

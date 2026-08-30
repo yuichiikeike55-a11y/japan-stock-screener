@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.523157+00:00",
+  "generated_at": "2026-08-30T22:38:24.817396+00:00",
   "code": "5122",
   "data": {
     "code": "5122",
     "name": "オカモト",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 6320.0,
     "high": 6450.0,
     "low": 6310.0,

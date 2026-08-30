@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.487577+00:00",
+  "generated_at": "2026-08-30T22:38:24.770578+00:00",
   "code": "4062",
   "data": {
     "code": "4062",
     "name": "イビデン",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 20550.0,
     "high": 20855.0,
     "low": 20040.0,

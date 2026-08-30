@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.411041+00:00",
+  "generated_at": "2026-08-30T22:38:24.665228+00:00",
   "code": "1720",
   "data": {
     "code": "1720",
     "name": "東急建設",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1176.0,
     "high": 1181.0,
     "low": 1168.0,

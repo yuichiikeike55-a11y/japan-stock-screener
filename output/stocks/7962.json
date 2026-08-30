@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.621167+00:00",
+  "generated_at": "2026-08-30T22:38:24.937595+00:00",
   "code": "7962",
   "data": {
     "code": "7962",
     "name": "キングジム",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 811.0,
     "high": 816.0,
     "low": 808.0,

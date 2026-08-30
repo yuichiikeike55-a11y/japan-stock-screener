@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.637912+00:00",
+  "generated_at": "2026-08-30T22:38:24.959809+00:00",
   "code": "8255",
   "data": {
     "code": "8255",
     "name": "アクシアル　リテイリング",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1260.0,
     "high": 1271.0,
     "low": 1257.0,

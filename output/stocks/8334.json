@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.640178+00:00",
+  "generated_at": "2026-08-30T22:38:24.963015+00:00",
   "code": "8334",
   "data": {
     "code": "8334",
     "name": "群馬銀行",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2773.0,
     "high": 2853.5,
     "low": 2773.0,

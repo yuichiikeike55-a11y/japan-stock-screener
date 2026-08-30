@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.592064+00:00",
+  "generated_at": "2026-08-30T22:38:24.899393+00:00",
   "code": "7085",
   "data": {
     "code": "7085",
     "name": "カーブスホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 945.0,
     "high": 960.0,
     "low": 927.0,

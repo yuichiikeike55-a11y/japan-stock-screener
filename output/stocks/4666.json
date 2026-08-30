@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.509038+00:00",
+  "generated_at": "2026-08-30T22:38:24.798776+00:00",
   "code": "4666",
   "data": {
     "code": "4666",
     "name": "パーク２４",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1973.0,
     "high": 1994.5,
     "low": 1970.0,

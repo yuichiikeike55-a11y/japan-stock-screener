@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.442430+00:00",
+  "generated_at": "2026-08-30T22:38:24.708048+00:00",
   "code": "2726",
   "data": {
     "code": "2726",
     "name": "パルグループホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1485.0,
     "high": 1498.0,
     "low": 1474.0,

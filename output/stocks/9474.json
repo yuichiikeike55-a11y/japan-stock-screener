@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.670942+00:00",
+  "generated_at": "2026-08-30T22:38:25.004390+00:00",
   "code": "9474",
   "data": {
     "code": "9474",
     "name": "ゼンリン",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 907.0,
     "high": 939.0,
     "low": 907.0,

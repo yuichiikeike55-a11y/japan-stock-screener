@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.622258+00:00",
+  "generated_at": "2026-08-30T22:38:24.939038+00:00",
   "code": "7976",
   "data": {
     "code": "7976",
     "name": "三菱鉛筆",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3035.0,
     "high": 3090.0,
     "low": 3025.0,

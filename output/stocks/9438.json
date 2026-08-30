@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.670264+00:00",
+  "generated_at": "2026-08-30T22:38:25.003477+00:00",
   "code": "9438",
   "data": {
     "code": "9438",
     "name": "エムティーアイ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 601.0,
     "high": 618.0,
     "low": 601.0,

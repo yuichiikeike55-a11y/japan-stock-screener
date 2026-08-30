@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.617949+00:00",
+  "generated_at": "2026-08-30T22:38:24.933255+00:00",
   "code": "7888",
   "data": {
     "code": "7888",
     "name": "三光合成",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 903.0,
     "high": 916.0,
     "low": 903.0,

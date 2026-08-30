@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.545314+00:00",
+  "generated_at": "2026-08-30T22:38:24.846439+00:00",
   "code": "6183",
   "data": {
     "code": "6183",
     "name": "ベルシステム２４ホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1384.0,
     "high": 1398.0,
     "low": 1375.0,

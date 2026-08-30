@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.547866+00:00",
+  "generated_at": "2026-08-30T22:38:24.849775+00:00",
   "code": "6258",
   "data": {
     "code": "6258",
     "name": "平田機工",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3575.0,
     "high": 3590.0,
     "low": 3490.0,

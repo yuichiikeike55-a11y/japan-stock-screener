@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.425655+00:00",
+  "generated_at": "2026-08-30T22:38:24.689404+00:00",
   "code": "2127",
   "data": {
     "code": "2127",
     "name": "日本Ｍ＆Ａセンターホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 683.7000122070312,
     "high": 691.5999755859375,
     "low": 679.2000122070312,

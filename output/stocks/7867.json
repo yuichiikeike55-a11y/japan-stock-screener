@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.617428+00:00",
+  "generated_at": "2026-08-30T22:38:24.932487+00:00",
   "code": "7867",
   "data": {
     "code": "7867",
     "name": "タカラトミー",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3653.0,
     "high": 3730.0,
     "low": 3643.0,

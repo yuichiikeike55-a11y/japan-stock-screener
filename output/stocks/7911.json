@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.618280+00:00",
+  "generated_at": "2026-08-30T22:38:24.933716+00:00",
   "code": "7911",
   "data": {
     "code": "7911",
     "name": "ＴＯＰＰＡＮホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 5050.0,
     "high": 5088.0,
     "low": 4969.0,

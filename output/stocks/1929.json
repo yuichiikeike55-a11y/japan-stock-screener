@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.418541+00:00",
+  "generated_at": "2026-08-30T22:38:24.673628+00:00",
   "code": "1929",
   "data": {
     "code": "1929",
     "name": "日特建設",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1182.0,
     "high": 1189.0,
     "low": 1178.0,

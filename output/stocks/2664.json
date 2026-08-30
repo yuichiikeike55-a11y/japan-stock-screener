@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.440857+00:00",
+  "generated_at": "2026-08-30T22:38:24.706224+00:00",
   "code": "2664",
   "data": {
     "code": "2664",
     "name": "カワチ薬品",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3745.0,
     "high": 3745.0,
     "low": 3680.0,

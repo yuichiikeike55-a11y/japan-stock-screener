@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.684923+00:00",
+  "generated_at": "2026-08-30T22:38:25.022836+00:00",
   "code": "9887",
   "data": {
     "code": "9887",
     "name": "松屋フーズホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 5210.0,
     "high": 5340.0,
     "low": 5210.0,

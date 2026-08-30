@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.676000+00:00",
+  "generated_at": "2026-08-30T22:38:25.011177+00:00",
   "code": "9619",
   "data": {
     "code": "9619",
     "name": "イチネンホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2711.0,
     "high": 2742.0,
     "low": 2706.0,

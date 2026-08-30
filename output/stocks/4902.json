@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.516890+00:00",
+  "generated_at": "2026-08-30T22:38:24.808980+00:00",
   "code": "4902",
   "data": {
     "code": "4902",
     "name": "コニカミノルタ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 656.9000244140625,
     "high": 666.4000244140625,
     "low": 655.4000244140625,

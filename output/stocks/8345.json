@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.641407+00:00",
+  "generated_at": "2026-08-30T22:38:24.964563+00:00",
   "code": "8345",
   "data": {
     "code": "8345",
     "name": "岩手銀行",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2486.0,
     "high": 2600.0,
     "low": 2466.0,

@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.467878+00:00",
+  "generated_at": "2026-08-30T22:38:24.746545+00:00",
   "code": "3465",
   "data": {
     "code": "3465",
     "name": "ケイアイスター不動産",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3745.0,
     "high": 3760.0,
     "low": 3675.0,

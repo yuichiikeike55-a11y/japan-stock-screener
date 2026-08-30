@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.677898+00:00",
+  "generated_at": "2026-08-30T22:38:25.013627+00:00",
   "code": "9682",
   "data": {
     "code": "9682",
     "name": "ＤＴＳ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1127.0,
     "high": 1150.0,
     "low": 1120.0,

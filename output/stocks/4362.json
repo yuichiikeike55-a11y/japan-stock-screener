@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.497601+00:00",
+  "generated_at": "2026-08-30T22:38:24.783892+00:00",
   "code": "4362",
   "data": {
     "code": "4362",
     "name": "日本精化",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2744.0,
     "high": 2750.0,
     "low": 2724.0,

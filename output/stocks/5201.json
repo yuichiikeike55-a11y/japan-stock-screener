@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.524258+00:00",
+  "generated_at": "2026-08-30T22:38:24.818830+00:00",
   "code": "5201",
   "data": {
     "code": "5201",
     "name": "ＡＧＣ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 5790.0,
     "high": 5796.0,
     "low": 5724.0,

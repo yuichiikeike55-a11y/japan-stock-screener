@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.681408+00:00",
+  "generated_at": "2026-08-30T22:38:25.018204+00:00",
   "code": "9759",
   "data": {
     "code": "9759",
     "name": "ＮＳＤ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2920.0,
     "high": 2960.0,
     "low": 2911.0,

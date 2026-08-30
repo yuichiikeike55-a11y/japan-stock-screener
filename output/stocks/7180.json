@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.594023+00:00",
+  "generated_at": "2026-08-30T22:38:24.901942+00:00",
   "code": "7180",
   "data": {
     "code": "7180",
     "name": "九州フィナンシャルグループ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1549.0,
     "high": 1576.5,
     "low": 1543.0,

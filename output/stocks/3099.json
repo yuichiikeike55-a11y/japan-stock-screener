@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.454941+00:00",
+  "generated_at": "2026-08-30T22:38:24.726168+00:00",
   "code": "3099",
   "data": {
     "code": "3099",
     "name": "三越伊勢丹ホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3539.0,
     "high": 3572.0,
     "low": 3531.0,

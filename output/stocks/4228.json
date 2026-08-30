@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.494138+00:00",
+  "generated_at": "2026-08-30T22:38:24.779305+00:00",
   "code": "4228",
   "data": {
     "code": "4228",
     "name": "積水化成品工業",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 592.0,
     "high": 601.0,
     "low": 584.0,

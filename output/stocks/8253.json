@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.637750+00:00",
+  "generated_at": "2026-08-30T22:38:24.959570+00:00",
   "code": "8253",
   "data": {
     "code": "8253",
     "name": "クレディセゾン",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 4693.0,
     "high": 4742.0,
     "low": 4681.0,

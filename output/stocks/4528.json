@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.503184+00:00",
+  "generated_at": "2026-08-30T22:38:24.791145+00:00",
   "code": "4528",
   "data": {
     "code": "4528",
     "name": "小野薬品工業",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2459.5,
     "high": 2482.5,
     "low": 2442.0,

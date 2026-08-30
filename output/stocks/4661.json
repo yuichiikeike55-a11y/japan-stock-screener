@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.508530+00:00",
+  "generated_at": "2026-08-30T22:38:24.798098+00:00",
   "code": "4661",
   "data": {
     "code": "4661",
     "name": "オリエンタルランド",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2995.5,
     "high": 3039.0,
     "low": 2990.0,

@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.595547+00:00",
+  "generated_at": "2026-08-30T22:38:24.903951+00:00",
   "code": "7201",
   "data": {
     "code": "7201",
     "name": "日産自動車",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 315.3999938964844,
     "high": 322.8999938964844,
     "low": 312.79998779296875,

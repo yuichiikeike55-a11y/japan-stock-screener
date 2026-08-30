@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.445675+00:00",
+  "generated_at": "2026-08-30T22:38:24.716175+00:00",
   "code": "2802",
   "data": {
     "code": "2802",
     "name": "味の素",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 5411.0,
     "high": 5509.0,
     "low": 5401.0,

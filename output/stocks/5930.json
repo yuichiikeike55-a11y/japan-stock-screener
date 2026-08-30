@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.536858+00:00",
+  "generated_at": "2026-08-30T22:38:24.835348+00:00",
   "code": "5930",
   "data": {
     "code": "5930",
     "name": "文化シヤッター",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1882.0,
     "high": 1899.0,
     "low": 1874.0,

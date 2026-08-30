@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.560194+00:00",
+  "generated_at": "2026-08-30T22:38:24.858228+00:00",
   "code": "6361",
   "data": {
     "code": "6361",
     "name": "荏原製作所",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 4780.0,
     "high": 4815.0,
     "low": 4655.0,

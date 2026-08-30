@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.535080+00:00",
+  "generated_at": "2026-08-30T22:38:24.833048+00:00",
   "code": "5838",
   "data": {
     "code": "5838",
     "name": "楽天銀行",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 6454.0,
     "high": 6598.0,
     "low": 6441.0,

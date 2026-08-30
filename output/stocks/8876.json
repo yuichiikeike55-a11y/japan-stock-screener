@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.655246+00:00",
+  "generated_at": "2026-08-30T22:38:24.983144+00:00",
   "code": "8876",
   "data": {
     "code": "8876",
     "name": "リログループ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2146.5,
     "high": 2182.0,
     "low": 2140.5,

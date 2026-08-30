@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.489602+00:00",
+  "generated_at": "2026-08-30T22:38:24.773272+00:00",
   "code": "4099",
   "data": {
     "code": "4099",
     "name": "四国化成ホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2469.0,
     "high": 2486.0,
     "low": 2414.0,

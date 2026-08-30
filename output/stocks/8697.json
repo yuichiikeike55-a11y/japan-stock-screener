@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.650993+00:00",
+  "generated_at": "2026-08-30T22:38:24.977231+00:00",
   "code": "8697",
   "data": {
     "code": "8697",
     "name": "日本取引所グループ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2285.5,
     "high": 2313.0,
     "low": 2280.0,

@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.645596+00:00",
+  "generated_at": "2026-08-30T22:38:24.970051+00:00",
   "code": "8418",
   "data": {
     "code": "8418",
     "name": "山口フィナンシャルグループ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3154.0,
     "high": 3224.0,
     "low": 3149.0,

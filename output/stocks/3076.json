@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.453287+00:00",
+  "generated_at": "2026-08-30T22:38:24.724422+00:00",
   "code": "3076",
   "data": {
     "code": "3076",
     "name": "あい　ホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2961.0,
     "high": 3005.0,
     "low": 2956.0,

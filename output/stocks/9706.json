@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.678906+00:00",
+  "generated_at": "2026-08-30T22:38:25.014973+00:00",
   "code": "9706",
   "data": {
     "code": "9706",
     "name": "日本空港ビルデング",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 5900.0,
     "high": 6009.0,
     "low": 5891.0,

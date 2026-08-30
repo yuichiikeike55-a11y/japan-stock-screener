@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.626261+00:00",
+  "generated_at": "2026-08-30T22:38:24.944334+00:00",
   "code": "8035",
   "data": {
     "code": "8035",
     "name": "東京エレクトロン",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 56920.0,
     "high": 57520.0,
     "low": 55900.0,

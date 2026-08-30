@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.552220+00:00",
+  "generated_at": "2026-08-30T22:38:24.856209+00:00",
   "code": "6331",
   "data": {
     "code": "6331",
     "name": "三菱化工機",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3280.0,
     "high": 3285.0,
     "low": 3225.0,

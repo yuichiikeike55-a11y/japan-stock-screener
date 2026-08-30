@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.408758+00:00",
+  "generated_at": "2026-08-30T22:38:24.662762+00:00",
   "code": "1414",
   "data": {
     "code": "1414",
     "name": "ショーボンドホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1270.0,
     "high": 1273.5,
     "low": 1265.5,

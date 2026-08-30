@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.548611+00:00",
+  "generated_at": "2026-08-30T22:38:24.850754+00:00",
   "code": "6269",
   "data": {
     "code": "6269",
     "name": "三井海洋開発",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 9825.0,
     "high": 9975.0,
     "low": 9760.0,

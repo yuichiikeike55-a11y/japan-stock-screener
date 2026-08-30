@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.526660+00:00",
+  "generated_at": "2026-08-30T22:38:24.821956+00:00",
   "code": "5332",
   "data": {
     "code": "5332",
     "name": "ＴＯＴＯ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 6417.0,
     "high": 6484.0,
     "low": 6324.0,

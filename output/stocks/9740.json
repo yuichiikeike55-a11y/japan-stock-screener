@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.680222+00:00",
+  "generated_at": "2026-08-30T22:38:25.016593+00:00",
   "code": "9740",
   "data": {
     "code": "9740",
     "name": "セントラル警備保障",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2750.0,
     "high": 2793.0,
     "low": 2700.0,

@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.493287+00:00",
+  "generated_at": "2026-08-30T22:38:24.778210+00:00",
   "code": "4212",
   "data": {
     "code": "4212",
     "name": "積水樹脂",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2911.0,
     "high": 2958.0,
     "low": 2910.0,

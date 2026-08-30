@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.640750+00:00",
+  "generated_at": "2026-08-30T22:38:24.963692+00:00",
   "code": "8338",
   "data": {
     "code": "8338",
     "name": "筑波銀行",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 721.0,
     "high": 761.0,
     "low": 718.0,

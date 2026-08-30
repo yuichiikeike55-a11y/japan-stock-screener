@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.562528+00:00",
+  "generated_at": "2026-08-30T22:38:24.860904+00:00",
   "code": "6387",
   "data": {
     "code": "6387",
     "name": "サムコ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 9010.0,
     "high": 9110.0,
     "low": 8700.0,

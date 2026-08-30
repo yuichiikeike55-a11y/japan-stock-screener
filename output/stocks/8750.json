@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.652674+00:00",
+  "generated_at": "2026-08-30T22:38:24.979664+00:00",
   "code": "8750",
   "data": {
     "code": "8750",
     "name": "第一ライフグループ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1816.0,
     "high": 1857.0,
     "low": 1810.5,

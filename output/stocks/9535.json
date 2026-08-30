@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.674148+00:00",
+  "generated_at": "2026-08-30T22:38:25.008552+00:00",
   "code": "9535",
   "data": {
     "code": "9535",
     "name": "広島ガス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 428.0,
     "high": 432.0,
     "low": 426.0,

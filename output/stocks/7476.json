@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.605305+00:00",
+  "generated_at": "2026-08-30T22:38:24.916630+00:00",
   "code": "7476",
   "data": {
     "code": "7476",
     "name": "アズワン",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2457.5,
     "high": 2520.0,
     "low": 2457.5,

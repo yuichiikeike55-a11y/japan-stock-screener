@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.615502+00:00",
+  "generated_at": "2026-08-30T22:38:24.930033+00:00",
   "code": "7820",
   "data": {
     "code": "7820",
     "name": "ニホンフラッシュ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 718.0,
     "high": 719.0,
     "low": 711.0,

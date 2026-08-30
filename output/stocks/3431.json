@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.466675+00:00",
+  "generated_at": "2026-08-30T22:38:24.745218+00:00",
   "code": "3431",
   "data": {
     "code": "3431",
     "name": "宮地エンジニアリンググループ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1643.0,
     "high": 1643.0,
     "low": 1621.0,

@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.669759+00:00",
+  "generated_at": "2026-08-30T22:38:25.002793+00:00",
   "code": "9433",
   "data": {
     "code": "9433",
     "name": "ＫＤＤＩ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2870.0,
     "high": 2922.0,
     "low": 2867.0,

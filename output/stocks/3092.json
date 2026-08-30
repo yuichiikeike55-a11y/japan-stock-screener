@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.454344+00:00",
+  "generated_at": "2026-08-30T22:38:24.725536+00:00",
   "code": "3092",
   "data": {
     "code": "3092",
     "name": "ＺＯＺＯ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1133.5,
     "high": 1152.5,
     "low": 1133.0,

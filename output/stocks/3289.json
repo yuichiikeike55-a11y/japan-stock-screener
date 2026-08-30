@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.462589+00:00",
+  "generated_at": "2026-08-30T22:38:24.740610+00:00",
   "code": "3289",
   "data": {
     "code": "3289",
     "name": "東急不動産ホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1330.0,
     "high": 1337.0,
     "low": 1326.0,

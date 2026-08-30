@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.452482+00:00",
+  "generated_at": "2026-08-30T22:38:24.723599+00:00",
   "code": "3046",
   "data": {
     "code": "3046",
     "name": "ジンズホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 6100.0,
     "high": 6160.0,
     "low": 5950.0,

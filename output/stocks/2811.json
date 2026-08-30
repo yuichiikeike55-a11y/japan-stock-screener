@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.446467+00:00",
+  "generated_at": "2026-08-30T22:38:24.717099+00:00",
   "code": "2811",
   "data": {
     "code": "2811",
     "name": "カゴメ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2711.0,
     "high": 2739.5,
     "low": 2705.0,

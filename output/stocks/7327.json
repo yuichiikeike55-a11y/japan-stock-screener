@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.601325+00:00",
+  "generated_at": "2026-08-30T22:38:24.911404+00:00",
   "code": "7327",
   "data": {
     "code": "7327",
     "name": "第四北越フィナンシャルグループ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2546.0,
     "high": 2602.0,
     "low": 2534.0,

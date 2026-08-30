@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.422362+00:00",
+  "generated_at": "2026-08-30T22:38:24.677978+00:00",
   "code": "1975",
   "data": {
     "code": "1975",
     "name": "朝日工業社",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3905.0,
     "high": 3935.0,
     "low": 3860.0,

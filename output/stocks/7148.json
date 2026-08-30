@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.593001+00:00",
+  "generated_at": "2026-08-30T22:38:24.900579+00:00",
   "code": "7148",
   "data": {
     "code": "7148",
     "name": "ＦＰＧ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1654.0,
     "high": 1674.0,
     "low": 1653.0,

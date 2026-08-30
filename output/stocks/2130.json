@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.425857+00:00",
+  "generated_at": "2026-08-30T22:38:24.689638+00:00",
   "code": "2130",
   "data": {
     "code": "2130",
     "name": "メンバーズ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 933.0,
     "high": 944.0,
     "low": 929.0,

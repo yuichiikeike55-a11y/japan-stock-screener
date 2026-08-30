@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.574476+00:00",
+  "generated_at": "2026-08-30T22:38:24.876378+00:00",
   "code": "6632",
   "data": {
     "code": "6632",
     "name": "ＪＶＣケンウッド",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1028.0,
     "high": 1041.5,
     "low": 1023.5,

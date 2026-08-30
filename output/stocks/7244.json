@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.598029+00:00",
+  "generated_at": "2026-08-30T22:38:24.907070+00:00",
   "code": "7244",
   "data": {
     "code": "7244",
     "name": "市光工業",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 558.0,
     "high": 566.0,
     "low": 556.0,

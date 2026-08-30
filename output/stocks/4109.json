@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.489769+00:00",
+  "generated_at": "2026-08-30T22:38:24.773490+00:00",
   "code": "4109",
   "data": {
     "code": "4109",
     "name": "ステラ　ケミファ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 5500.0,
     "high": 5550.0,
     "low": 5380.0,

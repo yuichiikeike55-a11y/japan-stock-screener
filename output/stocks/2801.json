@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.445457+00:00",
+  "generated_at": "2026-08-30T22:38:24.715925+00:00",
   "code": "2801",
   "data": {
     "code": "2801",
     "name": "キッコーマン",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1792.5,
     "high": 1824.5,
     "low": 1790.5,

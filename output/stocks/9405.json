@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.668341+00:00",
+  "generated_at": "2026-08-30T22:38:25.000780+00:00",
   "code": "9405",
   "data": {
     "code": "9405",
     "name": "朝日放送グループホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 849.0,
     "high": 861.0,
     "low": 849.0,

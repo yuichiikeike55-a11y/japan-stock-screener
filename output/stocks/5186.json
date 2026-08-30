@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.523763+00:00",
+  "generated_at": "2026-08-30T22:38:24.818152+00:00",
   "code": "5186",
   "data": {
     "code": "5186",
     "name": "ニッタ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 6850.0,
     "high": 6880.0,
     "low": 6720.0,

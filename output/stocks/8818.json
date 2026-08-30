@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.654331+00:00",
+  "generated_at": "2026-08-30T22:38:24.981925+00:00",
   "code": "8818",
   "data": {
     "code": "8818",
     "name": "京阪神ビルディング",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1136.0,
     "high": 1139.0,
     "low": 1126.0,

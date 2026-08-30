@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.571744+00:00",
+  "generated_at": "2026-08-30T22:38:24.872800+00:00",
   "code": "6564",
   "data": {
     "code": "6564",
     "name": "ミダックホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2100.0,
     "high": 2120.0,
     "low": 2053.0,

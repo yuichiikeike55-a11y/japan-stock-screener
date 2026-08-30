@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.461192+00:00",
+  "generated_at": "2026-08-30T22:38:24.739062+00:00",
   "code": "3231",
   "data": {
     "code": "3231",
     "name": "野村不動産ホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 931.0999755859375,
     "high": 937.4000244140625,
     "low": 928.0,

@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.669583+00:00",
+  "generated_at": "2026-08-30T22:38:25.002545+00:00",
   "code": "9432",
   "data": {
     "code": "9432",
     "name": "ＮＴＴ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 168.1999969482422,
     "high": 169.60000610351562,
     "low": 167.3000030517578,

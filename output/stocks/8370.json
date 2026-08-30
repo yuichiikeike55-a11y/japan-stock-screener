@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.643568+00:00",
+  "generated_at": "2026-08-30T22:38:24.967341+00:00",
   "code": "8370",
   "data": {
     "code": "8370",
     "name": "紀陽銀行",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 5060.0,
     "high": 5160.0,
     "low": 5040.0,

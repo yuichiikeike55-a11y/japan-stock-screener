@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.452694+00:00",
+  "generated_at": "2026-08-30T22:38:24.723822+00:00",
   "code": "3048",
   "data": {
     "code": "3048",
     "name": "ビックカメラ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1770.0,
     "high": 1784.0,
     "low": 1742.5,

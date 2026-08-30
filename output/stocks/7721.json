@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.612019+00:00",
+  "generated_at": "2026-08-30T22:38:24.925463+00:00",
   "code": "7721",
   "data": {
     "code": "7721",
     "name": "東京計器",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 7340.0,
     "high": 7620.0,
     "low": 7300.0,

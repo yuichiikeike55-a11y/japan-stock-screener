@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.532886+00:00",
+  "generated_at": "2026-08-30T22:38:24.830154+00:00",
   "code": "5714",
   "data": {
     "code": "5714",
     "name": "ＤＯＷＡホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 10370.0,
     "high": 10495.0,
     "low": 10255.0,

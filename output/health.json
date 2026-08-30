@@ -1,9 +1,9 @@
 {
   "status": "partial",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.780265+00:00",
+  "generated_at": "2026-08-30T22:38:25.182522+00:00",
   "universe_count": 1532,
-  "processed_count": 1528,
-  "failure_count": 4,
-  "coverage_pct": 99.74
+  "processed_count": 1530,
+  "failure_count": 2,
+  "coverage_pct": 99.87
 }

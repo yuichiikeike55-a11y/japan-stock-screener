@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.425050+00:00",
+  "generated_at": "2026-08-30T22:38:24.688670+00:00",
   "code": "2120",
   "data": {
     "code": "2120",
     "name": "ＬＩＦＵＬＬ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 235.0,
     "high": 242.0,
     "low": 235.0,

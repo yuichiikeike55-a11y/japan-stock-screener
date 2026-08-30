@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.447676+00:00",
+  "generated_at": "2026-08-30T22:38:24.718460+00:00",
   "code": "2884",
   "data": {
     "code": "2884",
     "name": "ヨシムラ・フード・ホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 652.0,
     "high": 663.0,
     "low": 648.0,

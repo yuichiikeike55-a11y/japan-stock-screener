@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.451899+00:00",
+  "generated_at": "2026-08-30T22:38:24.722996+00:00",
   "code": "3036",
   "data": {
     "code": "3036",
     "name": "アルコニックス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3465.0,
     "high": 3610.0,
     "low": 3445.0,

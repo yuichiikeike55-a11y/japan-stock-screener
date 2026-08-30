@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.632942+00:00",
+  "generated_at": "2026-08-30T22:38:24.953150+00:00",
   "code": "8141",
   "data": {
     "code": "8141",
     "name": "新光商事",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1568.0,
     "high": 1571.0,
     "low": 1567.0,

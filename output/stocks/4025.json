@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.485268+00:00",
+  "generated_at": "2026-08-30T22:38:24.767619+00:00",
   "code": "4025",
   "data": {
     "code": "4025",
     "name": "多木化学",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 6050.0,
     "high": 6310.0,
     "low": 5950.0,

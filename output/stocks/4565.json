@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.505559+00:00",
+  "generated_at": "2026-08-30T22:38:24.794247+00:00",
   "code": "4565",
   "data": {
     "code": "4565",
     "name": "ネクセラファーマ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1119.0,
     "high": 1150.0,
     "low": 1112.0,

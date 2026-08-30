@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.444520+00:00",
+  "generated_at": "2026-08-30T22:38:24.710217+00:00",
   "code": "2767",
   "data": {
     "code": "2767",
     "name": "円谷フィールズホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2513.0,
     "high": 2606.0,
     "low": 2509.0,

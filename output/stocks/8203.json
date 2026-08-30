@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.636061+00:00",
+  "generated_at": "2026-08-30T22:38:24.957328+00:00",
   "code": "8203",
   "data": {
     "code": "8203",
     "name": "ＭｒＭａｘＨＤ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 786.0,
     "high": 791.0,
     "low": 785.0,

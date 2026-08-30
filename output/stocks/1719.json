@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.410841+00:00",
+  "generated_at": "2026-08-30T22:38:24.665019+00:00",
   "code": "1719",
   "data": {
     "code": "1719",
     "name": "安藤・間",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1916.5,
     "high": 1928.5,
     "low": 1911.5,

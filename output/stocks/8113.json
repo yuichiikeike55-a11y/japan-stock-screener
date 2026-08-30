@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.631595+00:00",
+  "generated_at": "2026-08-30T22:38:24.951361+00:00",
   "code": "8113",
   "data": {
     "code": "8113",
     "name": "ユニ・チャーム",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 977.5,
     "high": 987.5999755859375,
     "low": 974.2000122070312,

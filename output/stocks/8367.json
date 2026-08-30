@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.643219+00:00",
+  "generated_at": "2026-08-30T22:38:24.966899+00:00",
   "code": "8367",
   "data": {
     "code": "8367",
     "name": "南都銀行",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1915.0,
     "high": 1969.0,
     "low": 1911.0,

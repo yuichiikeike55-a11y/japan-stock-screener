@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.650403+00:00",
+  "generated_at": "2026-08-30T22:38:24.976459+00:00",
   "code": "8624",
   "data": {
     "code": "8624",
     "name": "いちよし証券",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1719.0,
     "high": 1797.0,
     "low": 1711.0,

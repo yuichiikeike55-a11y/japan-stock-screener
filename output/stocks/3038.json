@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.452091+00:00",
+  "generated_at": "2026-08-30T22:38:24.723198+00:00",
   "code": "3038",
   "data": {
     "code": "3038",
     "name": "神戸物産",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2802.0,
     "high": 2872.0,
     "low": 2791.0,

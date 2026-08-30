@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.640343+00:00",
+  "generated_at": "2026-08-30T22:38:24.963235+00:00",
   "code": "8336",
   "data": {
     "code": "8336",
     "name": "武蔵野銀行",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2772.0,
     "high": 2809.0,
     "low": 2757.0,

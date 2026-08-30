@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.686160+00:00",
+  "generated_at": "2026-08-30T22:38:25.024472+00:00",
   "code": "9936",
   "data": {
     "code": "9936",
     "name": "王将フードサービス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2950.0,
     "high": 2990.0,
     "low": 2946.0,

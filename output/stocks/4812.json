@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.514415+00:00",
+  "generated_at": "2026-08-30T22:38:24.805776+00:00",
   "code": "4812",
   "data": {
     "code": "4812",
     "name": "電通総研",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2900.0,
     "high": 2930.0,
     "low": 2881.0,

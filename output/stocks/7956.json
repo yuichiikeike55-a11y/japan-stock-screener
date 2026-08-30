@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.621001+00:00",
+  "generated_at": "2026-08-30T22:38:24.937378+00:00",
   "code": "7956",
   "data": {
     "code": "7956",
     "name": "ピジョン",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2117.5,
     "high": 2146.0,
     "low": 2111.5,

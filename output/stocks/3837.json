@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.478422+00:00",
+  "generated_at": "2026-08-30T22:38:24.758913+00:00",
   "code": "3837",
   "data": {
     "code": "3837",
     "name": "アドソル日進",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1432.0,
     "high": 1459.0,
     "low": 1432.0,

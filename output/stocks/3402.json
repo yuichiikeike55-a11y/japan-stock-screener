@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.465864+00:00",
+  "generated_at": "2026-08-30T22:38:24.744309+00:00",
   "code": "3402",
   "data": {
     "code": "3402",
     "name": "東レ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1277.5,
     "high": 1295.5,
     "low": 1274.5,

@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.563442+00:00",
+  "generated_at": "2026-08-30T22:38:24.862114+00:00",
   "code": "6413",
   "data": {
     "code": "6413",
     "name": "理想科学工業",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1154.0,
     "high": 1164.0,
     "low": 1147.0,

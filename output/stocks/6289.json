@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.549967+00:00",
+  "generated_at": "2026-08-30T22:38:24.852801+00:00",
   "code": "6289",
   "data": {
     "code": "6289",
     "name": "技研製作所",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1971.0,
     "high": 1976.0,
     "low": 1942.0,

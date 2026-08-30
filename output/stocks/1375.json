@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.408120+00:00",
+  "generated_at": "2026-08-30T22:38:24.662110+00:00",
   "code": "1375",
   "data": {
     "code": "1375",
     "name": "ユキグニファクトリー",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1178.0,
     "high": 1179.0,
     "low": 1169.0,

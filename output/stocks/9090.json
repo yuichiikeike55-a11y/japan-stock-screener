@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.662276+00:00",
+  "generated_at": "2026-08-30T22:38:24.992429+00:00",
   "code": "9090",
   "data": {
     "code": "9090",
     "name": "ＡＺ－ＣＯＭ丸和ホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 891.0,
     "high": 911.0,
     "low": 887.0,

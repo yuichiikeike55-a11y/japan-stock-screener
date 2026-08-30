@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.446680+00:00",
+  "generated_at": "2026-08-30T22:38:24.717326+00:00",
   "code": "2815",
   "data": {
     "code": "2815",
     "name": "アリアケジャパン",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 5420.0,
     "high": 5500.0,
     "low": 5400.0,

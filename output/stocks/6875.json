@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.585320+00:00",
+  "generated_at": "2026-08-30T22:38:24.890511+00:00",
   "code": "6875",
   "data": {
     "code": "6875",
     "name": "メガチップス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 10940.0,
     "high": 10990.0,
     "low": 10670.0,

@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.409585+00:00",
+  "generated_at": "2026-08-30T22:38:24.663604+00:00",
   "code": "1433",
   "data": {
     "code": "1433",
     "name": "ベステラ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1265.0,
     "high": 1321.0,
     "low": 1262.0,

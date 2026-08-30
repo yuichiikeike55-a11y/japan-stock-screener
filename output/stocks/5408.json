@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.528408+00:00",
+  "generated_at": "2026-08-30T22:38:24.824303+00:00",
   "code": "5408",
   "data": {
     "code": "5408",
     "name": "中山製鋼所",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 638.0,
     "high": 644.0,
     "low": 637.0,

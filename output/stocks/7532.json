@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.607185+00:00",
+  "generated_at": "2026-08-30T22:38:24.919105+00:00",
   "code": "7532",
   "data": {
     "code": "7532",
     "name": "パン・パシフィック・インターナショナルホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 804.9000244140625,
     "high": 810.2000122070312,
     "low": 798.5999755859375,

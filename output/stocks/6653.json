@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.575650+00:00",
+  "generated_at": "2026-08-30T22:38:24.877739+00:00",
   "code": "6653",
   "data": {
     "code": "6653",
     "name": "正興電機製作所",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 2243.0,
     "high": 2291.0,
     "low": 2242.0,

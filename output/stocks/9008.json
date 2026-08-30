@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.657797+00:00",
+  "generated_at": "2026-08-30T22:38:24.986484+00:00",
   "code": "9008",
   "data": {
     "code": "9008",
     "name": "京王電鉄",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 778.9000244140625,
     "high": 786.2000122070312,
     "low": 775.0,

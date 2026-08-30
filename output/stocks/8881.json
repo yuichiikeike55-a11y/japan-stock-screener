@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.655593+00:00",
+  "generated_at": "2026-08-30T22:38:24.983579+00:00",
   "code": "8881",
   "data": {
     "code": "8881",
     "name": "日神グループホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 675.0,
     "high": 679.0,
     "low": 674.0,

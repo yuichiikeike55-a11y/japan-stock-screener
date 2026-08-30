@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.678391+00:00",
+  "generated_at": "2026-08-30T22:38:25.014304+00:00",
   "code": "9697",
   "data": {
     "code": "9697",
     "name": "カプコン",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 4205.0,
     "high": 4316.0,
     "low": 4194.0,

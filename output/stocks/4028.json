@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.485603+00:00",
+  "generated_at": "2026-08-30T22:38:24.768085+00:00",
   "code": "4028",
   "data": {
     "code": "4028",
     "name": "石原産業",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3215.0,
     "high": 3285.0,
     "low": 3180.0,

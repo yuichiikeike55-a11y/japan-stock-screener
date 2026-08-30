@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.668178+00:00",
+  "generated_at": "2026-08-30T22:38:25.000512+00:00",
   "code": "9404",
   "data": {
     "code": "9404",
     "name": "日本テレビホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3000.0,
     "high": 3030.0,
     "low": 2991.0,

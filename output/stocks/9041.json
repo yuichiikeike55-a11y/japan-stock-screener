@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.659922+00:00",
+  "generated_at": "2026-08-30T22:38:24.989261+00:00",
   "code": "9041",
   "data": {
     "code": "9041",
     "name": "近鉄グループホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 3489.0,
     "high": 3530.0,
     "low": 3482.0,

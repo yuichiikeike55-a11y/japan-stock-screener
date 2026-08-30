@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.648741+00:00",
+  "generated_at": "2026-08-30T22:38:24.974195+00:00",
   "code": "8593",
   "data": {
     "code": "8593",
     "name": "三菱ＨＣキャピタル",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1394.5,
     "high": 1404.5,
     "low": 1390.0,

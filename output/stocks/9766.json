@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.681771+00:00",
+  "generated_at": "2026-08-30T22:38:25.018641+00:00",
   "code": "9766",
   "data": {
     "code": "9766",
     "name": "コナミグループ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 21545.0,
     "high": 22325.0,
     "low": 21520.0,

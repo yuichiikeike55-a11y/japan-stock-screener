@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.529944+00:00",
+  "generated_at": "2026-08-30T22:38:24.826302+00:00",
   "code": "5463",
   "data": {
     "code": "5463",
     "name": "丸一鋼管",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1752.5,
     "high": 1768.0,
     "low": 1743.5,

@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.547179+00:00",
+  "generated_at": "2026-08-30T22:38:24.848894+00:00",
   "code": "6240",
   "data": {
     "code": "6240",
     "name": "ヤマシンフィルタ",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 542.0,
     "high": 546.0,
     "low": 536.0,

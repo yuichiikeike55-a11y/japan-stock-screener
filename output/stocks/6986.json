@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.589347+00:00",
+  "generated_at": "2026-08-30T22:38:24.895855+00:00",
   "code": "6986",
   "data": {
     "code": "6986",
     "name": "双葉電子工業",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 783.0,
     "high": 798.0,
     "low": 771.0,

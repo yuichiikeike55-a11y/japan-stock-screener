@@ -1,13 +1,15 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-28",
-  "generated_at": "2026-08-30T11:01:58.652001+00:00",
+  "generated_at": "2026-08-30T22:38:24.978569+00:00",
   "code": "8714",
   "data": {
     "code": "8714",
     "name": "池田泉州ホールディングス",
     "market": "プライム（内国株式）",
     "base_date": "2026-08-28",
+    "history_days": 403,
+    "high52_available": true,
     "open": 1088.0,
     "high": 1110.0,
     "low": 1085.0,
