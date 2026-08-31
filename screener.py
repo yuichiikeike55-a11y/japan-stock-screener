@@ -44,6 +44,10 @@ JPX_PAGES = [
     "https://www.jpx.co.jp/listing/co-search/01.html",
 ]
 
+JPX_DELISTED_URL = (
+    "https://www.jpx.co.jp/listing/stocks/delisted/index.html"
+)
+
 
 # ============================================================
 # 共通関数
