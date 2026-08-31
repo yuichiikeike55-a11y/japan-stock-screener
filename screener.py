@@ -117,47 +117,42 @@ def load_delisted_codes(base_date):
     )
     r.raise_for_status()
 
-    tables = pd.read_html(StringIO(r.text))
+    soup = BeautifulSoup(r.text, "html.parser")
 
     base_date = pd.Timestamp(base_date).normalize()
     delisted_codes = set()
-    found_table = False
+    parsed_rows = 0
 
-    for df in tables:
-        date_col = find_column(
-            df.columns,
-            ["上場廃止日"],
-        )
-        code_col = find_column(
-            df.columns,
-            ["コード", "Code"],
-        )
+    for tr in soup.find_all("tr"):
+        cells = [
+            cell.get_text(" ", strip=True)
+            for cell in tr.find_all(["th", "td"])
+        ]
 
-        if date_col is None or code_col is None:
+        if len(cells) < 3:
             continue
 
-        found_table = True
+        delisted_date = pd.to_datetime(
+            cells[0],
+            errors="coerce",
+        )
+        code = clean_code(cells[2])
 
-        for _, row in df.iterrows():
-            delisted_date = pd.to_datetime(
-                row[date_col],
-                errors="coerce",
-            )
-            code = clean_code(row[code_col])
+        if pd.isna(delisted_date) or code is None:
+            continue
 
-            if pd.isna(delisted_date) or code is None:
-                continue
+        parsed_rows += 1
 
-            delisted_date = pd.Timestamp(
-                delisted_date
-            ).normalize()
+        delisted_date = pd.Timestamp(
+            delisted_date
+        ).normalize()
 
-            if delisted_date <= base_date:
-                delisted_codes.add(code)
+        if delisted_date <= base_date:
+            delisted_codes.add(code)
 
-    if not found_table:
+    if parsed_rows == 0:
         raise RuntimeError(
-            "JPX delisted-stock table was not found"
+            "JPX delisted-stock rows were not found"
         )
 
     print(
