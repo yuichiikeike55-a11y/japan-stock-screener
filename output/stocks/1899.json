@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-31",
-  "generated_at": "2026-08-31T09:08:56.603710+00:00",
+  "generated_at": "2026-08-31T09:35:36.945749+00:00",
   "code": "1899",
   "data": {
     "code": "1899",
@@ -12,7 +12,7 @@
     "high52_available": true,
     "open": 4935.0,
     "high": 5020.0,
-    "low": 4795.0,
+    "low": 4805.0,
     "close": 4830.0,
     "previous_open": 5050.0,
     "previous_high": 5100.0,
