@@ -1772,10 +1772,28 @@ def main():
             "BASE_DATE not specified."
         )
 
-    # 1. Prime universe
-    universe = load_prime_universe()
+# 1. Prime universe
+universe = load_prime_universe()
 
-    universe_count = len(universe)
+if requested_date is not None:
+    delisted_codes = load_delisted_codes(
+        requested_date
+    )
+
+    before_count = len(universe)
+
+    universe = universe[
+        ~universe["code"].isin(delisted_codes)
+    ].copy()
+
+    universe = universe.reset_index(drop=True)
+
+    print(
+        "Excluded delisted stocks:",
+        before_count - len(universe),
+    )
+
+universe_count = len(universe)
 
     # 2. Prices
     price_data, download_failures = (
