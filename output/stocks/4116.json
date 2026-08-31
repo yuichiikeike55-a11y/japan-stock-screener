@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-31",
-  "generated_at": "2026-08-31T08:11:55.023821+00:00",
+  "generated_at": "2026-08-31T08:40:56.746236+00:00",
   "code": "4116",
   "data": {
     "code": "4116",
@@ -11,7 +11,7 @@
     "history_days": 401,
     "high52_available": true,
     "open": 1375.0,
-    "high": 1405.0,
+    "high": 1401.0,
     "low": 1360.0,
     "close": 1387.0,
     "previous_open": 1399.0,
