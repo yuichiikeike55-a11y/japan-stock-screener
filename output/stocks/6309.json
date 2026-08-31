@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-08-31",
-  "generated_at": "2026-08-31T08:40:56.785368+00:00",
+  "generated_at": "2026-08-31T09:08:56.754040+00:00",
   "code": "6309",
   "data": {
     "code": "6309",
@@ -11,7 +11,7 @@
     "history_days": 401,
     "high52_available": true,
     "open": 2060.0,
-    "high": 2062.0,
+    "high": 2063.0,
     "low": 2033.0,
     "close": 2056.0,
     "previous_open": 2055.0,
