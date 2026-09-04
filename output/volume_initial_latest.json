@@ -1,7 +1,7 @@
 {
   "strategy": "volume_initial_catch",
   "base_date": "2026-09-04",
-  "generated_at": "2026-09-04T07:37:32.699612+00:00",
+  "generated_at": "2026-09-04T08:21:18.136847+00:00",
   "universe_count": 1529,
   "processed_count": 1529,
   "coverage_pct": 100.0,
@@ -74,7 +74,7 @@
       "high52_available": true,
       "open": 1735.0,
       "high": 1735.0,
-      "low": 1690.5,
+      "low": 1691.0,
       "close": 1696.5,
       "previous_open": 1715.5,
       "previous_high": 1734.5,

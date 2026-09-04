@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-09-04",
-  "generated_at": "2026-09-04T07:37:32.269726+00:00",
+  "generated_at": "2026-09-04T08:21:17.758009+00:00",
   "code": "4051",
   "data": {
     "code": "4051",
@@ -11,7 +11,7 @@
     "history_days": 403,
     "high52_available": true,
     "open": 6050.0,
-    "high": 6230.0,
+    "high": 6220.0,
     "low": 6050.0,
     "close": 6090.0,
     "previous_open": 6190.0,
