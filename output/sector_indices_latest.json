@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-04T08:41:16.141326+00:00",
+  "generated_at": "2026-09-04T09:40:26.899214+00:00",
   "sector_count": 18,
   "processed_count": 18,
   "failure_count": 0,
@@ -201,7 +201,7 @@
       "data_quality_flags": [],
       "open": 35550.0,
       "high": 35550.0,
-      "low": 34960.0,
+      "low": 34990.0,
       "close": 35020.0,
       "volume": 315.0,
       "ma5": 35698.0,
