@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-09-04",
-  "generated_at": "2026-09-04T08:21:17.814233+00:00",
+  "generated_at": "2026-09-04T08:47:04.457174+00:00",
   "code": "5803",
   "data": {
     "code": "5803",
@@ -11,7 +11,7 @@
     "history_days": 403,
     "high52_available": true,
     "open": 5000.0,
-    "high": 5111.0,
+    "high": 5112.0,
     "low": 4955.0,
     "close": 5053.0,
     "previous_open": 5151.0,
