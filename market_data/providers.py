@@ -1,21 +1,53 @@
 """
 市場データの取得処理。
 
-現段階では yfinance から
-1シンボルの生データを取得する。
+yfinanceから
+1時間足データと日足データを取得する。
+
+この段階では鮮度判定や
+正常・異常の最終判定は行わない。
 """
 
 import pandas as pd
 import yfinance as yf
 
 
+def _prepare_dataframe(
+    symbol,
+    df,
+):
+    """
+    yfinanceのDataFrameを
+    最低限扱いやすい形に整える。
+    """
+
+    if df.empty:
+        raise RuntimeError(
+            f"{symbol}: no data returned from yfinance"
+        )
+
+    # yfinanceのMultiIndex対策
+    if isinstance(
+        df.columns,
+        pd.MultiIndex,
+    ):
+        df.columns = (
+            df.columns
+            .get_level_values(0)
+        )
+
+    df.index = pd.to_datetime(
+        df.index
+    )
+
+    return df
+
+
 def fetch_yfinance(symbol):
     """
-    yfinanceから1シンボルの市場データを取得する。
+    yfinanceから1時間足を取得する。
 
-    この段階では鮮度判定や
-    正常・異常の最終判定は行わない。
-    取得したデータの構造確認を目的とする。
+    主に現在値と最新時刻の確認に使用する。
     """
 
     df = yf.download(
@@ -27,50 +59,55 @@ def fetch_yfinance(symbol):
         threads=False,
     )
 
-    if df.empty:
-        raise RuntimeError(
-            f"{symbol}: no data returned from yfinance"
-        )
+    return _prepare_dataframe(
+        symbol,
+        df,
+    )
 
-    # yfinanceのMultiIndex対策
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
 
-    df.index = pd.to_datetime(df.index)
+def fetch_yfinance_daily(symbol):
+    """
+    yfinanceから日足を取得する。
 
-    return df
+    前営業日の終値など、
+    日次基準値の確認に使用する。
+    """
+
+    df = yf.download(
+        symbol,
+        period="10d",
+        interval="1d",
+        auto_adjust=False,
+        progress=False,
+        threads=False,
+    )
+
+    return _prepare_dataframe(
+        symbol,
+        df,
+    )
 
 
 if __name__ == "__main__":
     symbol = "NIY=F"
 
-    print("=== yfinance fetch test ===")
-    print("symbol:", symbol)
+    print("=== Hourly Data ===")
 
-    try:
-        df = fetch_yfinance(symbol)
+    hourly = fetch_yfinance(
+        symbol
+    )
 
-        print()
-        print("=== columns ===")
-        print(df.columns.tolist())
+    print(
+        hourly.tail()
+    )
 
-        print()
-        print("=== index type ===")
-        print(type(df.index))
+    print()
+    print("=== Daily Data ===")
 
-        print()
-        print("=== latest timestamp ===")
-        print(df.index[-1])
+    daily = fetch_yfinance_daily(
+        symbol
+    )
 
-        print()
-        print("=== latest row ===")
-        print(df.tail(1))
-
-        print()
-        print("=== last 5 rows ===")
-        print(df.tail())
-
-    except Exception as e:
-        print()
-        print("=== ERROR ===")
-        print(repr(e))
+    print(
+        daily.tail()
+    )
