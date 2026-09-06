@@ -1,109 +1,210 @@
 """
-日足市場データ取得テスト。
+市場データ取得・標準化テスト。
 
-NIY=Fの日足をyfinanceから取得し、
-前日終値判定に使えるデータ構造か確認する。
+NIY=Fについて、
+1時間足から最新値、
+日足から前営業日終値を取得し、
+共通市場データ形式へ変換できるか確認する。
 """
 
-import pandas as pd
+from market_data.providers import (
+    fetch_yfinance,
+    fetch_yfinance_daily,
+)
 
-from market_data.providers import fetch_yfinance_daily
+from market_data.normalizers import (
+    normalize_yfinance,
+)
 
 
 def main():
     symbol = "NIY=F"
 
-    print("=== Daily Market Data Test ===")
+    print("=== Market Data Full Test ===")
     print()
     print("Symbol:", symbol)
-    print("Fetching daily data...")
 
     try:
-        df = fetch_yfinance_daily(
+        # =====================================
+        # データ取得
+        # =====================================
+
+        print()
+        print("Fetching hourly data...")
+
+        hourly_df = fetch_yfinance(
             symbol
         )
 
-        print()
-        print("=== FETCH SUCCESS ===")
-
         print(
-            "rows:",
-            len(df),
+            "hourly rows:",
+            len(hourly_df),
         )
 
         print()
-        print("=== Columns ===")
+        print("Fetching daily data...")
+
+        daily_df = fetch_yfinance_daily(
+            symbol
+        )
+
         print(
-            df.columns.tolist()
+            "daily rows:",
+            len(daily_df),
+        )
+
+        # =====================================
+        # 標準化
+        # =====================================
+
+        result = normalize_yfinance(
+            symbol,
+            hourly_df,
+            daily_df,
         )
 
         print()
-        print("=== Index Type ===")
+        print("=== NORMALIZE RESULT ===")
+
         print(
-            type(df.index)
+            "symbol:",
+            result["symbol"],
         )
 
-        print()
-        print("=== Last 5 Daily Rows ===")
         print(
-            df.tail()
+            "source:",
+            result["source"],
         )
 
-        print()
-        print("=== Latest Daily Date ===")
         print(
-            df.index[-1]
+            "value:",
+            result["value"],
         )
 
-        print()
-        print("=== Latest Daily Close ===")
         print(
-            float(
-                df.iloc[-1]["Close"]
+            "previous_close:",
+            result["previous_close"],
+        )
+
+        print(
+            "change:",
+            result["change"],
+        )
+
+        print(
+            "change_pct:",
+            result["change_pct"],
+        )
+
+        print(
+            "as_of:",
+            result["as_of"],
+        )
+
+        # =====================================
+        # 基本整合性チェック
+        # =====================================
+
+        required_keys = [
+            "symbol",
+            "source",
+            "value",
+            "previous_close",
+            "change",
+            "change_pct",
+            "as_of",
+        ]
+
+        missing_keys = [
+            key
+            for key in required_keys
+            if key not in result
+        ]
+
+        if missing_keys:
+            raise RuntimeError(
+                f"missing keys: {missing_keys}"
             )
+
+        if result["symbol"] != symbol:
+            raise RuntimeError(
+                "symbol mismatch"
+            )
+
+        if result["source"] != "yfinance":
+            raise RuntimeError(
+                "source mismatch"
+            )
+
+        # =====================================
+        # 前日比計算チェック
+        # =====================================
+
+        expected_change = (
+            result["value"]
+            - result["previous_close"]
         )
 
-        if len(df) >= 2:
-            print()
-            print(
-                "=== Previous Daily Date ==="
-            )
-            print(
-                df.index[-2]
+        if abs(
+            result["change"]
+            - expected_change
+        ) > 0.000001:
+            raise RuntimeError(
+                "change calculation mismatch"
             )
 
-            print()
-            print(
-                "=== Previous Daily Close ==="
+        expected_change_pct = (
+            expected_change
+            / result["previous_close"]
+            * 100
+        )
+
+        if abs(
+            result["change_pct"]
+            - expected_change_pct
+        ) > 0.000001:
+            raise RuntimeError(
+                "change_pct calculation mismatch"
             )
-            print(
-                float(
-                    df.iloc[-2]["Close"]
+
+        # =====================================
+        # 前営業日選択チェック
+        # =====================================
+
+        latest_date = (
+            hourly_df.index[-1].date()
+        )
+
+        previous_rows = (
+            daily_df[
+                daily_df.index.map(
+                    lambda x:
+                        x.date()
+                        < latest_date
                 )
+            ]
+        )
+
+        if previous_rows.empty:
+            raise RuntimeError(
+                "previous daily row not found"
             )
 
-        # 最低限の構造確認
-        if "Close" not in df.columns:
-            raise RuntimeError(
-                f"{symbol}: Close column is missing"
-            )
+        expected_previous_close = float(
+            previous_rows.iloc[-1]["Close"]
+        )
 
-        if not isinstance(
-            df.index,
-            pd.DatetimeIndex,
-        ):
+        if abs(
+            result["previous_close"]
+            - expected_previous_close
+        ) > 0.000001:
             raise RuntimeError(
-                f"{symbol}: index is not DatetimeIndex"
-            )
-
-        if len(df) < 2:
-            raise RuntimeError(
-                f"{symbol}: not enough daily data"
+                "previous_close selection mismatch"
             )
 
         print()
         print(
-            "=== DAILY DATA CHECK PASSED ==="
+            "=== FULL CHECK PASSED ==="
         )
 
     except Exception as e:
