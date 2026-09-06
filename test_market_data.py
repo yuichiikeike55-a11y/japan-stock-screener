@@ -1,23 +1,19 @@
 """
-市場データ取得の単体テスト。
+市場データ取得・標準化の単体テスト。
 
-まず日経225先物 NIY=F が
-yfinanceから正常に取得できるか確認する。
-
-この段階では鮮度判定や
-正常・異常の最終判定は行わない。
-取得したDataFrameの構造を確認する。
+NIY=Fをyfinanceから取得し、
+共通市場データ形式へ正常に
+変換できるか確認する。
 """
 
-import pandas as pd
-
 from market_data.providers import fetch_yfinance
+from market_data.normalizers import normalize_yfinance
 
 
 def main():
     symbol = "NIY=F"
 
-    print("=== Market Data Test ===")
+    print("=== Market Data Normalize Test ===")
     print()
     print("Symbol:", symbol)
     print("Fetching...")
@@ -28,67 +24,107 @@ def main():
         )
 
         print()
-        print("=== SUCCESS ===")
+        print("=== FETCH SUCCESS ===")
+        print(
+            "rows:",
+            len(df),
+        )
+
+        result = normalize_yfinance(
+            symbol,
+            df,
+        )
 
         print()
-        print("=== DataFrame Type ===")
-        print(type(df))
+        print("=== NORMALIZE SUCCESS ===")
 
-        print()
-        print("=== Row Count ===")
-        print(len(df))
+        print(
+            "symbol:",
+            result["symbol"],
+        )
 
-        print()
-        print("=== Columns ===")
-        print(df.columns.tolist())
+        print(
+            "source:",
+            result["source"],
+        )
 
-        print()
-        print("=== Index Type ===")
-        print(type(df.index))
+        print(
+            "value:",
+            result["value"],
+        )
 
-        print()
-        print("=== Latest Timestamp ===")
-        print(df.index[-1])
+        print(
+            "previous_close:",
+            result["previous_close"],
+        )
 
-        print()
-        print("=== Latest Row ===")
-        print(df.tail(1))
+        print(
+            "change:",
+            result["change"],
+        )
 
-        print()
-        print("=== Last 5 Rows ===")
-        print(df.tail())
+        print(
+            "change_pct:",
+            result["change_pct"],
+        )
 
-        # 最低限の構造チェック
-        required_columns = [
-            "Open",
-            "High",
-            "Low",
-            "Close",
-            "Volume",
+        print(
+            "as_of:",
+            result["as_of"],
+        )
+
+        # =====================================
+        # 基本整合性チェック
+        # =====================================
+
+        required_keys = [
+            "symbol",
+            "source",
+            "value",
+            "previous_close",
+            "change",
+            "change_pct",
+            "as_of",
         ]
 
-        missing_columns = [
-            column
-            for column in required_columns
-            if column not in df.columns
+        missing_keys = [
+            key
+            for key in required_keys
+            if key not in result
         ]
 
-        if missing_columns:
+        if missing_keys:
             raise RuntimeError(
-                f"{symbol}: missing columns "
-                f"{missing_columns}"
+                f"missing keys: {missing_keys}"
             )
 
-        if not isinstance(
-            df.index,
-            pd.DatetimeIndex,
-        ):
+        if result["symbol"] != symbol:
             raise RuntimeError(
-                f"{symbol}: index is not DatetimeIndex"
+                "symbol mismatch"
+            )
+
+        if result["source"] != "yfinance":
+            raise RuntimeError(
+                "source mismatch"
+            )
+
+        expected_change = (
+            result["value"]
+            - result["previous_close"]
+        )
+
+        if abs(
+            result["change"]
+            - expected_change
+        ) > 0.000001:
+            raise RuntimeError(
+                "change calculation mismatch"
             )
 
         print()
-        print("=== STRUCTURE CHECK PASSED ===")
+        print(
+            "=== NORMALIZE CHECK PASSED ==="
+        )
 
     except Exception as e:
         print()
