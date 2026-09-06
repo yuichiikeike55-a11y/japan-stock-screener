@@ -1,221 +1,157 @@
 """
-市場データ取得・標準化テスト。
+市場データ鮮度判定の単体テスト。
 
-NIY=Fについて、
-1時間足から最新値、
-日足から前営業日終値を取得し、
-共通市場データ形式へ変換できるか確認する。
+固定時刻を使い、
+closed / ok / stale の
+3ケースを確認する。
 """
 
-from market_data.providers import (
-    fetch_yfinance,
-    fetch_yfinance_daily,
+from datetime import datetime
+from datetime import timezone
+
+from market_data.validators import (
+    validate_freshness,
 )
 
-from market_data.normalizers import (
-    normalize_yfinance,
-)
+
+def make_data(as_of):
+    """
+    テスト用の標準化済みデータを作る。
+    """
+
+    return {
+        "symbol": "NIY=F",
+        "source": "yfinance",
+        "value": 65830.0,
+        "previous_close": 64560.0,
+        "change": 1270.0,
+        "change_pct": 1.9671623296158611,
+        "as_of": as_of,
+    }
 
 
 def main():
-    symbol = "NIY=F"
+    print(
+        "=== Freshness Validator Test ==="
+    )
 
-    print("=== Market Data Full Test ===")
+    max_age_minutes = 180
+
+    # =====================================
+    # CASE 1
+    # 日曜日 + 直近金曜日データ
+    # → closed
+    # =====================================
+
+    sunday_now = datetime(
+        2026,
+        9,
+        6,
+        12,
+        0,
+        tzinfo=timezone.utc,
+    )
+
+    friday_data = make_data(
+        "2026-09-04T16:00:00+00:00"
+    )
+
+    result = validate_freshness(
+        friday_data,
+        max_age_minutes,
+        now=sunday_now,
+    )
+
     print()
-    print("Symbol:", symbol)
+    print("CASE 1")
+    print(
+        "status:",
+        result["status"],
+    )
 
-    try:
-        # =====================================
-        # データ取得
-        # =====================================
-
-        print()
-        print("Fetching hourly data...")
-
-        hourly_df = fetch_yfinance(
-            symbol
+    if result["status"] != "closed":
+        raise RuntimeError(
+            "CASE 1 failed"
         )
 
-        print(
-            "hourly rows:",
-            len(hourly_df),
+    # =====================================
+    # CASE 2
+    # 平日 + 60分前
+    # → ok
+    # =====================================
+
+    weekday_now = datetime(
+        2026,
+        9,
+        4,
+        17,
+        0,
+        tzinfo=timezone.utc,
+    )
+
+    fresh_data = make_data(
+        "2026-09-04T16:00:00+00:00"
+    )
+
+    result = validate_freshness(
+        fresh_data,
+        max_age_minutes,
+        now=weekday_now,
+    )
+
+    print()
+    print("CASE 2")
+    print(
+        "status:",
+        result["status"],
+    )
+
+    if result["status"] != "ok":
+        raise RuntimeError(
+            "CASE 2 failed"
         )
 
-        print()
-        print("Fetching daily data...")
+    # =====================================
+    # CASE 3
+    # 平日 + 4時間前
+    # → stale
+    # =====================================
 
-        daily_df = fetch_yfinance_daily(
-            symbol
+    stale_now = datetime(
+        2026,
+        9,
+        4,
+        20,
+        0,
+        tzinfo=timezone.utc,
+    )
+
+    stale_data = make_data(
+        "2026-09-04T16:00:00+00:00"
+    )
+
+    result = validate_freshness(
+        stale_data,
+        max_age_minutes,
+        now=stale_now,
+    )
+
+    print()
+    print("CASE 3")
+    print(
+        "status:",
+        result["status"],
+    )
+
+    if result["status"] != "stale":
+        raise RuntimeError(
+            "CASE 3 failed"
         )
 
-        print(
-            "daily rows:",
-            len(daily_df),
-        )
-
-        # =====================================
-        # 標準化
-        # =====================================
-
-        result = normalize_yfinance(
-            symbol,
-            hourly_df,
-            daily_df,
-        )
-
-        print()
-        print("=== NORMALIZE RESULT ===")
-
-        print(
-            "symbol:",
-            result["symbol"],
-        )
-
-        print(
-            "source:",
-            result["source"],
-        )
-
-        print(
-            "value:",
-            result["value"],
-        )
-
-        print(
-            "previous_close:",
-            result["previous_close"],
-        )
-
-        print(
-            "change:",
-            result["change"],
-        )
-
-        print(
-            "change_pct:",
-            result["change_pct"],
-        )
-
-        print(
-            "as_of:",
-            result["as_of"],
-        )
-
-        # =====================================
-        # 基本整合性チェック
-        # =====================================
-
-        required_keys = [
-            "symbol",
-            "source",
-            "value",
-            "previous_close",
-            "change",
-            "change_pct",
-            "as_of",
-        ]
-
-        missing_keys = [
-            key
-            for key in required_keys
-            if key not in result
-        ]
-
-        if missing_keys:
-            raise RuntimeError(
-                f"missing keys: {missing_keys}"
-            )
-
-        if result["symbol"] != symbol:
-            raise RuntimeError(
-                "symbol mismatch"
-            )
-
-        if result["source"] != "yfinance":
-            raise RuntimeError(
-                "source mismatch"
-            )
-
-        # =====================================
-        # 前日比計算チェック
-        # =====================================
-
-        expected_change = (
-            result["value"]
-            - result["previous_close"]
-        )
-
-        if abs(
-            result["change"]
-            - expected_change
-        ) > 0.000001:
-            raise RuntimeError(
-                "change calculation mismatch"
-            )
-
-        expected_change_pct = (
-            expected_change
-            / result["previous_close"]
-            * 100
-        )
-
-        if abs(
-            result["change_pct"]
-            - expected_change_pct
-        ) > 0.000001:
-            raise RuntimeError(
-                "change_pct calculation mismatch"
-            )
-
-        # =====================================
-        # 前営業日選択チェック
-        # =====================================
-
-        latest_date = (
-            hourly_df.index[-1].date()
-        )
-
-        previous_rows = (
-            daily_df[
-                daily_df.index.map(
-                    lambda x:
-                        x.date()
-                        < latest_date
-                )
-            ]
-        )
-
-        if previous_rows.empty:
-            raise RuntimeError(
-                "previous daily row not found"
-            )
-
-        expected_previous_close = float(
-            previous_rows.iloc[-1]["Close"]
-        )
-
-        if abs(
-            result["previous_close"]
-            - expected_previous_close
-        ) > 0.000001:
-            raise RuntimeError(
-                "previous_close selection mismatch"
-            )
-
-        print()
-        print(
-            "=== FULL CHECK PASSED ==="
-        )
-
-    except Exception as e:
-        print()
-        print("=== FAILED ===")
-        print(
-            "error:",
-            repr(e),
-        )
-
-        raise
+    print()
+    print(
+        "=== FRESHNESS CHECK PASSED ==="
+    )
 
 
 if __name__ == "__main__":
