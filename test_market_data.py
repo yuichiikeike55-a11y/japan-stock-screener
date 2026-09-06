@@ -1,129 +1,109 @@
 """
-市場データ取得・標準化の単体テスト。
+日足市場データ取得テスト。
 
-NIY=Fをyfinanceから取得し、
-共通市場データ形式へ正常に
-変換できるか確認する。
+NIY=Fの日足をyfinanceから取得し、
+前日終値判定に使えるデータ構造か確認する。
 """
 
-from market_data.providers import fetch_yfinance
-from market_data.normalizers import normalize_yfinance
+import pandas as pd
+
+from market_data.providers import fetch_yfinance_daily
 
 
 def main():
     symbol = "NIY=F"
 
-    print("=== Market Data Normalize Test ===")
+    print("=== Daily Market Data Test ===")
     print()
     print("Symbol:", symbol)
-    print("Fetching...")
+    print("Fetching daily data...")
 
     try:
-        df = fetch_yfinance(
+        df = fetch_yfinance_daily(
             symbol
         )
 
         print()
         print("=== FETCH SUCCESS ===")
+
         print(
             "rows:",
             len(df),
         )
 
-        result = normalize_yfinance(
-            symbol,
-            df,
+        print()
+        print("=== Columns ===")
+        print(
+            df.columns.tolist()
         )
 
         print()
-        print("=== NORMALIZE SUCCESS ===")
-
+        print("=== Index Type ===")
         print(
-            "symbol:",
-            result["symbol"],
+            type(df.index)
         )
 
+        print()
+        print("=== Last 5 Daily Rows ===")
         print(
-            "source:",
-            result["source"],
+            df.tail()
         )
 
+        print()
+        print("=== Latest Daily Date ===")
         print(
-            "value:",
-            result["value"],
+            df.index[-1]
         )
 
+        print()
+        print("=== Latest Daily Close ===")
         print(
-            "previous_close:",
-            result["previous_close"],
+            float(
+                df.iloc[-1]["Close"]
+            )
         )
 
-        print(
-            "change:",
-            result["change"],
-        )
-
-        print(
-            "change_pct:",
-            result["change_pct"],
-        )
-
-        print(
-            "as_of:",
-            result["as_of"],
-        )
-
-        # =====================================
-        # 基本整合性チェック
-        # =====================================
-
-        required_keys = [
-            "symbol",
-            "source",
-            "value",
-            "previous_close",
-            "change",
-            "change_pct",
-            "as_of",
-        ]
-
-        missing_keys = [
-            key
-            for key in required_keys
-            if key not in result
-        ]
-
-        if missing_keys:
-            raise RuntimeError(
-                f"missing keys: {missing_keys}"
+        if len(df) >= 2:
+            print()
+            print(
+                "=== Previous Daily Date ==="
+            )
+            print(
+                df.index[-2]
             )
 
-        if result["symbol"] != symbol:
-            raise RuntimeError(
-                "symbol mismatch"
+            print()
+            print(
+                "=== Previous Daily Close ==="
+            )
+            print(
+                float(
+                    df.iloc[-2]["Close"]
+                )
             )
 
-        if result["source"] != "yfinance":
+        # 最低限の構造確認
+        if "Close" not in df.columns:
             raise RuntimeError(
-                "source mismatch"
+                f"{symbol}: Close column is missing"
             )
 
-        expected_change = (
-            result["value"]
-            - result["previous_close"]
-        )
-
-        if abs(
-            result["change"]
-            - expected_change
-        ) > 0.000001:
+        if not isinstance(
+            df.index,
+            pd.DatetimeIndex,
+        ):
             raise RuntimeError(
-                "change calculation mismatch"
+                f"{symbol}: index is not DatetimeIndex"
+            )
+
+        if len(df) < 2:
+            raise RuntimeError(
+                f"{symbol}: not enough daily data"
             )
 
         print()
         print(
-            "=== NORMALIZE CHECK PASSED ==="
+            "=== DAILY DATA CHECK PASSED ==="
         )
 
     except Exception as e:
