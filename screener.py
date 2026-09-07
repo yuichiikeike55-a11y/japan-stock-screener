@@ -1807,7 +1807,7 @@ def main():
         "Base date:",
         base_date.date()
     )
-        now = datetime.now(JST)
+    now = datetime.now(JST)
     expected_latest_date = get_latest_trading_date(now)
 
     print(
