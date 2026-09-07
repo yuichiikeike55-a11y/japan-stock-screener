@@ -14,6 +14,19 @@
 from datetime import datetime
 from datetime import timedelta
 
+def get_latest_trading_date(now):
+    """
+    現時点で期待される最新取引日を返す。
+
+    現段階では土日のみ対応。
+    土曜・日曜は直近金曜日、
+    平日は当日を返す。
+    """
+    if now.weekday() >= 5:
+        days_since_friday = now.weekday() - 4
+        return now.date() - timedelta(days=days_since_friday)
+
+    return now.date()
 
 def validate_freshness(
     data,
