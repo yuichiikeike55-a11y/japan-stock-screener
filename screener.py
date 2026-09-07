@@ -1748,13 +1748,15 @@ def safe_records(df):
 # MAIN
 # ============================================================
 def get_jpx_holidays():
+    from io import StringIO
+
     url = "https://www.jpx.co.jp/corporate/about-jpx/calendar/index.html"
 
     try:
         with urllib.request.urlopen(url, timeout=10) as response:
             html = response.read().decode("utf-8")
 
-        tables = pd.read_html(html)
+        tables = pd.read_html(StringIO(html))
         holidays = set()
 
         for table in tables:
@@ -1769,7 +1771,10 @@ def get_jpx_holidays():
         return holidays
 
     except Exception as e:
-        print("Warning: failed to load JPX holidays:", e)
+        print(
+            "Warning: failed to load JPX holidays:",
+            repr(e),
+        )
         return set()
 def get_latest_trading_date(now):
     d = now.date()
