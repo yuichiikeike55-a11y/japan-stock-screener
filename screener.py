@@ -4,6 +4,7 @@ import time
 from io import BytesIO, StringIO
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
@@ -11,6 +12,7 @@ import requests
 import yfinance as yf
 from bs4 import BeautifulSoup
 
+JST = ZoneInfo("Asia/Tokyo")
 
 # ============================================================
 # 設定
