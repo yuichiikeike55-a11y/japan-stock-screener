@@ -1773,14 +1773,10 @@ def get_jpx_holidays():
         return set()
 def get_latest_trading_date(now):
     d = now.date()
+    holidays = get_jpx_holidays()
 
-    # 土曜日なら金曜日
-    if d.weekday() == 5:
+    while d.weekday() >= 5 or d in holidays:
         d -= timedelta(days=1)
-
-    # 日曜日なら金曜日
-    elif d.weekday() == 6:
-        d -= timedelta(days=2)
 
     return d
 
