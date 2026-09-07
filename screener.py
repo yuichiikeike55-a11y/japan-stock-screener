@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import requests
 import yfinance as yf
+import urllib.request
 from bs4 import BeautifulSoup
 
 JST = ZoneInfo("Asia/Tokyo")
