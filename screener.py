@@ -1746,6 +1746,19 @@ def safe_records(df):
 # ============================================================
 # MAIN
 # ============================================================
+def get_latest_trading_date(now):
+    d = now.date()
+
+    # 土曜日なら金曜日
+    if d.weekday() == 5:
+        d -= timedelta(days=1)
+
+    # 日曜日なら金曜日
+    elif d.weekday() == 6:
+        d -= timedelta(days=2)
+
+    return d
+
 
 def main():
     print("=== Japan Stock 25MA Screener ===")
