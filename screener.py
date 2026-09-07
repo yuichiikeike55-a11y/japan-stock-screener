@@ -1807,6 +1807,14 @@ def main():
         "Base date:",
         base_date.date()
     )
+        now = datetime.now(JST)
+    expected_latest_date = get_latest_trading_date(now)
+
+    print(
+        "Expected latest trading date:",
+        expected_latest_date
+    )
+    
     # Requested base date must actually exist in enough stocks.
     if requested_date is not None:
         available_count = 0
