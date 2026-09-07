@@ -1747,6 +1747,30 @@ def safe_records(df):
 # ============================================================
 # MAIN
 # ============================================================
+def get_jpx_holidays():
+    url = "https://www.jpx.co.jp/corporate/about-jpx/calendar/index.html"
+
+    try:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            html = response.read().decode("utf-8")
+
+        tables = pd.read_html(html)
+        holidays = set()
+
+        for table in tables:
+            for col in table.columns:
+                for value in table[col].dropna():
+                    try:
+                        d = pd.to_datetime(value).date()
+                        holidays.add(d)
+                    except Exception:
+                        pass
+
+        return holidays
+
+    except Exception as e:
+        print("Warning: failed to load JPX holidays:", e)
+        return set()
 def get_latest_trading_date(now):
     d = now.date()
 
