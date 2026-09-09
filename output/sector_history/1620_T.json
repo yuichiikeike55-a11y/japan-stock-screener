@@ -5,7 +5,7 @@
   "proxy_type": "ETF",
   "source": "yfinance",
   "base_date": "2026-09-09",
-  "generated_at": "2026-09-09T08:40:56.884381+00:00",
+  "generated_at": "2026-09-09T09:41:52.913468+00:00",
   "history": [
     {
       "date": "2025-06-18",
