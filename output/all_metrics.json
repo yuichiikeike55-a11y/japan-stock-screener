@@ -1,7 +1,7 @@
 {
   "strategy": "all_metrics",
   "base_date": "2026-09-10",
-  "generated_at": "2026-09-10T07:38:37.679933+00:00",
+  "generated_at": "2026-09-10T08:20:20.031111+00:00",
   "universe_count": 1529,
   "processed_count": 1529,
   "coverage_pct": 100.0,
