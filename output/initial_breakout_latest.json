@@ -1,7 +1,7 @@
 {
   "strategy": "initial_breakout_pullback",
   "base_date": "2026-09-11",
-  "generated_at": "2026-09-11T10:54:48.940619+00:00",
+  "generated_at": "2026-09-11T10:58:48.027329+00:00",
   "universe_count": 1529,
   "processed_count": 1529,
   "coverage_pct": 100.0,
