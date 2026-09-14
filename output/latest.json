@@ -1,7 +1,7 @@
 {
   "strategy": "25MA_pullback",
   "base_date": "2026-09-14",
-  "generated_at": "2026-09-14T10:44:34.074478+00:00",
+  "generated_at": "2026-09-14T10:55:45.711979+00:00",
   "universe_count": 1529,
   "processed_count": 1529,
   "coverage_pct": 100.0,
