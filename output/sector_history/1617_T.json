@@ -4,8 +4,8 @@
   "name": "NEXT FUNDS 食品(TOPIX-17)ETF",
   "proxy_type": "ETF",
   "source": "yfinance",
-  "base_date": "2026-09-14",
-  "generated_at": "2026-09-14T12:44:41.582274+00:00",
+  "base_date": "2026-09-15",
+  "generated_at": "2026-09-15T08:42:57.080308+00:00",
   "history": [
     {
       "date": "2025-06-23",
@@ -2400,12 +2400,12 @@
       "volume": 788.0
     },
     {
-      "date": "2026-09-14",
-      "open": 46500.0,
-      "high": 47540.0,
-      "low": 46500.0,
-      "close": 47540.0,
-      "volume": 511.0
+      "date": "2026-09-15",
+      "open": 47820.0,
+      "high": 47870.0,
+      "low": 47240.0,
+      "close": 47420.0,
+      "volume": 305.0
     }
   ]
 }

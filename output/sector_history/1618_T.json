@@ -4,8 +4,8 @@
   "name": "NEXT FUNDS エネルギー資源(TOPIX-17)ETF",
   "proxy_type": "ETF",
   "source": "yfinance",
-  "base_date": "2026-09-14",
-  "generated_at": "2026-09-14T12:44:41.859623+00:00",
+  "base_date": "2026-09-15",
+  "generated_at": "2026-09-15T08:42:57.239221+00:00",
   "history": [
     {
       "date": "2025-06-23",
@@ -2400,12 +2400,12 @@
       "volume": 1070.0
     },
     {
-      "date": "2026-09-14",
-      "open": 37670.0,
-      "high": 38480.0,
-      "low": 37400.0,
-      "close": 37450.0,
-      "volume": 755.0
+      "date": "2026-09-15",
+      "open": 36750.0,
+      "high": 37400.0,
+      "low": 36720.0,
+      "close": 36910.0,
+      "volume": 1420.0
     }
   ]
 }

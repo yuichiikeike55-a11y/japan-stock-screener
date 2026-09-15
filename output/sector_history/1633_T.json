@@ -4,8 +4,8 @@
   "name": "NEXT FUNDS 不動産(TOPIX-17)ETF",
   "proxy_type": "ETF",
   "source": "yfinance",
-  "base_date": "2026-09-14",
-  "generated_at": "2026-09-14T12:44:44.691222+00:00",
+  "base_date": "2026-09-15",
+  "generated_at": "2026-09-15T08:42:59.680407+00:00",
   "history": [
     {
       "date": "2025-06-23",
@@ -2400,12 +2400,12 @@
       "volume": 608.0
     },
     {
-      "date": "2026-09-14",
-      "open": 47750.0,
-      "high": 48870.0,
-      "low": 47750.0,
-      "close": 48590.0,
-      "volume": 136.0
+      "date": "2026-09-15",
+      "open": 49040.0,
+      "high": 49040.0,
+      "low": 47810.0,
+      "close": 47890.0,
+      "volume": 1723.0
     }
   ]
 }

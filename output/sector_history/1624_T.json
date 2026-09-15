@@ -4,8 +4,8 @@
   "name": "NEXT FUNDS 機械(TOPIX-17)ETF",
   "proxy_type": "ETF",
   "source": "yfinance",
-  "base_date": "2026-09-14",
-  "generated_at": "2026-09-14T12:44:43.028407+00:00",
+  "base_date": "2026-09-15",
+  "generated_at": "2026-09-15T08:42:58.250209+00:00",
   "history": [
     {
       "date": "2025-06-23",
@@ -2400,12 +2400,12 @@
       "volume": 367.0
     },
     {
-      "date": "2026-09-14",
-      "open": 79510.0,
-      "high": 80640.0,
-      "low": 79090.0,
-      "close": 80340.0,
-      "volume": 102.0
+      "date": "2026-09-15",
+      "open": 79990.0,
+      "high": 80820.0,
+      "low": 79310.0,
+      "close": 80350.0,
+      "volume": 352.0
     }
   ]
 }

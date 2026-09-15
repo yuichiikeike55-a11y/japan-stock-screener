@@ -4,8 +4,8 @@
   "name": "NEXT FUNDS 素材・化学(TOPIX-17)ETF",
   "proxy_type": "ETF",
   "source": "yfinance",
-  "base_date": "2026-09-14",
-  "generated_at": "2026-09-14T12:44:42.230915+00:00",
+  "base_date": "2026-09-15",
+  "generated_at": "2026-09-15T08:42:57.587043+00:00",
   "history": [
     {
       "date": "2025-06-23",
@@ -2400,12 +2400,12 @@
       "volume": 241.0
     },
     {
-      "date": "2026-09-14",
-      "open": 35720.0,
-      "high": 35720.0,
-      "low": 35230.0,
-      "close": 35620.0,
-      "volume": 247.0
+      "date": "2026-09-15",
+      "open": 35860.0,
+      "high": 35860.0,
+      "low": 35430.0,
+      "close": 35490.0,
+      "volume": 47.0
     }
   ]
 }

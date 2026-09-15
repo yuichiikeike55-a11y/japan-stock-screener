@@ -4,8 +4,8 @@
   "name": "NEXT FUNDS 銀行(TOPIX-17)ETF",
   "proxy_type": "ETF",
   "source": "yfinance",
-  "base_date": "2026-09-14",
-  "generated_at": "2026-09-14T12:44:44.327893+00:00",
+  "base_date": "2026-09-15",
+  "generated_at": "2026-09-15T08:42:59.370063+00:00",
   "history": [
     {
       "date": "2025-06-23",
@@ -2400,12 +2400,12 @@
       "volume": 2646.0
     },
     {
-      "date": "2026-09-14",
-      "open": 41750.0,
+      "date": "2026-09-15",
+      "open": 42300.0,
       "high": 42300.0,
       "low": 41250.0,
-      "close": 42300.0,
-      "volume": 8000.0
+      "close": 41760.0,
+      "volume": 4403.0
     }
   ]
 }

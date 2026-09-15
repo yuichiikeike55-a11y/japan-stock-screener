@@ -4,8 +4,8 @@
   "name": "NEXT FUNDS 小売(TOPIX-17)ETF",
   "proxy_type": "ETF",
   "source": "yfinance",
-  "base_date": "2026-09-14",
-  "generated_at": "2026-09-14T12:44:44.131396+00:00",
+  "base_date": "2026-09-15",
+  "generated_at": "2026-09-15T08:42:59.226380+00:00",
   "history": [
     {
       "date": "2025-06-23",
@@ -2400,12 +2400,12 @@
       "volume": 522.0
     },
     {
-      "date": "2026-09-14",
-      "open": 35330.0,
-      "high": 36780.0,
-      "low": 35310.0,
-      "close": 36620.0,
-      "volume": 334.0
+      "date": "2026-09-15",
+      "open": 36900.0,
+      "high": 36900.0,
+      "low": 36360.0,
+      "close": 36450.0,
+      "volume": 791.0
     }
   ]
 }
