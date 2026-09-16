@@ -1,7 +1,7 @@
 {
   "strategy": "reacceleration_pullback",
   "base_date": "2026-09-16",
-  "generated_at": "2026-09-16T13:26:14.144081+00:00",
+  "generated_at": "2026-09-16T13:43:33.536038+00:00",
   "universe_count": 1529,
   "processed_count": 1529,
   "coverage_pct": 100.0,
