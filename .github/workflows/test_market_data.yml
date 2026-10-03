@@ -30,3 +30,6 @@ jobs:
       - name: Test CME Nikkei 225 Futures
         run: |
           python test_cme_futures.py          
+      - name: Run market data runner
+        run: |
+          python market_data_runner.py          
