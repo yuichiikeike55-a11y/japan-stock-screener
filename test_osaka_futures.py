@@ -22,7 +22,7 @@ def main():
             data
         )
     )
-        validated = validate_freshness(
+    validated = validate_freshness(
         normalized,
         180,
     )
