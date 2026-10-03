@@ -217,6 +217,10 @@ def normalize_yahoo_japan_osaka(
             f"Osaka futures missing fields: {missing}"
         )
 
+    # =====================================
+    # 現在時刻
+    # =====================================
+
     if now is None:
         now = datetime.now(JST)
 
@@ -227,6 +231,10 @@ def normalize_yahoo_japan_osaka(
 
     else:
         now = now.astimezone(JST)
+
+    # =====================================
+    # Yahoo Japanの表示時刻
+    # =====================================
 
     try:
         quote_clock = datetime.strptime(
@@ -240,19 +248,27 @@ def normalize_yahoo_japan_osaka(
             f"{raw_data['quote_time']}"
         ) from e
 
+    # =====================================
+    # as_of作成
+    # =====================================
+
     as_of = datetime.combine(
         now.date(),
         quote_clock,
         tzinfo=JST,
     )
 
-    # 取得時刻より未来なら
-    # 前日のデータとして扱う。
+    # quote_timeが現在時刻より未来なら、
+    # 日付をまたいだ前日のデータとして扱う。
     if as_of > now:
         as_of = (
             as_of
             - timedelta(days=1)
         )
+
+    # =====================================
+    # 共通形式
+    # =====================================
 
     return {
         "symbol":
@@ -283,9 +299,4 @@ def normalize_yahoo_japan_osaka(
 
         "as_of":
             as_of.isoformat(),
-    }
-            change_pct,
-
-        "as_of":
-            as_of,
     }
