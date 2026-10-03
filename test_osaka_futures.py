@@ -4,6 +4,9 @@ from market_data.providers import (
 from market_data.normalizers import (
     normalize_yahoo_japan_osaka,
 )
+from market_data.validators import (
+    validate_freshness,
+)
 
 def main():
     print(
@@ -19,6 +22,10 @@ def main():
             data
         )
     )
+        validated = validate_freshness(
+        normalized,
+        180,
+    )
     print()
     print("=== RESULT ===")
 
@@ -33,7 +40,13 @@ def main():
         print(
             f"{key}: {value}"
         )
-        
+    print()
+    print("=== VALIDATED RESULT ===")
+
+    for key, value in validated.items():
+        print(
+            f"{key}: {value}"
+        )        
     required = [
         "symbol",
         "source",
