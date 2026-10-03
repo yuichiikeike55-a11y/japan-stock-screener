@@ -74,7 +74,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-    print("SUCCESS:", ticker)
+
 
 
 if __name__ == "__main__":
