@@ -7,6 +7,9 @@ from market_data.normalizers import (
     normalize_yfinance,
 )
 
+from market_data.validators import (
+    validate_freshness,
+)
 
 def main():
     symbol = "NKD=F"
@@ -54,7 +57,10 @@ def main():
         hourly,
         daily,
     )
-
+    validated = validate_freshness(
+        normalized,
+        180,
+    )
     print()
     print("=== NORMALIZED RESULT ===")
 
@@ -62,7 +68,13 @@ def main():
         print(
             f"{key}: {value}"
         )
+    print()
+    print("=== VALIDATED RESULT ===")
 
+    for key, value in validated.items():
+        print(
+            f"{key}: {value}"
+        )
     # =====================================
     # Required fields
     # =====================================
