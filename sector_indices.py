@@ -789,30 +789,31 @@ def main():
         "",
     ).strip()
 
-requested_base_date = None
+    requested_base_date = None
 
-if requested_base_date_raw:
-    action_date = pd.Timestamp(
-        requested_base_date_raw
-    ).normalize()
+    if requested_base_date_raw:
+        action_date = pd.Timestamp(
+            requested_base_date_raw
+        ).normalize()
 
-    previous_trading_date = get_previous_trading_date(
-        action_date.date()
-    )
+        previous_trading_date = get_previous_trading_date(
+            action_date.date()
+        )
 
-    requested_base_date = pd.Timestamp(
-        previous_trading_date
-    ).normalize()
+        requested_base_date = pd.Timestamp(
+            previous_trading_date
+        ).normalize()
 
-    print(
-        "Action date:",
-        action_date.date()
-    )
+        print(
+            "Action date:",
+            action_date.date()
+        )
 
-    print(
-        "Required previous trading date:",
-        requested_base_date.date()
-    )
+        print(
+            "Required previous trading date:",
+            requested_base_date.date()
+        )
+
     latest_results = []
     failures = []
 
