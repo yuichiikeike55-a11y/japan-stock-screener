@@ -7,6 +7,7 @@
 この段階では鮮度判定や
 正常・異常の最終判定は行わない。
 """
+
 from datetime import datetime
 from datetime import timedelta
 from zoneinfo import ZoneInfo
@@ -14,100 +15,12 @@ from zoneinfo import ZoneInfo
 
 JST = ZoneInfo("Asia/Tokyo")
 
+
 def normalize_yfinance(
     symbol,
     hourly_df,
     daily_df,
 ):
-def normalize_yahoo_japan_osaka(
-    raw_data,
-    now=None,
-):
-    """
-    Yahoo!ファイナンス日本の
-    大阪日経225先物データを
-    共通市場データ形式へ変換する。
-    """
-
-    required = [
-        "symbol",
-        "source",
-        "value",
-        "previous_close",
-        "change",
-        "change_pct",
-        "quote_time",
-    ]
-
-    missing = [
-        key
-        for key in required
-        if raw_data.get(key) is None
-    ]
-
-    if missing:
-        raise RuntimeError(
-            f"Osaka futures missing fields: {missing}"
-        )
-
-    if now is None:
-        now = datetime.now(JST)
-    elif now.tzinfo is None:
-        raise RuntimeError(
-            "now must include timezone"
-        )
-    else:
-        now = now.astimezone(JST)
-
-    try:
-        quote_clock = datetime.strptime(
-            raw_data["quote_time"],
-            "%H:%M",
-        ).time()
-    except (TypeError, ValueError) as e:
-        raise RuntimeError(
-            "invalid Osaka futures quote_time: "
-            f"{raw_data['quote_time']}"
-        ) from e
-
-    as_of = datetime.combine(
-        now.date(),
-        quote_clock,
-        tzinfo=JST,
-    )
-
-    # 取得時刻より未来の時刻になった場合は、
-    # 日付をまたいだ前日のデータとして扱う。
-    if as_of > now:
-        as_of = (
-            as_of
-            - timedelta(days=1)
-        )
-
-    return {
-        "symbol":
-            raw_data["symbol"],
-
-        "source":
-            raw_data["source"],
-
-        "value":
-            float(raw_data["value"]),
-
-        "previous_close":
-            float(
-                raw_data["previous_close"]
-            ),
-
-        "change":
-            float(raw_data["change"]),
-
-        "change_pct":
-            float(raw_data["change_pct"]),
-
-        "as_of":
-            as_of.isoformat(),
-    }    
     """
     yfinanceの1時間足と日足を
     共通市場データ形式へ変換する。
@@ -266,6 +179,111 @@ def normalize_yahoo_japan_osaka(
             change,
 
         "change_pct":
+            change_pct,
+
+        "as_of":
+            as_of,
+    }
+
+
+def normalize_yahoo_japan_osaka(
+    raw_data,
+    now=None,
+):
+    """
+    Yahoo!ファイナンス日本の
+    大阪日経225先物データを
+    共通市場データ形式へ変換する。
+    """
+
+    required = [
+        "symbol",
+        "source",
+        "value",
+        "previous_close",
+        "change",
+        "change_pct",
+        "quote_time",
+    ]
+
+    missing = [
+        key
+        for key in required
+        if raw_data.get(key) is None
+    ]
+
+    if missing:
+        raise RuntimeError(
+            f"Osaka futures missing fields: {missing}"
+        )
+
+    if now is None:
+        now = datetime.now(JST)
+
+    elif now.tzinfo is None:
+        raise RuntimeError(
+            "now must include timezone"
+        )
+
+    else:
+        now = now.astimezone(JST)
+
+    try:
+        quote_clock = datetime.strptime(
+            raw_data["quote_time"],
+            "%H:%M",
+        ).time()
+
+    except (TypeError, ValueError) as e:
+        raise RuntimeError(
+            "invalid Osaka futures quote_time: "
+            f"{raw_data['quote_time']}"
+        ) from e
+
+    as_of = datetime.combine(
+        now.date(),
+        quote_clock,
+        tzinfo=JST,
+    )
+
+    # 取得時刻より未来なら
+    # 前日のデータとして扱う。
+    if as_of > now:
+        as_of = (
+            as_of
+            - timedelta(days=1)
+        )
+
+    return {
+        "symbol":
+            raw_data["symbol"],
+
+        "source":
+            raw_data["source"],
+
+        "value":
+            float(
+                raw_data["value"]
+            ),
+
+        "previous_close":
+            float(
+                raw_data["previous_close"]
+            ),
+
+        "change":
+            float(
+                raw_data["change"]
+            ),
+
+        "change_pct":
+            float(
+                raw_data["change_pct"]
+            ),
+
+        "as_of":
+            as_of.isoformat(),
+    }
             change_pct,
 
         "as_of":
