@@ -12,23 +12,32 @@
 
 MARKET_DATA_ITEMS = [
     {
-        "key": "nikkei225_futures",
-        "name": "日経225先物",
+        "key": "nikkei225_futures_osaka",
+        "name": "日経225先物（大阪）",
         "category": "futures",
 
-        # 主取得元
         "primary": {
-            "source": "yfinance",
-            "symbol": "NIY=F",
+            "source": "yahoo_japan",
+            "symbol": "5040469.O",
         },
 
-        # 主取得元が失敗した場合に使う取得元。
-        # 最初は未設定。
         "fallback": None,
 
-        # データ鮮度判定用。
-        # 取得値がこの時間より古い場合は
-        # 当日値として正常公開しない。
+        "max_age_minutes": 180,
+    },
+
+    {
+        "key": "nikkei225_futures_cme",
+        "name": "CME日経225先物",
+        "category": "futures",
+
+        "primary": {
+            "source": "yfinance",
+            "symbol": "NKD=F",
+        },
+
+        "fallback": None,
+
         "max_age_minutes": 180,
     },
 ]
