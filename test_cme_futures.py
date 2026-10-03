@@ -1,33 +1,97 @@
-import yfinance as yf
+from market_data.providers import (
+    fetch_yfinance,
+    fetch_yfinance_daily,
+)
+
+from market_data.normalizers import (
+    normalize_yfinance,
+)
 
 
 def main():
-    ticker = "NKD=F"
+    symbol = "NKD=F"
 
-    print("=== CME Nikkei 225 Futures Test ===")
-    print("Ticker:", ticker)
+    print(
+        "=== CME Nikkei 225 Futures "
+        "Provider Test ==="
+    )
 
-    data = yf.download(
-        ticker,
-        period="5d",
-        interval="1d",
-        progress=False,
-        auto_adjust=False,
+    print(
+        "Symbol:",
+        symbol
+    )
+
+    # =====================================
+    # Provider
+    # =====================================
+
+    hourly = fetch_yfinance(
+        symbol
+    )
+
+    daily = fetch_yfinance_daily(
+        symbol
     )
 
     print()
-    print("Rows:", len(data))
-    print("Columns:", list(data.columns))
-    print()
-    print(data.tail())
+    print("=== HOURLY DATA ===")
+    print(
+        hourly.tail()
+    )
 
-    if data.empty:
+    print()
+    print("=== DAILY DATA ===")
+    print(
+        daily.tail()
+    )
+
+    # =====================================
+    # Normalizer
+    # =====================================
+
+    normalized = normalize_yfinance(
+        symbol,
+        hourly,
+        daily,
+    )
+
+    print()
+    print("=== NORMALIZED RESULT ===")
+
+    for key, value in normalized.items():
+        print(
+            f"{key}: {value}"
+        )
+
+    # =====================================
+    # Required fields
+    # =====================================
+
+    required = [
+        "symbol",
+        "source",
+        "value",
+        "previous_close",
+        "change",
+        "change_pct",
+        "as_of",
+    ]
+
+    missing = [
+        key
+        for key in required
+        if normalized.get(key) is None
+    ]
+
+    if missing:
         raise RuntimeError(
-            f"{ticker}: yfinance returned no data"
+            f"Missing fields: {missing}"
         )
 
     print()
-    print("SUCCESS:", ticker)
+    print(
+        "SUCCESS: CME futures provider"
+    )
 
 
 if __name__ == "__main__":
