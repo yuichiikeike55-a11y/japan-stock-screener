@@ -124,24 +124,10 @@ jobs:
             # Monday-Friday
             else
 
-              # Monday
-              if [ "$JST_DOW" = "1" ]; then
+              BASE_DATE="$JST_DATE"
 
-                BASE_DATE=$(TZ=Asia/Tokyo date -d "3 days ago" +%Y-%m-%d)
-
-                echo "Monday run."
-                echo "Using previous Friday."
-
-              # Tuesday-Friday
-              else
-
-                BASE_DATE=$(TZ=Asia/Tokyo date -d "1 day ago" +%Y-%m-%d)
-
-                echo "Tuesday-Friday run."
-                echo "Using previous calendar date."
-
-              fi
-
+              echo "Weekday run."
+              echo "Using current JST date as action date."
               echo "BASE_DATE=$BASE_DATE"
 
             fi
