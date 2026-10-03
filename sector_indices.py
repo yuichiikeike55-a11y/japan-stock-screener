@@ -881,24 +881,33 @@ def main():
                     f"{symbol}: no data"
                 )
             # BASE_DATEが指定されている場合、
-            # yfinanceの最新日が要求日と一致することを必須にする
+            # 要求日がデータ内に存在することを確認し、
+            # その日より後のデータを完全に除外する
             if requested_base_date is not None:
-                actual_base_date = (
-                    pd.Timestamp(
-                        df.index[-1]
-                    )
+                normalized_dates = (
+                    pd.to_datetime(df.index)
                     .tz_localize(None)
                     .normalize()
                 )
 
-                if actual_base_date != requested_base_date:
+                if requested_base_date not in normalized_dates:
+                    actual_base_date = (
+                        pd.Timestamp(df.index[-1])
+                        .tz_localize(None)
+                        .normalize()
+                    )
+
                     raise RuntimeError(
                         f"{symbol}: requested base date "
                         f"{requested_base_date.date()} "
-                        f"is not ready. "
+                        f"is not available. "
                         f"Latest available date is "
                         f"{actual_base_date.date()}."
                     )
+
+                df = df.loc[
+                    normalized_dates <= requested_base_date
+                ].copy()
             latest = (
                 build_latest_record(
                     item,
