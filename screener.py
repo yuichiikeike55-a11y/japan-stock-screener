@@ -55,7 +55,50 @@ JPX_DELISTED_URL = (
 # ============================================================
 # 共通関数
 # ============================================================
+def get_jpx_holidays():
+    url = "https://www.jpx.co.jp/corporate/about-jpx/calendar/index.html"
 
+    try:
+        with urllib.request.urlopen(url, timeout=10) as response:
+            html = response.read().decode("utf-8")
+
+        tables = pd.read_html(StringIO(html))
+        holidays = set()
+
+        for table in tables:
+            for col in table.columns:
+                for value in table[col].dropna():
+                    try:
+                        d = pd.to_datetime(value).date()
+                        holidays.add(d)
+                    except Exception:
+                        pass
+
+        return holidays
+
+    except Exception as e:
+        raise RuntimeError(
+            "Failed to load JPX holiday calendar: "
+            f"{repr(e)}"
+        )
+
+
+def get_previous_trading_date(target_date):
+    """
+    target_date より前の直近JPX営業日を返す。
+    土日・JPX休場日は遡る。
+    """
+    holidays = get_jpx_holidays()
+
+    d = target_date - timedelta(days=1)
+
+    while (
+        d.weekday() >= 5
+        or d in holidays
+    ):
+        d -= timedelta(days=1)
+
+    return d
 def make_json_safe(obj):
     if isinstance(obj, dict):
         return {
