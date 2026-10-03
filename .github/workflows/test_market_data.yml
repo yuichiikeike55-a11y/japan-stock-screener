@@ -33,3 +33,6 @@ jobs:
       - name: Run market data runner
         run: |
           python market_data_runner.py          
+      - name: Show market data JSON
+        run: |
+          cat output/market_data.json
