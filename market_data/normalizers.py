@@ -265,7 +265,12 @@ def normalize_yahoo_japan_osaka(
             as_of
             - timedelta(days=1)
         )
-
+    # 土日の場合は直近金曜日へ戻す。
+    while as_of.weekday() >= 5:
+        as_of = (
+            as_of
+            - timedelta(days=1)
+        )
     # =====================================
     # 共通形式
     # =====================================
