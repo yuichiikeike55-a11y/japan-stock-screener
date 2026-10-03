@@ -27,3 +27,6 @@ jobs:
       - name: Test Osaka Nikkei 225 Futures
         run: |
           python test_osaka_futures.py
+      - name: Test CME Nikkei 225 Futures
+        run: |
+          python test_cme_futures.py          
