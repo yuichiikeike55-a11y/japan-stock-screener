@@ -1827,26 +1827,55 @@ def get_latest_trading_date(now):
         d -= timedelta(days=1)
 
     return d
+    
+def get_previous_trading_date(target_date):
+    """
+    target_date より前の直近JPX営業日を返す。
+    土日・JPX休場日は遡る。
+    """
+    holidays = get_jpx_holidays()
 
+    d = target_date - timedelta(days=1)
+
+    while d.weekday() >= 5 or d in holidays:
+        d -= timedelta(days=1)
+
+    return d
 
 def main():
     print("=== Japan Stock 25MA Screener ===")
 
-    requested_date = os.getenv(
+    requested_date_raw = os.getenv(
         "BASE_DATE",
         ""
     ).strip()
 
-    if requested_date:
-        requested_date = pd.Timestamp(
-            requested_date
+    if requested_date_raw:
+        action_date = pd.Timestamp(
+            requested_date_raw
         ).normalize()
+
+        previous_trading_date = get_previous_trading_date(
+            action_date.date()
+        )
+
+        requested_date = pd.Timestamp(
+            previous_trading_date
+        ).normalize()
+
+        print(
+            "Action date:",
+            action_date.date()
+        )
+
         print(
             "Requested base date:",
             requested_date.date()
         )
+
     else:
         requested_date = None
+
         print(
             "BASE_DATE not specified."
         )
