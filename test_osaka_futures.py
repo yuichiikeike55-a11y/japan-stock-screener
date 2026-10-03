@@ -93,7 +93,46 @@ def main():
         raise RuntimeError(
             "Nikkei futures name not found in page"
         )
+    # =====================================
+    # Price data diagnostic
+    # =====================================
 
+    labels = [
+        "前日終値",
+        "始値",
+        "高値",
+        "安値",
+        "出来高",
+    ]
+
+    print()
+    print("=== PRICE DATA DIAGNOSTIC ===")
+
+    for label in labels:
+        position = text.find(label)
+
+        print()
+        print("LABEL:", label)
+        print("POSITION:", position)
+
+        if position >= 0:
+            start = max(
+                0,
+                position - 100,
+            )
+
+            end = min(
+                len(text),
+                position + 250,
+            )
+
+            print(
+                text[start:end]
+            )
+        else:
+            print(
+                "NOT FOUND"
+            )
     print()
     print("SUCCESS: Yahoo Japan page retrieved")
 
