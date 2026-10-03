@@ -1814,11 +1814,10 @@ def get_jpx_holidays():
         return holidays
 
     except Exception as e:
-        print(
-            "Warning: failed to load JPX holidays:",
-            repr(e),
+        raise RuntimeError(
+            "Failed to load JPX holiday calendar: "
+            f"{repr(e)}"
         )
-        return set()
 def get_latest_trading_date(now):
     d = now.date()
     holidays = get_jpx_holidays()
