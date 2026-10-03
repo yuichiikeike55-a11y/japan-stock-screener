@@ -24,3 +24,6 @@ jobs:
       - name: Test market data
         run: |
           python test_market_data.py
+      - name: Test Osaka Nikkei 225 Futures
+        run: |
+          python test_osaka_futures.py
