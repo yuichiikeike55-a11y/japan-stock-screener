@@ -1,3 +1,4 @@
+import re
 import requests
 from bs4 import BeautifulSoup
 
@@ -94,45 +95,95 @@ def main():
             "Nikkei futures name not found in page"
         )
     # =====================================
-    # Price data diagnostic
+    # Parse market data
     # =====================================
 
-    labels = [
-        "前日終値",
-        "始値",
-        "高値",
-        "安値",
-        "出来高",
-    ]
+    quote_pattern = re.search(
+        r"([0-9,]+\.\d+)\s+"
+        r"前日比\s+"
+        r"([+-]?[0-9,]+\.\d+)\s+"
+        r"\(\s*([+-]?[0-9.]+)\s*%\s*\)\s+"
+        r"15分ディレイ株価\s+"
+        r"(\d{1,2}:\d{2})",
+        text,
+    )
+
+    detail_pattern = re.search(
+        r"前日終値\s+用語\s+"
+        r"([0-9,]+\.\d+)\s+"
+        r"\(\s*([0-9]{1,2}/[0-9]{1,2})\s*\)\s+"
+        r"始値\s+用語\s+"
+        r"([0-9,]+\.\d+)\s+"
+        r"\(\s*\d{1,2}:\d{2}\s*\)\s+"
+        r"高値\s+用語\s+"
+        r"([0-9,]+\.\d+)\s+"
+        r"\(\s*\d{1,2}:\d{2}\s*\)\s+"
+        r"安値\s+用語\s+"
+        r"([0-9,]+\.\d+)\s+"
+        r"\(\s*\d{1,2}:\d{2}\s*\)\s+"
+        r"出来高\s+用語\s+"
+        r"([0-9,]+)\s+株",
+        text,
+    )
+
+    if quote_pattern is None:
+        raise RuntimeError(
+            "Failed to parse current quote"
+        )
+
+    if detail_pattern is None:
+        raise RuntimeError(
+            "Failed to parse OHLCV"
+        )
+
+    current_price = float(
+        quote_pattern.group(1).replace(",", "")
+    )
+
+    change = float(
+        quote_pattern.group(2).replace(",", "")
+    )
+
+    change_pct = float(
+        quote_pattern.group(3)
+    )
+
+    quote_time = quote_pattern.group(4)
+
+    previous_close = float(
+        detail_pattern.group(1).replace(",", "")
+    )
+
+    previous_close_date = detail_pattern.group(2)
+
+    open_price = float(
+        detail_pattern.group(3).replace(",", "")
+    )
+
+    high_price = float(
+        detail_pattern.group(4).replace(",", "")
+    )
+
+    low_price = float(
+        detail_pattern.group(5).replace(",", "")
+    )
+
+    volume = int(
+        detail_pattern.group(6).replace(",", "")
+    )
 
     print()
-    print("=== PRICE DATA DIAGNOSTIC ===")
-
-    for label in labels:
-        position = text.find(label)
-
-        print()
-        print("LABEL:", label)
-        print("POSITION:", position)
-
-        if position >= 0:
-            start = max(
-                0,
-                position - 100,
-            )
-
-            end = min(
-                len(text),
-                position + 250,
-            )
-
-            print(
-                text[start:end]
-            )
-        else:
-            print(
-                "NOT FOUND"
-            )
+    print("=== PARSED MARKET DATA ===")
+    print("Current price:", current_price)
+    print("Change:", change)
+    print("Change pct:", change_pct)
+    print("Quote time:", quote_time)
+    print("Previous close:", previous_close)
+    print("Previous close date:", previous_close_date)
+    print("Open:", open_price)
+    print("High:", high_price)
+    print("Low:", low_price)
+    print("Volume:", volume)
     print()
     print("SUCCESS: Yahoo Japan page retrieved")
 
