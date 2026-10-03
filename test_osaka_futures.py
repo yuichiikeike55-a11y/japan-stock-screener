@@ -1,7 +1,9 @@
 from market_data.providers import (
     fetch_yahoo_japan_osaka_futures,
 )
-
+from market_data.normalizers import (
+    normalize_yahoo_japan_osaka,
+)
 
 def main():
     print(
@@ -12,7 +14,11 @@ def main():
     data = (
         fetch_yahoo_japan_osaka_futures()
     )
-
+    normalized = (
+        normalize_yahoo_japan_osaka(
+            data
+        )
+    )
     print()
     print("=== RESULT ===")
 
@@ -20,7 +26,14 @@ def main():
         print(
             f"{key}: {value}"
         )
+    print()
+    print("=== NORMALIZED RESULT ===")
 
+    for key, value in normalized.items():
+        print(
+            f"{key}: {value}"
+        )
+        
     required = [
         "symbol",
         "source",
