@@ -23,13 +23,39 @@ def main():
         )
     }
 
-    response = requests.get(
-        url,
-        headers=headers,
-        timeout=20,
-    )
+    import time
 
-    print("HTTP status:", response.status_code)
+    response = None
+
+    for attempt in range(1, 4):
+        print(
+            f"HTTP attempt: {attempt}/3"
+        )
+
+        response = requests.get(
+            url,
+            headers=headers,
+            timeout=20,
+        )
+
+        print(
+            "HTTP status:",
+            response.status_code,
+        )
+
+        if response.status_code == 200:
+            break
+
+        if attempt < 3:
+            print(
+                "Retrying after 5 seconds..."
+            )
+            time.sleep(5)
+
+    if response is None:
+        raise RuntimeError(
+            "No HTTP response received"
+        )
 
     response.raise_for_status()
 
