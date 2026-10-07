@@ -1,12 +1,13 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-06",
-  "generated_at": "2026-10-07T02:46:22.822926+00:00",
+  "generated_at": "2026-10-07T04:51:13.691630+00:00",
   "code": "6134",
   "data": {
     "code": "6134",
     "name": "ＦＵＪＩ",
     "market": "プライム（内国株式）",
+    "sector17": "機械",
     "base_date": "2026-10-06",
     "history_days": 400,
     "high52_available": true,

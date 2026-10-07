@@ -1,12 +1,13 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-06",
-  "generated_at": "2026-10-07T02:46:22.756513+00:00",
+  "generated_at": "2026-10-07T04:51:13.626642+00:00",
   "code": "4666",
   "data": {
     "code": "4666",
     "name": "パーク２４",
     "market": "プライム（内国株式）",
+    "sector17": "不動産",
     "base_date": "2026-10-06",
     "history_days": 400,
     "high52_available": true,

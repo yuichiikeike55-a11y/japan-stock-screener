@@ -1,12 +1,13 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-06",
-  "generated_at": "2026-10-07T02:46:22.944384+00:00",
+  "generated_at": "2026-10-07T04:51:13.796391+00:00",
   "code": "7607",
   "data": {
     "code": "7607",
     "name": "進和",
     "market": "プライム（内国株式）",
+    "sector17": "商社・卸売",
     "base_date": "2026-10-06",
     "history_days": 400,
     "high52_available": true,

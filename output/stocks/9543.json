@@ -1,12 +1,13 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-06",
-  "generated_at": "2026-10-07T02:46:23.072046+00:00",
+  "generated_at": "2026-10-07T04:51:13.912794+00:00",
   "code": "9543",
   "data": {
     "code": "9543",
     "name": "静岡ガス",
     "market": "プライム（内国株式）",
+    "sector17": "電力・ガス",
     "base_date": "2026-10-06",
     "history_days": 400,
     "high52_available": true,

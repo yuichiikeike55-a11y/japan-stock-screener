@@ -1,12 +1,13 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-06",
-  "generated_at": "2026-10-07T02:46:22.784214+00:00",
+  "generated_at": "2026-10-07T04:51:13.656776+00:00",
   "code": "5186",
   "data": {
     "code": "5186",
     "name": "ニッタ",
     "market": "プライム（内国株式）",
+    "sector17": "自動車・輸送機",
     "base_date": "2026-10-06",
     "history_days": 400,
     "high52_available": true,

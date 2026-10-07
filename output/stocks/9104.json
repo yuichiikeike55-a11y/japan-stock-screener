@@ -1,12 +1,13 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-06",
-  "generated_at": "2026-10-07T02:46:23.049334+00:00",
+  "generated_at": "2026-10-07T04:51:13.892270+00:00",
   "code": "9104",
   "data": {
     "code": "9104",
     "name": "商船三井",
     "market": "プライム（内国株式）",
+    "sector17": "運輸・物流",
     "base_date": "2026-10-06",
     "history_days": 400,
     "high52_available": true,

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T02:46:22.433244+00:00",
+  "generated_at": "2026-10-07T04:51:13.190657+00:00",
   "base_date": "2026-10-06",
   "strategy_count": 4,
   "unique_stock_count": 14,
@@ -12,6 +12,7 @@
         "code": "6770",
         "name": "アルプスアルパイン",
         "market": "プライム（内国株式）",
+        "sector17": "電機・精密",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -80,7 +81,12 @@
         "reacceleration_pullback"
       ],
       "primary_strategy_raw": "reacceleration_pullback",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "7167",
@@ -90,6 +96,7 @@
         "code": "7167",
         "name": "めぶきフィナンシャルグループ",
         "market": "プライム（内国株式）",
+        "sector17": "銀行",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -155,7 +162,12 @@
         "initial_breakout_pullback"
       ],
       "primary_strategy_raw": "initial_breakout_pullback",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "7173",
@@ -165,6 +177,7 @@
         "code": "7173",
         "name": "東京きらぼしフィナンシャルグループ",
         "market": "プライム（内国株式）",
+        "sector17": "銀行",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -233,7 +246,12 @@
         "reacceleration_pullback"
       ],
       "primary_strategy_raw": "reacceleration_pullback",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "4205",
@@ -243,6 +261,7 @@
         "code": "4205",
         "name": "日本ゼオン",
         "market": "プライム（内国株式）",
+        "sector17": "素材・化学",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -307,7 +326,12 @@
         "25MA_pullback"
       ],
       "primary_strategy_raw": "25MA_pullback",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "8309",
@@ -317,6 +341,7 @@
         "code": "8309",
         "name": "三井住友トラストグループ",
         "market": "プライム（内国株式）",
+        "sector17": "銀行",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -381,7 +406,12 @@
         "volume_initial_catch"
       ],
       "primary_strategy_raw": "volume_initial_catch",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "6923",
@@ -391,6 +421,7 @@
         "code": "6923",
         "name": "スタンレー電気",
         "market": "プライム（内国株式）",
+        "sector17": "電機・精密",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -454,7 +485,12 @@
         "25MA_pullback"
       ],
       "primary_strategy_raw": "25MA_pullback",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "7282",
@@ -464,6 +500,7 @@
         "code": "7282",
         "name": "豊田合成",
         "market": "プライム（内国株式）",
+        "sector17": "自動車・輸送機",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -527,7 +564,12 @@
         "25MA_pullback"
       ],
       "primary_strategy_raw": "25MA_pullback",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "6178",
@@ -537,6 +579,7 @@
         "code": "6178",
         "name": "日本郵政",
         "market": "プライム（内国株式）",
+        "sector17": "情報通信・サービスその他",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -600,7 +643,12 @@
         "volume_initial_catch"
       ],
       "primary_strategy_raw": "volume_initial_catch",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "7186",
@@ -610,6 +658,7 @@
         "code": "7186",
         "name": "横浜フィナンシャルグループ",
         "market": "プライム（内国株式）",
+        "sector17": "銀行",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -673,7 +722,12 @@
         "volume_initial_catch"
       ],
       "primary_strategy_raw": "volume_initial_catch",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "7267",
@@ -683,6 +737,7 @@
         "code": "7267",
         "name": "本田技研工業",
         "market": "プライム（内国株式）",
+        "sector17": "自動車・輸送機",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -746,7 +801,12 @@
         "volume_initial_catch"
       ],
       "primary_strategy_raw": "volume_initial_catch",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "8306",
@@ -756,6 +816,7 @@
         "code": "8306",
         "name": "三菱ＵＦＪフィナンシャル・グループ",
         "market": "プライム（内国株式）",
+        "sector17": "銀行",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -819,7 +880,12 @@
         "volume_initial_catch"
       ],
       "primary_strategy_raw": "volume_initial_catch",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "7956",
@@ -829,6 +895,7 @@
         "code": "7956",
         "name": "ピジョン",
         "market": "プライム（内国株式）",
+        "sector17": "情報通信・サービスその他",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -893,7 +960,12 @@
         "25MA_pullback"
       ],
       "primary_strategy_raw": "25MA_pullback",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "7276",
@@ -903,6 +975,7 @@
         "code": "7276",
         "name": "小糸製作所",
         "market": "プライム（内国株式）",
+        "sector17": "電機・精密",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -965,7 +1038,12 @@
         "25MA_pullback"
       ],
       "primary_strategy_raw": "25MA_pullback",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     },
     {
       "code": "8750",
@@ -975,6 +1053,7 @@
         "code": "8750",
         "name": "第一ライフグループ",
         "market": "プライム（内国株式）",
+        "sector17": "金融（除く銀行）",
         "base_date": "2026-10-06",
         "history_days": 400,
         "high52_available": true,
@@ -1035,7 +1114,12 @@
         "25MA_pullback"
       ],
       "primary_strategy_raw": "25MA_pullback",
-      "secondary_strategies_raw": []
+      "secondary_strategies_raw": [],
+      "sector_evaluation": {
+        "evaluation_status": "stopped",
+        "stop_reason": "sector_base_date_mismatch",
+        "sector_score": null
+      }
     }
   ]
 }

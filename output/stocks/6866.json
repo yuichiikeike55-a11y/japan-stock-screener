@@ -1,12 +1,13 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-06",
-  "generated_at": "2026-10-07T02:46:22.889094+00:00",
+  "generated_at": "2026-10-07T04:51:13.753381+00:00",
   "code": "6866",
   "data": {
     "code": "6866",
     "name": "日置電機",
     "market": "プライム（内国株式）",
+    "sector17": "電機・精密",
     "base_date": "2026-10-06",
     "history_days": 400,
     "high52_available": true,

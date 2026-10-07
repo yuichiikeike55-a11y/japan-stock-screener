@@ -1,12 +1,13 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-06",
-  "generated_at": "2026-10-07T02:46:22.728002+00:00",
+  "generated_at": "2026-10-07T04:51:13.601409+00:00",
   "code": "4249",
   "data": {
     "code": "4249",
     "name": "森六",
     "market": "プライム（内国株式）",
+    "sector17": "素材・化学",
     "base_date": "2026-10-06",
     "history_days": 400,
     "high52_available": true,
