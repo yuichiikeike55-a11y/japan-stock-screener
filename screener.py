@@ -2737,6 +2737,336 @@ def attach_sector_scores_to_hits(
 
     return strategy_hits    
 # ============================================================
+# 戦略適合度 35点
+# ============================================================
+
+def score_strategy_fit_35(
+    strategy_hit,
+):
+    """
+    既存の各戦略 strategy_score（0～100）を、
+    正式評価の戦略適合度35点へ変換する。
+
+    既存 grade_*() が各戦略固有条件を評価済みなので、
+    ここでは同じ条件を再実装せず正規化する。
+
+    戦略否定条件による上限C・見送り判定は、
+    最終評価の安全弁で別途適用する。
+    """
+
+    if strategy_hit is None:
+        return {
+            "strategy_fit_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "strategy_hit_missing",
+        }
+
+    strategy = strategy_hit.get(
+        "strategy"
+    )
+
+    raw_score = strategy_hit.get(
+        "strategy_score_raw"
+    )
+
+    if strategy is None:
+        return {
+            "strategy_fit_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "strategy_name_missing",
+        }
+
+    if raw_score is None:
+        return {
+            "strategy_fit_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "strategy_score_missing",
+            "strategy": strategy,
+        }
+
+    try:
+        raw_score = float(
+            raw_score
+        )
+
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return {
+            "strategy_fit_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "strategy_score_invalid",
+            "strategy": strategy,
+        }
+
+    if (
+        np.isnan(raw_score)
+        or np.isinf(raw_score)
+    ):
+        return {
+            "strategy_fit_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "strategy_score_invalid",
+            "strategy": strategy,
+        }
+
+    # --------------------------------------------
+    # 0～100 → 0～35
+    # --------------------------------------------
+
+    raw_score = max(
+        0.0,
+        min(
+            100.0,
+            raw_score,
+        ),
+    )
+
+    score_35 = (
+        raw_score
+        / 100.0
+        * 35.0
+    )
+
+    # 0.1点単位
+    score_35 = round(
+        score_35,
+        1,
+    )
+
+    return {
+        "strategy":
+            strategy,
+
+        "strategy_fit_score":
+            score_35,
+
+        "strategy_score_raw":
+            raw_score,
+
+        "base_grade_raw":
+            strategy_hit.get(
+                "base_grade_raw"
+            ),
+
+        "condition_flags":
+            strategy_hit.get(
+                "condition_flags",
+                {}
+            ),
+
+        "grade_reasons":
+            strategy_hit.get(
+                "grade_reasons",
+                []
+            ),
+
+        "evaluation_status":
+            "ok",
+
+        "stop_reason":
+            None,
+    }
+def attach_strategy_fit_scores(
+    strategy_hits,
+):
+    """
+    4戦略ヒット銘柄について、
+    各戦略を35点満点で評価する。
+
+    ・各戦略を個別採点
+    ・最高点の戦略を主戦略
+    ・その他を副戦略
+    ・複数戦略ヒット情報を保持
+
+    複数一致ボーナスは、
+    最終100点計算時に別途加算する。
+    """
+
+    if not strategy_hits:
+        return []
+
+    for stock in strategy_hits:
+
+        hits = stock.get(
+            "strategy_hits",
+            []
+        )
+
+        if not hits:
+            stock[
+                "strategy_fit_evaluation"
+            ] = {
+                "evaluation_status":
+                    "stopped",
+
+                "stop_reason":
+                    "strategy_hits_missing",
+
+                "strategy_fit_score":
+                    None,
+            }
+
+            continue
+
+        # --------------------------------------------
+        # 各戦略を35点評価
+        # --------------------------------------------
+
+        evaluated_hits = []
+
+        for hit in hits:
+
+            evaluation = (
+                score_strategy_fit_35(
+                    hit
+                )
+            )
+
+            evaluated_hit = dict(
+                hit
+            )
+
+            evaluated_hit[
+                "strategy_fit_evaluation"
+            ] = evaluation
+
+            evaluated_hits.append(
+                evaluated_hit
+            )
+
+        # --------------------------------------------
+        # 正常評価できた戦略だけ抽出
+        # --------------------------------------------
+
+        valid_hits = [
+            hit
+            for hit in evaluated_hits
+            if (
+                hit.get(
+                    "strategy_fit_evaluation",
+                    {}
+                ).get(
+                    "evaluation_status"
+                )
+                == "ok"
+            )
+        ]
+
+        if not valid_hits:
+
+            stock[
+                "strategy_hits"
+            ] = evaluated_hits
+
+            stock[
+                "strategy_fit_evaluation"
+            ] = {
+                "evaluation_status":
+                    "stopped",
+
+                "stop_reason":
+                    "no_valid_strategy_score",
+
+                "strategy_fit_score":
+                    None,
+            }
+
+            continue
+
+        # --------------------------------------------
+        # 35点が高い順
+        # --------------------------------------------
+
+        valid_hits.sort(
+            key=lambda x: (
+                x[
+                    "strategy_fit_evaluation"
+                ].get(
+                    "strategy_fit_score",
+                    -1,
+                )
+            ),
+            reverse=True,
+        )
+
+        # --------------------------------------------
+        # 主戦略
+        # --------------------------------------------
+
+        primary_hit = (
+            valid_hits[0]
+        )
+
+        primary_strategy = (
+            primary_hit.get(
+                "strategy"
+            )
+        )
+
+        primary_score = (
+            primary_hit[
+                "strategy_fit_evaluation"
+            ].get(
+                "strategy_fit_score"
+            )
+        )
+
+        # --------------------------------------------
+        # 副戦略
+        # --------------------------------------------
+
+        secondary_strategies = [
+            hit.get(
+                "strategy"
+            )
+            for hit in valid_hits[1:]
+        ]
+
+        # --------------------------------------------
+        # 銘柄へ保存
+        # --------------------------------------------
+
+        stock[
+            "strategy_hits"
+        ] = evaluated_hits
+
+        stock[
+            "primary_strategy"
+        ] = primary_strategy
+
+        stock[
+            "secondary_strategies"
+        ] = secondary_strategies
+
+        stock[
+            "strategy_fit_evaluation"
+        ] = {
+            "evaluation_status":
+                "ok",
+
+            "stop_reason":
+                None,
+
+            "strategy_fit_score":
+                primary_score,
+
+            "primary_strategy":
+                primary_strategy,
+
+            "secondary_strategies":
+                secondary_strategies,
+
+            "evaluated_strategy_count":
+                len(valid_hits),
+
+            "hit_count":
+                len(hits),
+        }
+
+    return strategy_hits    
+# ============================================================
 # 4戦略ヒット銘柄 統合
 # ============================================================
 
@@ -3308,6 +3638,49 @@ def main():
         initial_breakout_result,
         volume_initial_result,
     )
+    # ========================================================
+    # 戦略適合度 35点
+    # ========================================================
+
+    strategy_hits = (
+        attach_strategy_fit_scores(
+            strategy_hits
+        )
+    )
+
+    print()
+    print(
+        "=== STRATEGY FIT SCORES ==="
+    )
+
+    for stock in strategy_hits:
+
+        strategy_eval = stock.get(
+            "strategy_fit_evaluation",
+            {}
+        )
+
+        print(
+            stock.get("code"),
+            stock.get("name"),
+            "primary:",
+            strategy_eval.get(
+                "primary_strategy"
+            ),
+            "score:",
+            strategy_eval.get(
+                "strategy_fit_score"
+            ),
+            "/35",
+            "secondary:",
+            strategy_eval.get(
+                "secondary_strategies"
+            ),
+            "status:",
+            strategy_eval.get(
+                "evaluation_status"
+            ),
+        )    
     # ========================================================
     # セクター評価データ読み込み
     # ========================================================
