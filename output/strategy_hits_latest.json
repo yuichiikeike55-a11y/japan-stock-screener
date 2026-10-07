@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T04:51:13.190657+00:00",
+  "generated_at": "2026-10-07T05:26:11.242586+00:00",
   "base_date": "2026-10-06",
   "strategy_count": 4,
   "unique_stock_count": 14,
@@ -83,9 +83,25 @@
       "primary_strategy_raw": "reacceleration_pullback",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 23,
+        "sector_score_breakdown": {
+          "medium_term_trend": 8,
+          "momentum": 7,
+          "high_position": 3,
+          "volume_flow": 2,
+          "relative_rank": 3
+        },
+        "relative_rank": 3,
+        "sector_count": 18,
+        "sector": "電機・精密",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "電機・精密",
+        "normalized_sector": "電機・精密",
+        "sector_rank_score": 12.102369926627158,
+        "semiconductor_override": false
       }
     },
     {
@@ -164,9 +180,25 @@
       "primary_strategy_raw": "initial_breakout_pullback",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 17,
+        "sector_score_breakdown": {
+          "medium_term_trend": 8,
+          "momentum": 4,
+          "high_position": 4,
+          "volume_flow": 0,
+          "relative_rank": 1
+        },
+        "relative_rank": 7,
+        "sector_count": 18,
+        "sector": "銀行",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "銀行",
+        "normalized_sector": "銀行",
+        "sector_rank_score": 4.077643103790297,
+        "semiconductor_override": false
       }
     },
     {
@@ -248,9 +280,25 @@
       "primary_strategy_raw": "reacceleration_pullback",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 17,
+        "sector_score_breakdown": {
+          "medium_term_trend": 8,
+          "momentum": 4,
+          "high_position": 4,
+          "volume_flow": 0,
+          "relative_rank": 1
+        },
+        "relative_rank": 7,
+        "sector_count": 18,
+        "sector": "銀行",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "銀行",
+        "normalized_sector": "銀行",
+        "sector_rank_score": 4.077643103790297,
+        "semiconductor_override": false
       }
     },
     {
@@ -328,9 +376,25 @@
       "primary_strategy_raw": "25MA_pullback",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 23,
+        "sector_score_breakdown": {
+          "medium_term_trend": 8,
+          "momentum": 6,
+          "high_position": 4,
+          "volume_flow": 3,
+          "relative_rank": 2
+        },
+        "relative_rank": 4,
+        "sector_count": 18,
+        "sector": "素材・化学",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "素材・化学",
+        "normalized_sector": "素材・化学",
+        "sector_rank_score": 8.151811832484036,
+        "semiconductor_override": false
       }
     },
     {
@@ -408,9 +472,25 @@
       "primary_strategy_raw": "volume_initial_catch",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 17,
+        "sector_score_breakdown": {
+          "medium_term_trend": 8,
+          "momentum": 4,
+          "high_position": 4,
+          "volume_flow": 0,
+          "relative_rank": 1
+        },
+        "relative_rank": 7,
+        "sector_count": 18,
+        "sector": "銀行",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "銀行",
+        "normalized_sector": "銀行",
+        "sector_rank_score": 4.077643103790297,
+        "semiconductor_override": false
       }
     },
     {
@@ -487,9 +567,25 @@
       "primary_strategy_raw": "25MA_pullback",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 23,
+        "sector_score_breakdown": {
+          "medium_term_trend": 8,
+          "momentum": 7,
+          "high_position": 3,
+          "volume_flow": 2,
+          "relative_rank": 3
+        },
+        "relative_rank": 3,
+        "sector_count": 18,
+        "sector": "電機・精密",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "電機・精密",
+        "normalized_sector": "電機・精密",
+        "sector_rank_score": 12.102369926627158,
+        "semiconductor_override": false
       }
     },
     {
@@ -566,9 +662,25 @@
       "primary_strategy_raw": "25MA_pullback",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 7,
+        "sector_score_breakdown": {
+          "medium_term_trend": 2,
+          "momentum": 2,
+          "high_position": 1,
+          "volume_flow": 2,
+          "relative_rank": 0
+        },
+        "relative_rank": 14,
+        "sector_count": 18,
+        "sector": "自動車・輸送機",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "自動車・輸送機",
+        "normalized_sector": "自動車・輸送機",
+        "sector_rank_score": -1.5479668091760113,
+        "semiconductor_override": false
       }
     },
     {
@@ -645,9 +757,25 @@
       "primary_strategy_raw": "volume_initial_catch",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 16,
+        "sector_score_breakdown": {
+          "medium_term_trend": 8,
+          "momentum": 3,
+          "high_position": 3,
+          "volume_flow": 0,
+          "relative_rank": 2
+        },
+        "relative_rank": 6,
+        "sector_count": 18,
+        "sector": "情報通信・サービスその他",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "情報通信・サービスその他",
+        "normalized_sector": "情報通信・サービスその他",
+        "sector_rank_score": 5.230526048909004,
+        "semiconductor_override": false
       }
     },
     {
@@ -724,9 +852,25 @@
       "primary_strategy_raw": "volume_initial_catch",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 17,
+        "sector_score_breakdown": {
+          "medium_term_trend": 8,
+          "momentum": 4,
+          "high_position": 4,
+          "volume_flow": 0,
+          "relative_rank": 1
+        },
+        "relative_rank": 7,
+        "sector_count": 18,
+        "sector": "銀行",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "銀行",
+        "normalized_sector": "銀行",
+        "sector_rank_score": 4.077643103790297,
+        "semiconductor_override": false
       }
     },
     {
@@ -803,9 +947,25 @@
       "primary_strategy_raw": "volume_initial_catch",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 7,
+        "sector_score_breakdown": {
+          "medium_term_trend": 2,
+          "momentum": 2,
+          "high_position": 1,
+          "volume_flow": 2,
+          "relative_rank": 0
+        },
+        "relative_rank": 14,
+        "sector_count": 18,
+        "sector": "自動車・輸送機",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "自動車・輸送機",
+        "normalized_sector": "自動車・輸送機",
+        "sector_rank_score": -1.5479668091760113,
+        "semiconductor_override": false
       }
     },
     {
@@ -882,9 +1042,25 @@
       "primary_strategy_raw": "volume_initial_catch",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 17,
+        "sector_score_breakdown": {
+          "medium_term_trend": 8,
+          "momentum": 4,
+          "high_position": 4,
+          "volume_flow": 0,
+          "relative_rank": 1
+        },
+        "relative_rank": 7,
+        "sector_count": 18,
+        "sector": "銀行",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "銀行",
+        "normalized_sector": "銀行",
+        "sector_rank_score": 4.077643103790297,
+        "semiconductor_override": false
       }
     },
     {
@@ -962,9 +1138,25 @@
       "primary_strategy_raw": "25MA_pullback",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 16,
+        "sector_score_breakdown": {
+          "medium_term_trend": 8,
+          "momentum": 3,
+          "high_position": 3,
+          "volume_flow": 0,
+          "relative_rank": 2
+        },
+        "relative_rank": 6,
+        "sector_count": 18,
+        "sector": "情報通信・サービスその他",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "情報通信・サービスその他",
+        "normalized_sector": "情報通信・サービスその他",
+        "sector_rank_score": 5.230526048909004,
+        "semiconductor_override": false
       }
     },
     {
@@ -1040,9 +1232,25 @@
       "primary_strategy_raw": "25MA_pullback",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 23,
+        "sector_score_breakdown": {
+          "medium_term_trend": 8,
+          "momentum": 7,
+          "high_position": 3,
+          "volume_flow": 2,
+          "relative_rank": 3
+        },
+        "relative_rank": 3,
+        "sector_count": 18,
+        "sector": "電機・精密",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "電機・精密",
+        "normalized_sector": "電機・精密",
+        "sector_rank_score": 12.102369926627158,
+        "semiconductor_override": false
       }
     },
     {
@@ -1116,9 +1324,25 @@
       "primary_strategy_raw": "25MA_pullback",
       "secondary_strategies_raw": [],
       "sector_evaluation": {
-        "evaluation_status": "stopped",
-        "stop_reason": "sector_base_date_mismatch",
-        "sector_score": null
+        "sector_score": 13,
+        "sector_score_breakdown": {
+          "medium_term_trend": 6,
+          "momentum": 3,
+          "high_position": 3,
+          "volume_flow": 0,
+          "relative_rank": 1
+        },
+        "relative_rank": 8,
+        "sector_count": 18,
+        "sector": "金融",
+        "sector_base_date": "2026-10-06",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "金融（除く銀行）",
+        "normalized_sector": "金融",
+        "sector_rank_score": 1.3395169852905557,
+        "semiconductor_override": false
       }
     }
   ]
