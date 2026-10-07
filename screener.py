@@ -3330,7 +3330,537 @@ def attach_technical_scores(
         ] = evaluation
 
     return strategy_hits    
+# ============================================================
+# 地合い評価 15点
+# ============================================================
 
+def score_market_condition_15(
+    metrics,
+    market_data_path=None,
+):
+    """
+    地合い評価：15点満点
+
+    配点
+    1. 市場内部 9点
+       ・25MAより上の銘柄比率       3点
+       ・25MA上向き銘柄比率         3点
+       ・前日比上昇銘柄比率         3点
+
+    2. 日経225先物 6点
+       ・大阪先物を主判定           最大4点
+       ・CME先物を確認材料          最大2点
+
+    安全弁
+    ・市場内部データ不足 → 評価停止
+    ・market_data.json 読込不能 → 評価停止
+    ・大阪/CMEとも利用不能 → 評価停止
+    ・stale は採点対象外
+    ・closed は直近確定データとして利用可能
+    """
+
+    # --------------------------------------------------------
+    # 0. 基本確認
+    # --------------------------------------------------------
+
+    if (
+        metrics is None
+        or metrics.empty
+    ):
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "market_metrics_missing",
+        }
+
+    required_columns = [
+        "close",
+        "previous_close",
+        "ma25",
+        "ma25_direction",
+    ]
+
+    missing_columns = [
+        column
+        for column in required_columns
+        if column not in metrics.columns
+    ]
+
+    if missing_columns:
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "market_required_columns_missing",
+            "missing_columns": missing_columns,
+        }
+
+    # --------------------------------------------------------
+    # 1. 市場内部データを数値化
+    # --------------------------------------------------------
+
+    close = pd.to_numeric(
+        metrics["close"],
+        errors="coerce",
+    )
+
+    previous_close = pd.to_numeric(
+        metrics["previous_close"],
+        errors="coerce",
+    )
+
+    ma25 = pd.to_numeric(
+        metrics["ma25"],
+        errors="coerce",
+    )
+
+    ma25_direction = (
+        metrics["ma25_direction"]
+        .astype(str)
+    )
+
+    valid_above_ma25 = (
+        close.notna()
+        & ma25.notna()
+    )
+
+    valid_price_change = (
+        close.notna()
+        & previous_close.notna()
+    )
+
+    valid_ma25_direction = (
+        ma25_direction.isin(
+            [
+                "up",
+                "flat",
+                "down",
+            ]
+        )
+    )
+
+    # 十分な母数が取れない場合は停止
+    if (
+        valid_above_ma25.sum() == 0
+        or valid_price_change.sum() == 0
+        or valid_ma25_direction.sum() == 0
+    ):
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "market_internal_data_invalid",
+        }
+
+    # --------------------------------------------------------
+    # 2. 市場内部比率
+    # --------------------------------------------------------
+
+    above_ma25_ratio = (
+        (
+            close[valid_above_ma25]
+            >= ma25[valid_above_ma25]
+        ).mean()
+        * 100.0
+    )
+
+    ma25_up_ratio = (
+        (
+            ma25_direction[
+                valid_ma25_direction
+            ]
+            == "up"
+        ).mean()
+        * 100.0
+    )
+
+    advancing_ratio = (
+        (
+            close[valid_price_change]
+            > previous_close[
+                valid_price_change
+            ]
+        ).mean()
+        * 100.0
+    )
+
+    # --------------------------------------------------------
+    # 3. 市場内部 9点
+    # --------------------------------------------------------
+
+    above_ma25_score = 0
+
+    if above_ma25_ratio >= 65:
+        above_ma25_score = 3
+    elif above_ma25_ratio >= 50:
+        above_ma25_score = 2
+    elif above_ma25_ratio >= 40:
+        above_ma25_score = 1
+
+    ma25_up_score = 0
+
+    if ma25_up_ratio >= 65:
+        ma25_up_score = 3
+    elif ma25_up_ratio >= 50:
+        ma25_up_score = 2
+    elif ma25_up_ratio >= 40:
+        ma25_up_score = 1
+
+    advancing_score = 0
+
+    if advancing_ratio >= 60:
+        advancing_score = 3
+    elif advancing_ratio >= 50:
+        advancing_score = 2
+    elif advancing_ratio >= 40:
+        advancing_score = 1
+
+    internal_score = (
+        above_ma25_score
+        + ma25_up_score
+        + advancing_score
+    )
+
+    # --------------------------------------------------------
+    # 4. market_data.json 読み込み
+    # --------------------------------------------------------
+
+    if market_data_path is None:
+        market_data_path = (
+            OUTPUT_DIR
+            / "market_data.json"
+        )
+
+    market_data_path = Path(
+        market_data_path
+    )
+
+    if not market_data_path.exists():
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "market_data_file_missing",
+            "market_internal_score": internal_score,
+        }
+
+    try:
+        with open(
+            market_data_path,
+            "r",
+            encoding="utf-8",
+        ) as f:
+            market_data = json.load(f)
+
+    except Exception as e:
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "market_data_json_load_failed",
+            "error": str(e),
+            "market_internal_score": internal_score,
+        }
+
+    results = market_data.get(
+        "results",
+        []
+    )
+
+    if not isinstance(
+        results,
+        list,
+    ):
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "market_data_results_invalid",
+            "market_internal_score": internal_score,
+        }
+
+    # --------------------------------------------------------
+    # 5. 大阪・CMEを取得
+    # --------------------------------------------------------
+
+    market_lookup = {}
+
+    for row in results:
+
+        key = row.get(
+            "key"
+        )
+
+        if key:
+            market_lookup[
+                key
+            ] = row
+
+    osaka = market_lookup.get(
+        "nikkei225_futures_osaka"
+    )
+
+    cme = market_lookup.get(
+        "nikkei225_futures_cme"
+    )
+
+    # --------------------------------------------------------
+    # 6. 先物データ利用可否
+    # --------------------------------------------------------
+
+    def usable_futures_row(row):
+
+        if not row:
+            return False
+
+        status = row.get(
+            "status"
+        )
+
+        # staleは使わない
+        # ok / closed は利用可能
+        if status not in (
+            "ok",
+            "closed",
+        ):
+            return False
+
+        change_pct = _num(
+            row,
+            "change_pct",
+        )
+
+        if change_pct is None:
+            return False
+
+        return True
+
+    osaka_usable = (
+        usable_futures_row(
+            osaka
+        )
+    )
+
+    cme_usable = (
+        usable_futures_row(
+            cme
+        )
+    )
+
+    if (
+        not osaka_usable
+        and not cme_usable
+    ):
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "futures_data_unavailable",
+            "market_internal_score": internal_score,
+        }
+
+    # --------------------------------------------------------
+    # 7. 大阪先物 最大4点
+    # --------------------------------------------------------
+
+    osaka_score = 0
+    osaka_change_pct = None
+
+    if osaka_usable:
+
+        osaka_change_pct = _num(
+            osaka,
+            "change_pct",
+        )
+
+        if osaka_change_pct >= 1.0:
+            osaka_score = 4
+
+        elif osaka_change_pct >= 0.3:
+            osaka_score = 3
+
+        elif osaka_change_pct >= 0.0:
+            osaka_score = 2
+
+        elif osaka_change_pct >= -0.5:
+            osaka_score = 1
+
+    # --------------------------------------------------------
+    # 8. CME先物 最大2点
+    # --------------------------------------------------------
+
+    cme_score = 0
+    cme_change_pct = None
+
+    if cme_usable:
+
+        cme_change_pct = _num(
+            cme,
+            "change_pct",
+        )
+
+        if cme_change_pct >= 0.5:
+            cme_score = 2
+
+        elif cme_change_pct >= 0.0:
+            cme_score = 1
+
+    futures_score = (
+        osaka_score
+        + cme_score
+    )
+
+    # --------------------------------------------------------
+    # 9. 合計 15点
+    # --------------------------------------------------------
+
+    total = (
+        internal_score
+        + futures_score
+    )
+
+    total = max(
+        0,
+        min(
+            15,
+            int(total),
+        ),
+    )
+
+    # --------------------------------------------------------
+    # 10. 判定補助情報
+    # --------------------------------------------------------
+
+    if total >= 12:
+        market_condition = "strong"
+
+    elif total >= 9:
+        market_condition = "positive"
+
+    elif total >= 6:
+        market_condition = "neutral"
+
+    elif total >= 3:
+        market_condition = "weak"
+
+    else:
+        market_condition = "very_weak"
+
+    return {
+        "market_score":
+            total,
+
+        "market_condition":
+            market_condition,
+
+        "market_score_breakdown": {
+            "internal":
+                internal_score,
+
+            "above_ma25":
+                above_ma25_score,
+
+            "ma25_up":
+                ma25_up_score,
+
+            "advancing":
+                advancing_score,
+
+            "futures":
+                futures_score,
+
+            "osaka_futures":
+                osaka_score,
+
+            "cme_futures":
+                cme_score,
+        },
+
+        "market_internal": {
+            "above_ma25_ratio":
+                round(
+                    float(
+                        above_ma25_ratio
+                    ),
+                    2,
+                ),
+
+            "ma25_up_ratio":
+                round(
+                    float(
+                        ma25_up_ratio
+                    ),
+                    2,
+                ),
+
+            "advancing_ratio":
+                round(
+                    float(
+                        advancing_ratio
+                    ),
+                    2,
+                ),
+
+            "sample_count":
+                int(
+                    len(metrics)
+                ),
+        },
+
+        "futures": {
+            "osaka": {
+                "usable":
+                    osaka_usable,
+
+                "status":
+                    (
+                        osaka.get(
+                            "status"
+                        )
+                        if osaka
+                        else None
+                    ),
+
+                "change_pct":
+                    osaka_change_pct,
+
+                "as_of":
+                    (
+                        osaka.get(
+                            "as_of"
+                        )
+                        if osaka
+                        else None
+                    ),
+            },
+
+            "cme": {
+                "usable":
+                    cme_usable,
+
+                "status":
+                    (
+                        cme.get(
+                            "status"
+                        )
+                        if cme
+                        else None
+                    ),
+
+                "change_pct":
+                    cme_change_pct,
+
+                "as_of":
+                    (
+                        cme.get(
+                            "as_of"
+                        )
+                        if cme
+                        else None
+                    ),
+            },
+        },
+
+        "evaluation_status":
+            "ok",
+
+        "stop_reason":
+            None,
+    }
 # ============================================================
 # 4戦略ヒット銘柄 統合
 # ============================================================
@@ -4001,6 +4531,122 @@ def main():
                 "evaluation_status"
             ),
         )    
+    # ========================================================
+    # 地合い評価 15点
+    # ========================================================
+
+    market_evaluation = (
+        score_market_condition_15(
+            metrics
+        )
+    )
+
+    print()
+    print(
+        "=== MARKET CONDITION SCORE ==="
+    )
+
+    print(
+        "score:",
+        market_evaluation.get(
+            "market_score"
+        ),
+        "/15",
+        "condition:",
+        market_evaluation.get(
+            "market_condition"
+        ),
+        "status:",
+        market_evaluation.get(
+            "evaluation_status"
+        ),
+        "reason:",
+        market_evaluation.get(
+            "stop_reason"
+        ),
+    )
+
+    market_breakdown = (
+        market_evaluation.get(
+            "market_score_breakdown",
+            {}
+        )
+    )
+
+    print(
+        "internal:",
+        market_breakdown.get(
+            "internal"
+        ),
+        "/9",
+        "above_ma25:",
+        market_breakdown.get(
+            "above_ma25"
+        ),
+        "/3",
+        "ma25_up:",
+        market_breakdown.get(
+            "ma25_up"
+        ),
+        "/3",
+        "advancing:",
+        market_breakdown.get(
+            "advancing"
+        ),
+        "/3",
+    )
+
+    print(
+        "futures:",
+        market_breakdown.get(
+            "futures"
+        ),
+        "/6",
+        "osaka:",
+        market_breakdown.get(
+            "osaka_futures"
+        ),
+        "/4",
+        "cme:",
+        market_breakdown.get(
+            "cme_futures"
+        ),
+        "/2",
+    )
+
+    market_internal = (
+        market_evaluation.get(
+            "market_internal",
+            {}
+        )
+    )
+
+    print(
+        "above_ma25_ratio:",
+        market_internal.get(
+            "above_ma25_ratio"
+        ),
+        "%",
+        "ma25_up_ratio:",
+        market_internal.get(
+            "ma25_up_ratio"
+        ),
+        "%",
+        "advancing_ratio:",
+        market_internal.get(
+            "advancing_ratio"
+        ),
+        "%",
+    )
+
+    # 4戦略ヒット銘柄へ同じ地合い評価を付与
+    for stock in strategy_hits:
+
+        stock[
+            "market_evaluation"
+        ] = dict(
+            market_evaluation
+        )        
     # ========================================================
     # セクター評価データ読み込み
     # ========================================================
