@@ -3067,6 +3067,325 @@ def attach_strategy_fit_scores(
 
     return strategy_hits    
 # ============================================================
+# 個別テクニカル 15点
+# ============================================================
+
+def score_stock_technical_15(
+    metrics,
+):
+    """
+    個別テクニカル：15点満点
+
+    1. 中期トレンド     6点
+    2. モメンタム       5点
+    3. 高値位置         4点
+
+    出来高・需給は別枠10点で評価するため、
+    ここでは採点しない。
+    """
+
+    if not metrics:
+        return {
+            "technical_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "stock_metrics_missing",
+        }
+
+    # --------------------------------------------------------
+    # 必須データ
+    # --------------------------------------------------------
+
+    required_keys = [
+        "close",
+        "ma25",
+        "ma75",
+        "ma25_gap_pct",
+        "rsi14",
+        "high52_gap_pct",
+    ]
+
+    missing = []
+
+    for key in required_keys:
+
+        value = metrics.get(
+            key
+        )
+
+        if value is None:
+            missing.append(
+                key
+            )
+
+    if missing:
+        return {
+            "technical_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "technical_required_data_missing",
+            "missing_fields": missing,
+        }
+
+    # --------------------------------------------------------
+    # 数値取得
+    # --------------------------------------------------------
+
+    close = _num(
+        metrics,
+        "close"
+    )
+
+    ma25 = _num(
+        metrics,
+        "ma25"
+    )
+
+    ma75 = _num(
+        metrics,
+        "ma75"
+    )
+
+    ma25_gap = _num(
+        metrics,
+        "ma25_gap_pct"
+    )
+
+    rsi14 = _num(
+        metrics,
+        "rsi14"
+    )
+
+    high52_gap = _num(
+        metrics,
+        "high52_gap_pct"
+    )
+
+    # 数値化失敗
+    numeric_values = [
+        close,
+        ma25,
+        ma75,
+        ma25_gap,
+        rsi14,
+        high52_gap,
+    ]
+
+    if any(
+        value is None
+        for value in numeric_values
+    ):
+        return {
+            "technical_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "technical_numeric_data_invalid",
+        }
+
+    # --------------------------------------------------------
+    # 1. 中期トレンド 6点
+    # --------------------------------------------------------
+
+    trend_score = 0
+
+    # 株価 > 25MA
+    if close >= ma25:
+        trend_score += 2
+
+    # 25MA > 75MA
+    if ma25 >= ma75:
+        trend_score += 2
+
+    # 25MAからの位置
+    # 過度な上方乖離は満点にしない
+    if 0 <= ma25_gap <= 5:
+        trend_score += 2
+
+    elif -2 <= ma25_gap < 0:
+        trend_score += 1
+
+    elif 5 < ma25_gap <= 8:
+        trend_score += 1
+
+    trend_score = min(
+        trend_score,
+        6,
+    )
+
+    # --------------------------------------------------------
+    # 2. モメンタム 5点
+    # RSI14
+    # --------------------------------------------------------
+
+    momentum_score = 0
+
+    # 強いが過熱しすぎていない
+    if 55 <= rsi14 <= 70:
+        momentum_score = 5
+
+    elif 50 <= rsi14 < 55:
+        momentum_score = 4
+
+    elif 45 <= rsi14 < 50:
+        momentum_score = 3
+
+    elif 40 <= rsi14 < 45:
+        momentum_score = 2
+
+    elif 30 <= rsi14 < 40:
+        momentum_score = 1
+
+    # RSI70超は上昇力はあるが
+    # 過熱リスクを考慮
+    elif 70 < rsi14 <= 75:
+        momentum_score = 4
+
+    elif 75 < rsi14 <= 80:
+        momentum_score = 2
+
+    elif rsi14 > 80:
+        momentum_score = 0
+
+    # --------------------------------------------------------
+    # 3. 高値位置 4点
+    # 52週高値からの距離
+    # --------------------------------------------------------
+
+    high_score = 0
+
+    if high52_gap >= -3:
+        high_score = 4
+
+    elif high52_gap >= -7:
+        high_score = 3
+
+    elif high52_gap >= -12:
+        high_score = 2
+
+    elif high52_gap >= -20:
+        high_score = 1
+
+    # --------------------------------------------------------
+    # 合計
+    # --------------------------------------------------------
+
+    total = (
+        trend_score
+        + momentum_score
+        + high_score
+    )
+
+    total = max(
+        0,
+        min(
+            15,
+            int(total),
+        ),
+    )
+
+    return {
+        "technical_score":
+            total,
+
+        "technical_score_breakdown": {
+            "medium_term_trend":
+                trend_score,
+
+            "momentum":
+                momentum_score,
+
+            "high_position":
+                high_score,
+        },
+
+        "evaluation_status":
+            "ok",
+
+        "stop_reason":
+            None,
+    }
+def attach_technical_scores(
+    strategy_hits,
+):
+    """
+    4戦略ヒット銘柄に
+    個別テクニカル15点を付与する。
+    """
+
+    if not strategy_hits:
+        return []
+
+    for stock in strategy_hits:
+
+        metrics = stock.get(
+            "metrics",
+            {}
+        )
+
+        evaluation = (
+            score_stock_technical_15(
+                metrics
+            )
+        )
+
+        stock[
+            "technical_evaluation"
+        ] = evaluation
+
+    return strategy_hits    
+    # ========================================================
+    # 個別テクニカル 15点
+    # ========================================================
+
+    strategy_hits = (
+        attach_technical_scores(
+            strategy_hits
+        )
+    )
+
+    print()
+    print(
+        "=== TECHNICAL SCORES ==="
+    )
+
+    for stock in strategy_hits:
+
+        technical_eval = stock.get(
+            "technical_evaluation",
+            {}
+        )
+
+        breakdown = technical_eval.get(
+            "technical_score_breakdown",
+            {}
+        )
+
+        print(
+            stock.get("code"),
+            stock.get("name"),
+            "score:",
+            technical_eval.get(
+                "technical_score"
+            ),
+            "/15",
+            "trend:",
+            breakdown.get(
+                "medium_term_trend"
+            ),
+            "/6",
+            "momentum:",
+            breakdown.get(
+                "momentum"
+            ),
+            "/5",
+            "high:",
+            breakdown.get(
+                "high_position"
+            ),
+            "/4",
+            "status:",
+            technical_eval.get(
+                "evaluation_status"
+            ),
+        )    
+# ============================================================
 # 4戦略ヒット銘柄 統合
 # ============================================================
 
