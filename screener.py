@@ -4103,9 +4103,14 @@ def attach_volume_supply_scores(
 
     for stock in strategy_hits:
 
+        stock_metrics = stock.get(
+            "metrics",
+            {}
+        )
+
         volume_supply_evaluation = (
             score_volume_supply_10(
-                stock
+                stock_metrics
             )
         )
 
@@ -4113,7 +4118,7 @@ def attach_volume_supply_scores(
             "volume_supply_evaluation"
         ] = volume_supply_evaluation
 
-    return strategy_hits    
+    return strategy_hits
 # ============================================================
 # 4戦略ヒット銘柄 統合
 # ============================================================
