@@ -4164,7 +4164,148 @@ def score_final_evaluation_100(stock):
             "evaluation_status": "stopped",
             "stop_reason": "stock_data_missing",
         }
+    # --------------------------------------------------------
+    # 0-1. 基準日整合性チェック
+    # --------------------------------------------------------
 
+    stock_base_date = stock.get(
+        "base_date"
+    )
+
+    stock_metrics = stock.get(
+        "metrics",
+        {}
+    )
+
+    metrics_base_date = (
+        stock_metrics.get(
+            "base_date"
+        )
+    )
+
+    # 日付を比較しやすい文字列へ統一
+    def normalize_base_date(value):
+
+        if value is None:
+            return None
+
+        if isinstance(
+            value,
+            pd.Timestamp,
+        ):
+            return value.strftime(
+                "%Y-%m-%d"
+            )
+
+        if isinstance(
+            value,
+            datetime,
+        ):
+            return value.strftime(
+                "%Y-%m-%d"
+            )
+
+        if hasattr(
+            value,
+            "strftime",
+        ):
+            try:
+                return value.strftime(
+                    "%Y-%m-%d"
+                )
+            except Exception:
+                pass
+
+        text = str(value)
+
+        if len(text) >= 10:
+            return text[:10]
+
+        return text
+
+    stock_base_date = (
+        normalize_base_date(
+            stock_base_date
+        )
+    )
+
+    metrics_base_date = (
+        normalize_base_date(
+            metrics_base_date
+        )
+    )
+
+    # stock側の基準日は必須
+    if stock_base_date is None:
+        return {
+            "final_score": None,
+            "final_rank": None,
+            "evaluation_status": "stopped",
+            "stop_reason":
+                "base_date_missing",
+        }
+
+    # metrics側にも基準日がある場合は
+    # stock側と一致している必要がある
+    if (
+        metrics_base_date is not None
+        and
+        metrics_base_date
+        != stock_base_date
+    ):
+        return {
+            "final_score": None,
+            "final_rank": None,
+            "evaluation_status": "stopped",
+            "stop_reason":
+                "base_date_mismatch",
+            "base_dates": {
+                "stock":
+                    stock_base_date,
+                "metrics":
+                    metrics_base_date,
+            },
+        }
+
+    # セクター評価の基準日も確認
+    sector_eval_for_date = (
+        stock.get(
+            "sector_evaluation",
+            {}
+        )
+    )
+
+    sector_base_date = (
+        sector_eval_for_date.get(
+            "base_date"
+        )
+    )
+
+    sector_base_date = (
+        normalize_base_date(
+            sector_base_date
+        )
+    )
+
+    if (
+        sector_base_date is not None
+        and
+        sector_base_date
+        != stock_base_date
+    ):
+        return {
+            "final_score": None,
+            "final_rank": None,
+            "evaluation_status": "stopped",
+            "stop_reason":
+                "sector_base_date_mismatch",
+            "base_dates": {
+                "stock":
+                    stock_base_date,
+                "sector":
+                    sector_base_date,
+            },
+        }
     # --------------------------------------------------------
     # 1. 各評価を取得
     # --------------------------------------------------------
