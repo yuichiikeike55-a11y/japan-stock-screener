@@ -4120,6 +4120,541 @@ def attach_volume_supply_scores(
 
     return strategy_hits
 # ============================================================
+# 最終評価 100点
+# ============================================================
+
+def score_final_evaluation_100(stock):
+    """
+    最終評価：100点満点
+
+    正式配点
+    ・戦略適合度       35点
+    ・セクター分析     25点
+    ・個別テクニカル   15点
+    ・地合い           15点
+    ・出来高・需給     10点
+
+    複数戦略一致ボーナス
+    ・1戦略 : +0
+    ・2戦略 : +1
+    ・3戦略 : +2
+    ・4戦略 : +3
+
+    最終点は100点上限。
+
+    安全弁
+    ・必須評価が stopped / 欠損
+        → 最終評価停止
+
+    ・data_quality warning
+        → 最高B
+
+    ・明確な戦略否定条件
+        → 原則最高C
+    """
+
+    # --------------------------------------------------------
+    # 0. 基本確認
+    # --------------------------------------------------------
+
+    if not stock:
+        return {
+            "final_score": None,
+            "final_rank": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "stock_data_missing",
+        }
+
+    # --------------------------------------------------------
+    # 1. 各評価を取得
+    # --------------------------------------------------------
+
+    strategy_eval = stock.get(
+        "strategy_fit_evaluation",
+        {}
+    )
+
+    sector_eval = stock.get(
+        "sector_evaluation",
+        {}
+    )
+
+    technical_eval = stock.get(
+        "technical_evaluation",
+        {}
+    )
+
+    market_eval = stock.get(
+        "market_evaluation",
+        {}
+    )
+
+    volume_eval = stock.get(
+        "volume_supply_evaluation",
+        {}
+    )
+
+    evaluations = {
+        "strategy":
+            strategy_eval,
+
+        "sector":
+            sector_eval,
+
+        "technical":
+            technical_eval,
+
+        "market":
+            market_eval,
+
+        "volume_supply":
+            volume_eval,
+    }
+
+    # --------------------------------------------------------
+    # 2. 必須評価 status 確認
+    # --------------------------------------------------------
+
+    stopped_components = []
+
+    for key, evaluation in evaluations.items():
+
+        if not evaluation:
+            stopped_components.append(
+                key
+            )
+            continue
+
+        if (
+            evaluation.get(
+                "evaluation_status"
+            )
+            != "ok"
+        ):
+            stopped_components.append(
+                key
+            )
+
+    if stopped_components:
+        return {
+            "final_score": None,
+            "final_rank": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "required_evaluation_stopped",
+            "stopped_components":
+                stopped_components,
+        }
+
+    # --------------------------------------------------------
+    # 3. 各点数取得
+    # --------------------------------------------------------
+
+    strategy_score = _num(
+        strategy_eval,
+        "strategy_fit_score",
+    )
+
+    sector_score = _num(
+        sector_eval,
+        "sector_score",
+    )
+
+    technical_score = _num(
+        technical_eval,
+        "technical_score",
+    )
+
+    market_score = _num(
+        market_eval,
+        "market_score",
+    )
+
+    volume_score = _num(
+        volume_eval,
+        "volume_supply_score",
+    )
+
+    scores = {
+        "strategy":
+            strategy_score,
+
+        "sector":
+            sector_score,
+
+        "technical":
+            technical_score,
+
+        "market":
+            market_score,
+
+        "volume_supply":
+            volume_score,
+    }
+
+    missing_scores = [
+        key
+        for key, value
+        in scores.items()
+        if value is None
+    ]
+
+    if missing_scores:
+        return {
+            "final_score": None,
+            "final_rank": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "required_score_missing",
+            "missing_scores":
+                missing_scores,
+        }
+
+    # --------------------------------------------------------
+    # 4. 配点範囲チェック
+    # --------------------------------------------------------
+
+    score_limits = {
+        "strategy": 35,
+        "sector": 25,
+        "technical": 15,
+        "market": 15,
+        "volume_supply": 10,
+    }
+
+    invalid_scores = []
+
+    for key, value in scores.items():
+
+        if (
+            value < 0
+            or value > score_limits[key]
+        ):
+            invalid_scores.append(
+                key
+            )
+
+    if invalid_scores:
+        return {
+            "final_score": None,
+            "final_rank": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "score_out_of_range",
+            "invalid_scores":
+                invalid_scores,
+        }
+
+    # --------------------------------------------------------
+    # 5. 基本100点
+    # --------------------------------------------------------
+
+    base_score = (
+        strategy_score
+        + sector_score
+        + technical_score
+        + market_score
+        + volume_score
+    )
+
+    # --------------------------------------------------------
+    # 6. 複数戦略一致ボーナス
+    # --------------------------------------------------------
+
+    hit_count = stock.get(
+        "hit_count",
+        1,
+    )
+
+    try:
+        hit_count = int(
+            hit_count
+        )
+    except Exception:
+        hit_count = 1
+
+    if hit_count >= 4:
+        multi_strategy_bonus = 3
+
+    elif hit_count == 3:
+        multi_strategy_bonus = 2
+
+    elif hit_count == 2:
+        multi_strategy_bonus = 1
+
+    else:
+        multi_strategy_bonus = 0
+
+    raw_final_score = (
+        base_score
+        + multi_strategy_bonus
+    )
+
+    final_score = min(
+        100.0,
+        raw_final_score,
+    )
+
+    final_score = round(
+        float(final_score),
+        1,
+    )
+
+    # --------------------------------------------------------
+    # 7. 通常ランク
+    # --------------------------------------------------------
+
+    def rank_from_score(score):
+
+        if score >= 90:
+            return "S"
+
+        if score >= 80:
+            return "A"
+
+        if score >= 70:
+            return "B"
+
+        if score >= 60:
+            return "C"
+
+        if score >= 50:
+            return "D"
+
+        return "E"
+
+    uncapped_rank = rank_from_score(
+        final_score
+    )
+
+    final_rank = uncapped_rank
+
+    # --------------------------------------------------------
+    # 8. data_quality 安全弁
+    #    warningなら最高B
+    # --------------------------------------------------------
+
+    safety_flags = []
+
+    data_quality_warning = False
+
+    # stock直下
+    stock_quality = str(
+        stock.get(
+            "data_quality_status",
+            ""
+        )
+    ).lower()
+
+    if stock_quality == "warning":
+        data_quality_warning = True
+
+    # sector評価
+    sector_quality = str(
+        sector_eval.get(
+            "data_quality_status",
+            ""
+        )
+    ).lower()
+
+    if sector_quality == "warning":
+        data_quality_warning = True
+
+    # metrics内も確認
+    stock_metrics = stock.get(
+        "metrics",
+        {}
+    )
+
+    metrics_quality = str(
+        stock_metrics.get(
+            "data_quality_status",
+            ""
+        )
+    ).lower()
+
+    if metrics_quality == "warning":
+        data_quality_warning = True
+
+    if data_quality_warning:
+
+        safety_flags.append(
+            "data_quality_warning_rank_cap_B"
+        )
+
+        if final_rank in (
+            "S",
+            "A",
+        ):
+            final_rank = "B"
+
+    # --------------------------------------------------------
+    # 9. 明確な戦略否定条件
+    #    原則最高C
+    # --------------------------------------------------------
+
+    strategy_negated = False
+
+    strategy_hits = stock.get(
+        "strategy_hits",
+        []
+    )
+
+    for hit in strategy_hits:
+
+        condition_flags = hit.get(
+            "condition_flags",
+            []
+        )
+
+        if isinstance(
+            condition_flags,
+            dict,
+        ):
+            flag_values = list(
+                condition_flags.values()
+            )
+
+        elif isinstance(
+            condition_flags,
+            list,
+        ):
+            flag_values = condition_flags
+
+        else:
+            flag_values = [
+                condition_flags
+            ]
+
+        for flag in flag_values:
+
+            flag_text = str(
+                flag
+            ).lower()
+
+            if any(
+                keyword in flag_text
+                for keyword in (
+                    "negated",
+                    "strategy_negated",
+                    "invalid",
+                    "否定",
+                    "無効",
+                )
+            ):
+                strategy_negated = True
+                break
+
+        if strategy_negated:
+            break
+
+    if strategy_negated:
+
+        safety_flags.append(
+            "strategy_negated_rank_cap_C"
+        )
+
+        if final_rank in (
+            "S",
+            "A",
+            "B",
+        ):
+            final_rank = "C"
+
+    # --------------------------------------------------------
+    # 10. 最終結果
+    # --------------------------------------------------------
+
+    return {
+        "final_score":
+            final_score,
+
+        "final_rank":
+            final_rank,
+
+        "uncapped_rank":
+            uncapped_rank,
+
+        "base_score":
+            round(
+                float(base_score),
+                1,
+            ),
+
+        "multi_strategy_bonus":
+            multi_strategy_bonus,
+
+        "score_breakdown": {
+            "strategy_fit":
+                round(
+                    float(strategy_score),
+                    1,
+                ),
+
+            "sector":
+                round(
+                    float(sector_score),
+                    1,
+                ),
+
+            "technical":
+                round(
+                    float(technical_score),
+                    1,
+                ),
+
+            "market":
+                round(
+                    float(market_score),
+                    1,
+                ),
+
+            "volume_supply":
+                round(
+                    float(volume_score),
+                    1,
+                ),
+        },
+
+        "safety": {
+            "data_quality_warning":
+                data_quality_warning,
+
+            "strategy_negated":
+                strategy_negated,
+
+            "flags":
+                safety_flags,
+        },
+
+        "evaluation_status":
+            "ok",
+
+        "stop_reason":
+            None,
+    }    
+def attach_final_evaluations(
+    strategy_hits,
+):
+    """
+    4戦略ヒット銘柄へ
+    最終100点評価を付与する。
+    """
+
+    if strategy_hits is None:
+        return []
+
+    for stock in strategy_hits:
+
+        final_evaluation = (
+            score_final_evaluation_100(
+                stock
+            )
+        )
+
+        stock[
+            "final_evaluation"
+        ] = final_evaluation
+
+    return strategy_hits    
+# ============================================================
 # 4戦略ヒット銘柄 統合
 # ============================================================
 
@@ -5052,7 +5587,100 @@ def main():
                 "evaluation_status"
             ),
         )    
+    # ========================================================
+    # 最終評価 100点
+    # ========================================================
 
+    strategy_hits = (
+        attach_final_evaluations(
+            strategy_hits
+        )
+    )
+
+    # 最終点の高い順
+    strategy_hits.sort(
+        key=lambda stock: (
+            stock.get(
+                "final_evaluation",
+                {}
+            ).get(
+                "final_score"
+            )
+            if stock.get(
+                "final_evaluation",
+                {}
+            ).get(
+                "final_score"
+            )
+            is not None
+            else -1
+        ),
+        reverse=True,
+    )
+
+    print()
+    print(
+        "=== FINAL EVALUATION ==="
+    )
+
+    for stock in strategy_hits:
+
+        final_eval = stock.get(
+            "final_evaluation",
+            {}
+        )
+
+        breakdown = final_eval.get(
+            "score_breakdown",
+            {}
+        )
+
+        print(
+            stock.get("code"),
+            stock.get("name"),
+            "score:",
+            final_eval.get(
+                "final_score"
+            ),
+            "/100",
+            "rank:",
+            final_eval.get(
+                "final_rank"
+            ),
+            "strategy:",
+            breakdown.get(
+                "strategy_fit"
+            ),
+            "/35",
+            "sector:",
+            breakdown.get(
+                "sector"
+            ),
+            "/25",
+            "technical:",
+            breakdown.get(
+                "technical"
+            ),
+            "/15",
+            "market:",
+            breakdown.get(
+                "market"
+            ),
+            "/15",
+            "volume:",
+            breakdown.get(
+                "volume_supply"
+            ),
+            "/10",
+            "bonus:",
+            final_eval.get(
+                "multi_strategy_bonus"
+            ),
+            "status:",
+            final_eval.get(
+                "evaluation_status"
+            ),
+        )
     strategy_hits_json = {
         "generated_at": datetime.now(
             timezone.utc
