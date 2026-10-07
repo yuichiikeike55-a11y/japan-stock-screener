@@ -2089,18 +2089,18 @@ def main():
                 ticker,
                 repr(e)
             )
-print("DEBUG price_data len:", len(price_data))
-print(
-    "DEBUG first 3:",
-    [
-        (
-            ticker,
-            len(df),
-            df.index[-1] if df is not None and not df.empty else None
-        )
-        for ticker, df in list(price_data.items())[:3]
-    ]
-)
+    print("DEBUG price_data len:", len(price_data))
+    print(
+        "DEBUG first 3:",
+        [
+            (
+                ticker,
+                len(df),
+                df.index[-1] if df is not None and not df.empty else None
+            )
+            for ticker, df in list(price_data.items())[:3]
+        ]
+    )
     # 4. Metrics
     metrics, metric_failures = (
         calculate_metrics(
