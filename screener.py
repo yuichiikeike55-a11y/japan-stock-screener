@@ -3330,61 +3330,7 @@ def attach_technical_scores(
         ] = evaluation
 
     return strategy_hits    
-    # ========================================================
-    # 個別テクニカル 15点
-    # ========================================================
 
-    strategy_hits = (
-        attach_technical_scores(
-            strategy_hits
-        )
-    )
-
-    print()
-    print(
-        "=== TECHNICAL SCORES ==="
-    )
-
-    for stock in strategy_hits:
-
-        technical_eval = stock.get(
-            "technical_evaluation",
-            {}
-        )
-
-        breakdown = technical_eval.get(
-            "technical_score_breakdown",
-            {}
-        )
-
-        print(
-            stock.get("code"),
-            stock.get("name"),
-            "score:",
-            technical_eval.get(
-                "technical_score"
-            ),
-            "/15",
-            "trend:",
-            breakdown.get(
-                "medium_term_trend"
-            ),
-            "/6",
-            "momentum:",
-            breakdown.get(
-                "momentum"
-            ),
-            "/5",
-            "high:",
-            breakdown.get(
-                "high_position"
-            ),
-            "/4",
-            "status:",
-            technical_eval.get(
-                "evaluation_status"
-            ),
-        )    
 # ============================================================
 # 4戦略ヒット銘柄 統合
 # ============================================================
@@ -3997,6 +3943,61 @@ def main():
             ),
             "status:",
             strategy_eval.get(
+                "evaluation_status"
+            ),
+        )    
+    # ========================================================
+    # 個別テクニカル 15点
+    # ========================================================
+
+    strategy_hits = (
+        attach_technical_scores(
+            strategy_hits
+        )
+    )
+
+    print()
+    print(
+        "=== TECHNICAL SCORES ==="
+    )
+
+    for stock in strategy_hits:
+
+        technical_eval = stock.get(
+            "technical_evaluation",
+            {}
+        )
+
+        breakdown = technical_eval.get(
+            "technical_score_breakdown",
+            {}
+        )
+
+        print(
+            stock.get("code"),
+            stock.get("name"),
+            "score:",
+            technical_eval.get(
+                "technical_score"
+            ),
+            "/15",
+            "trend:",
+            breakdown.get(
+                "medium_term_trend"
+            ),
+            "/6",
+            "momentum:",
+            breakdown.get(
+                "momentum"
+            ),
+            "/5",
+            "high:",
+            breakdown.get(
+                "high_position"
+            ),
+            "/4",
+            "status:",
+            technical_eval.get(
                 "evaluation_status"
             ),
         )    
