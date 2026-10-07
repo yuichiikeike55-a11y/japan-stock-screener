@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T07:42:19.905295+00:00",
+  "generated_at": "2026-10-07T07:50:30.303969+00:00",
   "base_date": "2026-10-06",
   "strategy_count": 4,
   "unique_stock_count": 14,
@@ -167,14 +167,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 4,
+        "supply_condition": "neutral",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 0,
+          "volume_ratio_prev": 2,
+          "avg_turnover_5d": 2
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 0.841,
+          "volume_ratio_prev": 1.23,
+          "avg_turnover_5d": 3686363500.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 23,
@@ -355,14 +361,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 8,
+        "supply_condition": "strong",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 2,
+          "volume_ratio_prev": 3,
+          "avg_turnover_5d": 3
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 1.33,
+          "volume_ratio_prev": 1.745,
+          "avg_turnover_5d": 5327422380.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 17,
@@ -549,14 +561,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 7,
+        "supply_condition": "strong",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 2,
+          "volume_ratio_prev": 3,
+          "avg_turnover_5d": 2
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 1.496,
+          "volume_ratio_prev": 1.931,
+          "avg_turnover_5d": 2276221220.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 17,
@@ -735,14 +753,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 5,
+        "supply_condition": "positive",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 3,
+          "volume_ratio_prev": 0,
+          "avg_turnover_5d": 2
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 1.568,
+          "volume_ratio_prev": 0.897,
+          "avg_turnover_5d": 2316637040.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 23,
@@ -921,14 +945,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 5,
+        "supply_condition": "positive",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 0,
+          "volume_ratio_prev": 2,
+          "avg_turnover_5d": 3
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 0.73,
+          "volume_ratio_prev": 1.223,
+          "avg_turnover_5d": 17937379020.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 17,
@@ -1105,14 +1135,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 4,
+        "supply_condition": "neutral",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 2,
+          "volume_ratio_prev": 1,
+          "avg_turnover_5d": 1
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 1.403,
+          "volume_ratio_prev": 1.194,
+          "avg_turnover_5d": 1430370620.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 23,
@@ -1289,14 +1325,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 5,
+        "supply_condition": "positive",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 3,
+          "volume_ratio_prev": 0,
+          "avg_turnover_5d": 2
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 1.7,
+          "volume_ratio_prev": 0.989,
+          "avg_turnover_5d": 2741776070.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 7,
@@ -1473,14 +1515,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 4,
+        "supply_condition": "neutral",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 0,
+          "volume_ratio_prev": 1,
+          "avg_turnover_5d": 3
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 0.865,
+          "volume_ratio_prev": 1.008,
+          "avg_turnover_5d": 12144169770.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 16,
@@ -1657,14 +1705,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 3,
+        "supply_condition": "neutral",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 0,
+          "volume_ratio_prev": 0,
+          "avg_turnover_5d": 3
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 0.72,
+          "volume_ratio_prev": 0.847,
+          "avg_turnover_5d": 8197695770.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 17,
@@ -1841,14 +1895,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 3,
+        "supply_condition": "neutral",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 0,
+          "volume_ratio_prev": 0,
+          "avg_turnover_5d": 3
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 0.836,
+          "volume_ratio_prev": 0.853,
+          "avg_turnover_5d": 23094368340.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 7,
@@ -2025,14 +2085,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 4,
+        "supply_condition": "neutral",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 0,
+          "volume_ratio_prev": 1,
+          "avg_turnover_5d": 3
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 0.665,
+          "volume_ratio_prev": 1.037,
+          "avg_turnover_5d": 155602649700.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 17,
@@ -2211,14 +2277,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 5,
+        "supply_condition": "positive",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 3,
+          "volume_ratio_prev": 1,
+          "avg_turnover_5d": 1
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 1.754,
+          "volume_ratio_prev": 1.08,
+          "avg_turnover_5d": 1768190240.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 16,
@@ -2393,14 +2465,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 7,
+        "supply_condition": "strong",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 3,
+          "volume_ratio_prev": 2,
+          "avg_turnover_5d": 2
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 1.582,
+          "volume_ratio_prev": 1.255,
+          "avg_turnover_5d": 2309007100.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 23,
@@ -2571,14 +2649,20 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": null,
-        "evaluation_status": "stopped",
-        "stop_reason": "required_data_missing",
-        "missing_fields": [
-          "volume_ratio_20d",
-          "volume_ratio_prev",
-          "avg_turnover_5d"
-        ]
+        "volume_supply_score": 6,
+        "supply_condition": "positive",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 2,
+          "volume_ratio_prev": 1,
+          "avg_turnover_5d": 3
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 1.201,
+          "volume_ratio_prev": 1.014,
+          "avg_turnover_5d": 19492225710.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
       },
       "sector_evaluation": {
         "sector_score": 13,
