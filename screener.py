@@ -278,6 +278,11 @@ def load_prime_universe():
         ["市場・商品区分", "市場区分", "市場", "Market"]
     )
 
+    sector17_col = find_column(
+        df.columns,
+        ["17業種区分"]
+    )
+
     if code_col is None:
         raise RuntimeError("JPXファイルの銘柄コード列を特定できません。")
 
@@ -297,14 +302,26 @@ def load_prime_universe():
         & df["_code"].notna()
     ].copy()
 
+    if sector17_col is None:
+        raise RuntimeError(
+            "JPXファイルの17業種区分列を"
+            "特定できません。"
+        )
+
     prime = prime[
-        ["_code", name_col, market_col]
+        [
+            "_code",
+            name_col,
+            market_col,
+            sector17_col,
+        ]
     ].copy()
 
     prime.columns = [
         "code",
         "name",
-        "market"
+        "market",
+        "sector17",
     ]
 
     prime["ticker"] = prime["code"] + ".T"
@@ -605,9 +622,11 @@ def calculate_metrics(
         try:
             name = lookup.loc[ticker, "name"]
             market = lookup.loc[ticker, "market"]
+            sector17 = lookup.loc[ticker, "sector17"]
         except Exception:
             name = ""
             market = "Prime"
+            sector17 = ""
 
         x = df.copy()
 
@@ -896,6 +915,7 @@ def calculate_metrics(
             "code": code,
             "name": str(name),
             "market": str(market),
+            "sector17": str(sector17),
             "base_date": base_date.strftime("%Y-%m-%d"),
             "history_days": history_days,
             "high52_available": high52_available,
@@ -1763,6 +1783,960 @@ def attach_grades(df, strategy):
 
     return result.reset_index(drop=True)
 # ============================================================
+# セクター評価 25点
+# ============================================================
+
+def score_sector_25(
+    sector_row,
+    relative_rank=None,
+    sector_count=18,
+):
+    """
+    セクター評価：25点満点
+
+    配点
+    1. 中期トレンド                 8点
+    2. 短中期モメンタム             7点
+    3. 高値位置                     4点
+    4. 出来高・資金流入             3点
+    5. 18セクター内相対順位         3点
+
+    data_quality warning の場合も点数自体は計算するが、
+    最終評価側で S/A 禁止（最高B）を適用する。
+    """
+
+    if sector_row is None:
+        return {
+            "sector_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "sector_data_missing",
+        }
+
+    # --------------------------------------------------------
+    # 必須項目
+    # --------------------------------------------------------
+
+    required_keys = [
+        "base_date",
+        "close",
+        "ma25",
+        "ma25_direction",
+        "ma25_gap_pct",
+        "return_1d_pct",
+        "return_5d_pct",
+        "return_20d_pct",
+        "high20_gap_pct",
+        "volume_ratio_20d",
+    ]
+
+    missing = []
+
+    for key in required_keys:
+        value = sector_row.get(key)
+
+        if value is None:
+            missing.append(key)
+
+    if missing:
+        return {
+            "sector_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "sector_required_data_missing",
+            "missing_fields": missing,
+        }
+
+    # --------------------------------------------------------
+    # 数値取得
+    # --------------------------------------------------------
+
+    close = _num(
+        sector_row,
+        "close"
+    )
+
+    ma25 = _num(
+        sector_row,
+        "ma25"
+    )
+
+    ma25_gap = _num(
+        sector_row,
+        "ma25_gap_pct"
+    )
+
+    ret1 = _num(
+        sector_row,
+        "return_1d_pct"
+    )
+
+    ret5 = _num(
+        sector_row,
+        "return_5d_pct"
+    )
+
+    ret20 = _num(
+        sector_row,
+        "return_20d_pct"
+    )
+
+    high20_gap = _num(
+        sector_row,
+        "high20_gap_pct"
+    )
+
+    high52_gap = _num(
+        sector_row,
+        "high52_gap_pct"
+    )
+
+    volume_ratio = _num(
+        sector_row,
+        "volume_ratio_20d"
+    )
+
+    ma25_direction = sector_row.get(
+        "ma25_direction"
+    )
+
+    # --------------------------------------------------------
+    # 1. 中期トレンド 8点
+    # MA25方向 + 株価位置
+    # --------------------------------------------------------
+
+    trend_score = 0
+
+    if ma25_direction == "up":
+        trend_score += 4
+    elif ma25_direction == "flat":
+        trend_score += 2
+
+    if (
+        close is not None
+        and ma25 is not None
+        and close >= ma25
+    ):
+        trend_score += 4
+    elif (
+        ma25_gap is not None
+        and ma25_gap >= -2
+    ):
+        trend_score += 2
+
+    trend_score = min(
+        trend_score,
+        8
+    )
+
+    # --------------------------------------------------------
+    # 2. 短中期モメンタム 7点
+    # 1日 / 5日 / 20日
+    # --------------------------------------------------------
+
+    momentum_score = 0
+
+    # 1日：最大1点
+    if ret1 > 0:
+        momentum_score += 1
+
+    # 5日：最大2点
+    if ret5 >= 3:
+        momentum_score += 2
+    elif ret5 > 0:
+        momentum_score += 1
+
+    # 20日：最大4点
+    if ret20 >= 8:
+        momentum_score += 4
+    elif ret20 >= 4:
+        momentum_score += 3
+    elif ret20 > 0:
+        momentum_score += 2
+    elif ret20 >= -2:
+        momentum_score += 1
+
+    momentum_score = min(
+        momentum_score,
+        7
+    )
+
+    # --------------------------------------------------------
+    # 3. 高値位置 4点
+    # 20日高値 + 52週高値
+    # --------------------------------------------------------
+
+    high_score = 0
+
+    # 20日高値：最大2点
+    if high20_gap >= -2:
+        high_score += 2
+    elif high20_gap >= -5:
+        high_score += 1
+
+    # 52週高値：最大2点
+    # high52欠損時は加点しない
+    if high52_gap is not None:
+        if high52_gap >= -5:
+            high_score += 2
+        elif high52_gap >= -10:
+            high_score += 1
+
+    high_score = min(
+        high_score,
+        4
+    )
+
+    # --------------------------------------------------------
+    # 4. 出来高・資金流入 3点
+    # --------------------------------------------------------
+
+    volume_score = 0
+
+    if volume_ratio >= 1.5:
+        volume_score = 3
+    elif volume_ratio >= 1.2:
+        volume_score = 2
+    elif volume_ratio >= 1.0:
+        volume_score = 1
+
+    # --------------------------------------------------------
+    # 5. 18セクター内相対順位 3点
+    # --------------------------------------------------------
+
+    relative_score = 0
+
+    if (
+        relative_rank is not None
+        and sector_count > 0
+    ):
+        if relative_rank <= 3:
+            relative_score = 3
+        elif relative_rank <= 6:
+            relative_score = 2
+        elif relative_rank <= 9:
+            relative_score = 1
+
+    # --------------------------------------------------------
+    # 合計
+    # --------------------------------------------------------
+
+    total = (
+        trend_score
+        + momentum_score
+        + high_score
+        + volume_score
+        + relative_score
+    )
+
+    total = max(
+        0,
+        min(
+            25,
+            int(total)
+        )
+    )
+
+    quality_status = sector_row.get(
+        "data_quality_status",
+        "ok"
+    )
+
+    quality_flags = sector_row.get(
+        "data_quality_flags",
+        []
+    )
+
+    return {
+        "sector_score": total,
+
+        "sector_score_breakdown": {
+            "medium_term_trend":
+                trend_score,
+
+            "momentum":
+                momentum_score,
+
+            "high_position":
+                high_score,
+
+            "volume_flow":
+                volume_score,
+
+            "relative_rank":
+                relative_score,
+        },
+
+        "relative_rank":
+            relative_rank,
+
+        "sector_count":
+            sector_count,
+
+        "sector":
+            sector_row.get(
+                "sector"
+            ),
+
+        "sector_base_date":
+            sector_row.get(
+                "base_date"
+            ),
+
+        "data_quality_status":
+            quality_status,
+
+        "data_quality_flags":
+            quality_flags,
+
+        "evaluation_status":
+            "ok",
+    }    
+def build_sector_relative_ranks(sector_results):
+    """
+    18セクターを相対評価して順位を付ける。
+
+    順位判定用スコア：
+    ・20日騰落率を中心
+    ・5日騰落率
+    ・1日騰落率
+    ・MA25方向
+    ・MA25上の位置
+    ・出来高比
+
+    最終的なセクター25点のうち、
+    相対順位3点を決めるためだけに使用する。
+    """
+
+    if not sector_results:
+        return {}
+
+    ranked = []
+
+    for row in sector_results:
+
+        sector = row.get(
+            "sector"
+        )
+
+        if not sector:
+            continue
+
+        ret1 = _num(
+            row,
+            "return_1d_pct"
+        )
+
+        ret5 = _num(
+            row,
+            "return_5d_pct"
+        )
+
+        ret20 = _num(
+            row,
+            "return_20d_pct"
+        )
+
+        ma25_gap = _num(
+            row,
+            "ma25_gap_pct"
+        )
+
+        volume_ratio = _num(
+            row,
+            "volume_ratio_20d"
+        )
+
+        ma25_direction = row.get(
+            "ma25_direction"
+        )
+
+        # 必須データ不足なら
+        # 相対順位の対象外
+        if (
+            ret1 is None
+            or ret5 is None
+            or ret20 is None
+            or ma25_gap is None
+            or volume_ratio is None
+        ):
+            continue
+
+        # --------------------------------------------
+        # 順位判定用内部スコア
+        # --------------------------------------------
+
+        rank_score = 0.0
+
+        # 20日モメンタムを最重視
+        rank_score += ret20 * 0.50
+
+        # 5日
+        rank_score += ret5 * 0.25
+
+        # 1日
+        rank_score += ret1 * 0.10
+
+        # MA25方向
+        if ma25_direction == "up":
+            rank_score += 2.0
+        elif ma25_direction == "flat":
+            rank_score += 0.5
+        elif ma25_direction == "down":
+            rank_score -= 1.0
+
+        # MA25より上なら加点
+        if ma25_gap >= 0:
+            rank_score += 1.0
+        elif ma25_gap < -3:
+            rank_score -= 1.0
+
+        # 出来高による資金流入
+        if volume_ratio >= 1.5:
+            rank_score += 1.5
+        elif volume_ratio >= 1.2:
+            rank_score += 1.0
+        elif volume_ratio >= 1.0:
+            rank_score += 0.5
+
+        ranked.append(
+            {
+                "sector": sector,
+                "rank_score":
+                    float(rank_score),
+            }
+        )
+
+    ranked.sort(
+        key=lambda x: x[
+            "rank_score"
+        ],
+        reverse=True,
+    )
+
+    rank_map = {}
+
+    for index, item in enumerate(
+        ranked,
+        start=1,
+    ):
+        rank_map[
+            item["sector"]
+        ] = {
+            "rank": index,
+            "rank_score":
+                item["rank_score"],
+        }
+
+    return rank_map
+def load_sector_evaluation_data(base_date):
+    """
+    sector_indices_latest.json を読み込み、
+    最終評価に使用できる状態か確認する。
+
+    安全弁：
+    ・ファイルなし → 評価停止
+    ・18セクター未完 → 評価停止
+    ・failureあり → 評価停止
+    ・latest_base_date不一致 → 評価停止
+    ・各セクターのbase_date不一致 → 評価停止
+
+    data_quality warning はここでは停止しない。
+    個別セクター評価後、最終ランクでS/A禁止を適用する。
+    """
+
+    sector_path = (
+        OUTPUT_DIR
+        / "sector_indices_latest.json"
+    )
+
+    # --------------------------------------------------------
+    # ファイル存在確認
+    # --------------------------------------------------------
+
+    if not sector_path.exists():
+        return {
+            "status": "stopped",
+            "reason": "sector_file_missing",
+            "path": str(sector_path),
+            "results": [],
+            "rank_map": {},
+        }
+
+    # --------------------------------------------------------
+    # JSON読み込み
+    # --------------------------------------------------------
+
+    try:
+        with open(
+            sector_path,
+            "r",
+            encoding="utf-8",
+        ) as f:
+            data = json.load(f)
+
+    except Exception as e:
+        return {
+            "status": "stopped",
+            "reason": "sector_json_load_failed",
+            "error": str(e),
+            "results": [],
+            "rank_map": {},
+        }
+
+    # --------------------------------------------------------
+    # 基準日
+    # --------------------------------------------------------
+
+    if isinstance(
+        base_date,
+        pd.Timestamp,
+    ):
+        expected_date = (
+            base_date.strftime(
+                "%Y-%m-%d"
+            )
+        )
+    else:
+        expected_date = str(
+            base_date
+        )
+
+    latest_base_date = data.get(
+        "latest_base_date"
+    )
+
+    if latest_base_date != expected_date:
+        return {
+            "status": "stopped",
+            "reason": "sector_base_date_mismatch",
+            "expected_base_date":
+                expected_date,
+            "sector_base_date":
+                latest_base_date,
+            "results": [],
+            "rank_map": {},
+        }
+
+    # --------------------------------------------------------
+    # 完全性チェック
+    # --------------------------------------------------------
+
+    results = data.get(
+        "results",
+        []
+    )
+
+    sector_count = data.get(
+        "sector_count"
+    )
+
+    processed_count = data.get(
+        "processed_count"
+    )
+
+    failure_count = data.get(
+        "failure_count",
+        0
+    )
+
+    if (
+        sector_count != 18
+        or processed_count != 18
+        or len(results) != 18
+        or failure_count != 0
+    ):
+        return {
+            "status": "stopped",
+            "reason": "sector_data_incomplete",
+            "sector_count":
+                sector_count,
+            "processed_count":
+                processed_count,
+            "result_count":
+                len(results),
+            "failure_count":
+                failure_count,
+            "results": [],
+            "rank_map": {},
+        }
+
+    # --------------------------------------------------------
+    # 各セクターの日付も確認
+    # --------------------------------------------------------
+
+    wrong_dates = []
+
+    for row in results:
+
+        row_date = row.get(
+            "base_date"
+        )
+
+        if row_date != expected_date:
+            wrong_dates.append(
+                {
+                    "sector":
+                        row.get(
+                            "sector"
+                        ),
+                    "base_date":
+                        row_date,
+                }
+            )
+
+    if wrong_dates:
+        return {
+            "status": "stopped",
+            "reason": "sector_individual_base_date_mismatch",
+            "expected_base_date":
+                expected_date,
+            "wrong_dates":
+                wrong_dates,
+            "results": [],
+            "rank_map": {},
+        }
+
+    # --------------------------------------------------------
+    # セクター名重複チェック
+    # --------------------------------------------------------
+
+    sector_names = [
+        row.get("sector")
+        for row in results
+    ]
+
+    if (
+        any(
+            name is None
+            for name in sector_names
+        )
+        or len(set(sector_names)) != 18
+    ):
+        return {
+            "status": "stopped",
+            "reason": "sector_name_invalid_or_duplicate",
+            "results": [],
+            "rank_map": {},
+        }
+
+    # --------------------------------------------------------
+    # 相対順位作成
+    # --------------------------------------------------------
+
+    rank_map = (
+        build_sector_relative_ranks(
+            results
+        )
+    )
+
+    # 必須データ不足などで
+    # 18セクター全部を順位付けできなければ停止
+    if len(rank_map) != 18:
+        return {
+            "status": "stopped",
+            "reason": "sector_relative_rank_incomplete",
+            "ranked_sector_count":
+                len(rank_map),
+            "results": [],
+            "rank_map": rank_map,
+        }
+
+    # --------------------------------------------------------
+    # 正常
+    # --------------------------------------------------------
+
+    return {
+        "status": "ok",
+        "reason": None,
+        "base_date":
+            expected_date,
+        "sector_count": 18,
+        "results": results,
+        "rank_map": rank_map,
+    }    
+def normalize_sector17_name(sector17):
+    """
+    JPXの17業種区分名を、
+    sector_indices_latest.json の
+    セクター名へ正規化する。
+
+    基本的にはTOPIX-17と同名なので、
+    表記ゆれだけ吸収する。
+    """
+
+    if sector17 is None:
+        return None
+
+    name = str(
+        sector17
+    ).strip()
+
+    if not name:
+        return None
+
+    mapping = {
+        "食品":
+            "食品",
+
+        "エネルギー資源":
+            "エネルギー資源",
+
+        "建設・資材":
+            "建設・資材",
+
+        "素材・化学":
+            "素材・化学",
+
+        "医薬品":
+            "医薬品",
+
+        "自動車・輸送機":
+            "自動車・輸送機",
+
+        "鉄鋼・非鉄":
+            "鉄鋼・非鉄",
+
+        "機械":
+            "機械",
+
+        "電機・精密":
+            "電機・精密",
+
+        "情報通信・サービスその他":
+            "情報通信・サービスその他",
+
+        "電力・ガス":
+            "電力・ガス",
+
+        "運輸・物流":
+            "運輸・物流",
+
+        "商社・卸売":
+            "商社・卸売",
+
+        "小売":
+            "小売",
+
+        "銀行":
+            "銀行",
+
+        "金融（除く銀行）":
+            "金融",
+
+        "金融(除く銀行)":
+            "金融",
+
+        "金融":
+            "金融",
+
+        "不動産":
+            "不動産",
+    }
+
+    return mapping.get(
+        name
+    )    
+def attach_sector_scores_to_hits(
+    strategy_hits,
+    sector_data,
+):
+    """
+    4戦略ヒット銘柄にセクター評価25点を付与する。
+
+    安全弁：
+    ・セクターデータ全体が使用不可 → 全銘柄評価停止
+    ・銘柄のsector17欠損 → その銘柄を評価停止
+    ・対応セクターなし → その銘柄を評価停止
+    ・個別セクター必須データ欠損 → その銘柄を評価停止
+
+    半導体への個別割当は現時点では行わない。
+    個別銘柄はJPX 17業種を使用する。
+    """
+
+    if not strategy_hits:
+        return []
+
+    # --------------------------------------------------------
+    # セクターデータ全体の安全確認
+    # --------------------------------------------------------
+
+    if (
+        sector_data is None
+        or sector_data.get("status") != "ok"
+    ):
+        reason = (
+            sector_data.get(
+                "reason",
+                "sector_data_unavailable",
+            )
+            if sector_data
+            else "sector_data_unavailable"
+        )
+
+        for stock in strategy_hits:
+            stock["sector_evaluation"] = {
+                "evaluation_status":
+                    "stopped",
+
+                "stop_reason":
+                    reason,
+
+                "sector_score":
+                    None,
+            }
+
+        return strategy_hits
+
+    sector_results = sector_data.get(
+        "results",
+        []
+    )
+
+    rank_map = sector_data.get(
+        "rank_map",
+        {}
+    )
+
+    # --------------------------------------------------------
+    # セクター名 → データ
+    # --------------------------------------------------------
+
+    sector_lookup = {}
+
+    for row in sector_results:
+
+        sector_name = row.get(
+            "sector"
+        )
+
+        if sector_name:
+            sector_lookup[
+                sector_name
+            ] = row
+
+    # --------------------------------------------------------
+    # 各ヒット銘柄へ付与
+    # --------------------------------------------------------
+
+    for stock in strategy_hits:
+
+        metrics = stock.get(
+            "metrics",
+            {}
+        )
+
+        sector17 = metrics.get(
+            "sector17"
+        )
+
+        normalized_sector = (
+            normalize_sector17_name(
+                sector17
+            )
+        )
+
+        # JPX 17業種が取得できない
+        if normalized_sector is None:
+
+            stock[
+                "sector_evaluation"
+            ] = {
+                "evaluation_status":
+                    "stopped",
+
+                "stop_reason":
+                    "stock_sector17_missing_or_unknown",
+
+                "sector17":
+                    sector17,
+
+                "sector_score":
+                    None,
+            }
+
+            continue
+
+        # 対応するセクター指数がない
+        sector_row = sector_lookup.get(
+            normalized_sector
+        )
+
+        if sector_row is None:
+
+            stock[
+                "sector_evaluation"
+            ] = {
+                "evaluation_status":
+                    "stopped",
+
+                "stop_reason":
+                    "sector_index_not_found",
+
+                "sector17":
+                    sector17,
+
+                "normalized_sector":
+                    normalized_sector,
+
+                "sector_score":
+                    None,
+            }
+
+            continue
+
+        # ----------------------------------------------------
+        # 相対順位
+        # ----------------------------------------------------
+
+        rank_info = rank_map.get(
+            normalized_sector,
+            {}
+        )
+
+        relative_rank = rank_info.get(
+            "rank"
+        )
+
+        # ----------------------------------------------------
+        # 25点評価
+        # ----------------------------------------------------
+
+        evaluation = score_sector_25(
+            sector_row,
+            relative_rank=
+                relative_rank,
+            sector_count=18,
+        )
+
+        # ----------------------------------------------------
+        # 銘柄側情報も追加
+        # ----------------------------------------------------
+
+        evaluation[
+            "sector17"
+        ] = sector17
+
+        evaluation[
+            "normalized_sector"
+        ] = normalized_sector
+
+        evaluation[
+            "sector_rank_score"
+        ] = rank_info.get(
+            "rank_score"
+        )
+
+        # 半導体独立指数は順位には参加するが、
+        # 現時点では個別銘柄へ直接割り当てない
+        evaluation[
+            "semiconductor_override"
+        ] = False
+
+        stock[
+            "sector_evaluation"
+        ] = evaluation
+
+    return strategy_hits    
+# ============================================================
 # 4戦略ヒット銘柄 統合
 # ============================================================
 
@@ -2334,6 +3308,98 @@ def main():
         initial_breakout_result,
         volume_initial_result,
     )
+    # ========================================================
+    # セクター評価データ読み込み
+    # ========================================================
+
+    sector_evaluation_data = (
+        load_sector_evaluation_data(
+            base_date
+        )
+    )
+
+    print()
+    print(
+        "=== SECTOR EVALUATION DATA ==="
+    )
+
+    print(
+        "Status:",
+        sector_evaluation_data.get(
+            "status"
+        ),
+    )
+
+    print(
+        "Reason:",
+        sector_evaluation_data.get(
+            "reason"
+        ),
+    )
+
+    if (
+        sector_evaluation_data.get(
+            "status"
+        )
+        == "ok"
+    ):
+        print(
+            "Base date:",
+            sector_evaluation_data.get(
+                "base_date"
+            ),
+        )
+
+        print(
+            "Sector count:",
+            sector_evaluation_data.get(
+                "sector_count"
+            ),
+        )
+
+    # ========================================================
+    # 4戦略ヒット銘柄へセクター25点を付与
+    # ========================================================
+
+    strategy_hits = (
+        attach_sector_scores_to_hits(
+            strategy_hits,
+            sector_evaluation_data,
+        )
+    )
+
+    print()
+    print(
+        "=== SECTOR SCORES ==="
+    )
+
+    for stock in strategy_hits:
+
+        sector_eval = stock.get(
+            "sector_evaluation",
+            {}
+        )
+
+        print(
+            stock.get("code"),
+            stock.get("name"),
+            "sector:",
+            sector_eval.get(
+                "normalized_sector"
+            ),
+            "rank:",
+            sector_eval.get(
+                "relative_rank"
+            ),
+            "score:",
+            sector_eval.get(
+                "sector_score"
+            ),
+            "status:",
+            sector_eval.get(
+                "evaluation_status"
+            ),
+        )    
 
     strategy_hits_json = {
         "generated_at": datetime.now(
