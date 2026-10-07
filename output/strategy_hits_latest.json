@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T07:16:09.688003+00:00",
+  "generated_at": "2026-10-07T07:34:21.341937+00:00",
   "base_date": "2026-10-06",
   "strategy_count": 4,
   "unique_stock_count": 14,
@@ -127,6 +127,41 @@
           "medium_term_trend": 6,
           "momentum": 5,
           "high_position": 3
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
         },
         "evaluation_status": "ok",
         "stop_reason": null
@@ -270,6 +305,41 @@
           "medium_term_trend": 6,
           "momentum": 5,
           "high_position": 4
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
         },
         "evaluation_status": "ok",
         "stop_reason": null
@@ -423,6 +493,41 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
       "sector_evaluation": {
         "sector_score": 17,
         "sector_score_breakdown": {
@@ -560,6 +665,41 @@
           "medium_term_trend": 6,
           "momentum": 4,
           "high_position": 3
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
         },
         "evaluation_status": "ok",
         "stop_reason": null
@@ -705,6 +845,41 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
       "sector_evaluation": {
         "sector_score": 17,
         "sector_score_breakdown": {
@@ -840,6 +1015,41 @@
           "medium_term_trend": 4,
           "momentum": 5,
           "high_position": 3
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
         },
         "evaluation_status": "ok",
         "stop_reason": null
@@ -983,6 +1193,41 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
       "sector_evaluation": {
         "sector_score": 7,
         "sector_score_breakdown": {
@@ -1118,6 +1363,41 @@
           "medium_term_trend": 6,
           "momentum": 4,
           "high_position": 3
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
         },
         "evaluation_status": "ok",
         "stop_reason": null
@@ -1261,6 +1541,41 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
       "sector_evaluation": {
         "sector_score": 17,
         "sector_score_breakdown": {
@@ -1400,6 +1715,41 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
       "sector_evaluation": {
         "sector_score": 7,
         "sector_score_breakdown": {
@@ -1535,6 +1885,41 @@
           "medium_term_trend": 6,
           "momentum": 4,
           "high_position": 3
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
         },
         "evaluation_status": "ok",
         "stop_reason": null
@@ -1680,6 +2065,41 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
       "sector_evaluation": {
         "sector_score": 16,
         "sector_score_breakdown": {
@@ -1817,6 +2237,41 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
       "sector_evaluation": {
         "sector_score": 23,
         "sector_score_breakdown": {
@@ -1946,6 +2401,41 @@
           "medium_term_trend": 3,
           "momentum": 3,
           "high_position": 3
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "market_evaluation": {
+        "market_score": 6,
+        "market_condition": "neutral",
+        "market_score_breakdown": {
+          "internal": 3,
+          "above_ma25": 0,
+          "ma25_up": 0,
+          "advancing": 3,
+          "futures": 3,
+          "osaka_futures": 1,
+          "cme_futures": 2
+        },
+        "market_internal": {
+          "above_ma25_ratio": 39.17,
+          "ma25_up_ratio": 34.32,
+          "advancing_ratio": 74.54,
+          "sample_count": 1524
+        },
+        "futures": {
+          "osaka": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": -0.03,
+            "as_of": "2026-10-07T09:18:00+09:00"
+          },
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 1.1332858161083392,
+            "as_of": "2026-10-06T20:00:00-04:00"
+          }
         },
         "evaluation_status": "ok",
         "stop_reason": null
