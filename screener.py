@@ -3862,6 +3862,259 @@ def score_market_condition_15(
             None,
     }
 # ============================================================
+# 出来高・需給評価 10点
+# ============================================================
+
+def score_volume_supply_10(metrics):
+    """
+    出来高・需給評価：10点満点
+
+    配点
+    1. 20日平均出来高比     4点
+       volume_ratio_20d
+
+    2. 前日出来高比         3点
+       volume_ratio_prev
+
+    3. 5日平均売買代金      3点
+       avg_turnover_5d
+
+    合計 10点
+
+    安全弁
+    ・必須データ欠損 → 評価停止
+    ・数値異常 → 評価停止
+    """
+
+    # --------------------------------------------------------
+    # 0. 必須データ
+    # --------------------------------------------------------
+
+    if metrics is None:
+        return {
+            "volume_supply_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "metrics_missing",
+        }
+
+    volume_ratio_20d = _num(
+        metrics,
+        "volume_ratio_20d",
+    )
+
+    volume_ratio_prev = _num(
+        metrics,
+        "volume_ratio_prev",
+    )
+
+    avg_turnover_5d = _num(
+        metrics,
+        "avg_turnover_5d",
+    )
+
+    missing_fields = []
+
+    if volume_ratio_20d is None:
+        missing_fields.append(
+            "volume_ratio_20d"
+        )
+
+    if volume_ratio_prev is None:
+        missing_fields.append(
+            "volume_ratio_prev"
+        )
+
+    if avg_turnover_5d is None:
+        missing_fields.append(
+            "avg_turnover_5d"
+        )
+
+    if missing_fields:
+        return {
+            "volume_supply_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "required_data_missing",
+            "missing_fields": missing_fields,
+        }
+
+    # --------------------------------------------------------
+    # 1. 異常値チェック
+    # --------------------------------------------------------
+
+    if (
+        volume_ratio_20d < 0
+        or volume_ratio_prev < 0
+        or avg_turnover_5d < 0
+    ):
+        return {
+            "volume_supply_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "invalid_negative_value",
+        }
+
+    # --------------------------------------------------------
+    # 2. 20日平均出来高比 4点
+    # --------------------------------------------------------
+
+    volume_20d_score = 0
+
+    if volume_ratio_20d >= 2.0:
+        volume_20d_score = 4
+
+    elif volume_ratio_20d >= 1.5:
+        volume_20d_score = 3
+
+    elif volume_ratio_20d >= 1.2:
+        volume_20d_score = 2
+
+    elif volume_ratio_20d >= 1.0:
+        volume_20d_score = 1
+
+    # --------------------------------------------------------
+    # 3. 前日出来高比 3点
+    # --------------------------------------------------------
+
+    volume_prev_score = 0
+
+    if volume_ratio_prev >= 1.5:
+        volume_prev_score = 3
+
+    elif volume_ratio_prev >= 1.2:
+        volume_prev_score = 2
+
+    elif volume_ratio_prev >= 1.0:
+        volume_prev_score = 1
+
+    # --------------------------------------------------------
+    # 4. 5日平均売買代金 3点
+    # --------------------------------------------------------
+
+    turnover_score = 0
+
+    # 50億円以上
+    if avg_turnover_5d >= 5_000_000_000:
+        turnover_score = 3
+
+    # 20億円以上
+    elif avg_turnover_5d >= 2_000_000_000:
+        turnover_score = 2
+
+    # 10億円以上
+    elif avg_turnover_5d >= 1_000_000_000:
+        turnover_score = 1
+
+    # --------------------------------------------------------
+    # 5. 合計
+    # --------------------------------------------------------
+
+    total = (
+        volume_20d_score
+        + volume_prev_score
+        + turnover_score
+    )
+
+    total = max(
+        0,
+        min(
+            10,
+            int(total),
+        ),
+    )
+
+    # --------------------------------------------------------
+    # 6. 補助判定
+    # --------------------------------------------------------
+
+    if total >= 9:
+        supply_condition = "very_strong"
+
+    elif total >= 7:
+        supply_condition = "strong"
+
+    elif total >= 5:
+        supply_condition = "positive"
+
+    elif total >= 3:
+        supply_condition = "neutral"
+
+    else:
+        supply_condition = "weak"
+
+    return {
+        "volume_supply_score":
+            total,
+
+        "supply_condition":
+            supply_condition,
+
+        "volume_supply_breakdown": {
+            "volume_ratio_20d":
+                volume_20d_score,
+
+            "volume_ratio_prev":
+                volume_prev_score,
+
+            "avg_turnover_5d":
+                turnover_score,
+        },
+
+        "volume_supply_metrics": {
+            "volume_ratio_20d":
+                round(
+                    float(
+                        volume_ratio_20d
+                    ),
+                    3,
+                ),
+
+            "volume_ratio_prev":
+                round(
+                    float(
+                        volume_ratio_prev
+                    ),
+                    3,
+                ),
+
+            "avg_turnover_5d":
+                round(
+                    float(
+                        avg_turnover_5d
+                    ),
+                    0,
+                ),
+        },
+
+        "evaluation_status":
+            "ok",
+
+        "stop_reason":
+            None,
+    }    
+def attach_volume_supply_scores(
+    strategy_hits,
+):
+    """
+    4戦略ヒット銘柄へ
+    出来高・需給10点評価を付与する。
+    """
+
+    if strategy_hits is None:
+        return []
+
+    for stock in strategy_hits:
+
+        volume_supply_evaluation = (
+            score_volume_supply_10(
+                stock
+            )
+        )
+
+        stock[
+            "volume_supply_evaluation"
+        ] = volume_supply_evaluation
+
+    return strategy_hits    
+# ============================================================
 # 4戦略ヒット銘柄 統合
 # ============================================================
 
@@ -4646,6 +4899,61 @@ def main():
             "market_evaluation"
         ] = dict(
             market_evaluation
+        )        
+    # ========================================================
+    # 出来高・需給評価 10点
+    # ========================================================
+
+    strategy_hits = (
+        attach_volume_supply_scores(
+            strategy_hits
+        )
+    )
+
+    print()
+    print(
+        "=== VOLUME / SUPPLY SCORES ==="
+    )
+
+    for stock in strategy_hits:
+
+        volume_eval = stock.get(
+            "volume_supply_evaluation",
+            {}
+        )
+
+        breakdown = volume_eval.get(
+            "volume_supply_breakdown",
+            {}
+        )
+
+        print(
+            stock.get("code"),
+            stock.get("name"),
+            "score:",
+            volume_eval.get(
+                "volume_supply_score"
+            ),
+            "/10",
+            "20d:",
+            breakdown.get(
+                "volume_ratio_20d"
+            ),
+            "/4",
+            "prev:",
+            breakdown.get(
+                "volume_ratio_prev"
+            ),
+            "/3",
+            "turnover:",
+            breakdown.get(
+                "avg_turnover_5d"
+            ),
+            "/3",
+            "status:",
+            volume_eval.get(
+                "evaluation_status"
+            ),
         )        
     # ========================================================
     # セクター評価データ読み込み
