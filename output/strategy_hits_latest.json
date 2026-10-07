@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T07:34:21.341937+00:00",
+  "generated_at": "2026-10-07T07:42:19.905295+00:00",
   "base_date": "2026-10-06",
   "strategy_count": 4,
   "unique_stock_count": 14,
@@ -165,6 +165,16 @@
         },
         "evaluation_status": "ok",
         "stop_reason": null
+      },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
       },
       "sector_evaluation": {
         "sector_score": 23,
@@ -343,6 +353,16 @@
         },
         "evaluation_status": "ok",
         "stop_reason": null
+      },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
       },
       "sector_evaluation": {
         "sector_score": 17,
@@ -528,6 +548,16 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
+      },
       "sector_evaluation": {
         "sector_score": 17,
         "sector_score_breakdown": {
@@ -703,6 +733,16 @@
         },
         "evaluation_status": "ok",
         "stop_reason": null
+      },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
       },
       "sector_evaluation": {
         "sector_score": 23,
@@ -880,6 +920,16 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
+      },
       "sector_evaluation": {
         "sector_score": 17,
         "sector_score_breakdown": {
@@ -1053,6 +1103,16 @@
         },
         "evaluation_status": "ok",
         "stop_reason": null
+      },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
       },
       "sector_evaluation": {
         "sector_score": 23,
@@ -1228,6 +1288,16 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
+      },
       "sector_evaluation": {
         "sector_score": 7,
         "sector_score_breakdown": {
@@ -1401,6 +1471,16 @@
         },
         "evaluation_status": "ok",
         "stop_reason": null
+      },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
       },
       "sector_evaluation": {
         "sector_score": 16,
@@ -1576,6 +1656,16 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
+      },
       "sector_evaluation": {
         "sector_score": 17,
         "sector_score_breakdown": {
@@ -1750,6 +1840,16 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
+      },
       "sector_evaluation": {
         "sector_score": 7,
         "sector_score_breakdown": {
@@ -1923,6 +2023,16 @@
         },
         "evaluation_status": "ok",
         "stop_reason": null
+      },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
       },
       "sector_evaluation": {
         "sector_score": 17,
@@ -2100,6 +2210,16 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
+      },
       "sector_evaluation": {
         "sector_score": 16,
         "sector_score_breakdown": {
@@ -2272,6 +2392,16 @@
         "evaluation_status": "ok",
         "stop_reason": null
       },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
+      },
       "sector_evaluation": {
         "sector_score": 23,
         "sector_score_breakdown": {
@@ -2439,6 +2569,16 @@
         },
         "evaluation_status": "ok",
         "stop_reason": null
+      },
+      "volume_supply_evaluation": {
+        "volume_supply_score": null,
+        "evaluation_status": "stopped",
+        "stop_reason": "required_data_missing",
+        "missing_fields": [
+          "volume_ratio_20d",
+          "volume_ratio_prev",
+          "avg_turnover_5d"
+        ]
       },
       "sector_evaluation": {
         "sector_score": 13,
