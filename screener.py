@@ -1763,6 +1763,206 @@ def attach_grades(df, strategy):
 
     return result.reset_index(drop=True)
 # ============================================================
+# 4戦略ヒット銘柄 統合
+# ============================================================
+
+def build_strategy_hits(
+    result,
+    reacceleration_result,
+    initial_breakout_result,
+    volume_initial_result,
+):
+    """
+    4戦略で実際にヒットした銘柄だけを統合する。
+
+    同一銘柄が複数戦略にヒットした場合も、
+    strategy_hits にすべて保持する。
+
+    この関数ではまだ最終100点評価は行わない。
+    """
+
+    strategy_frames = [
+        (
+            "25MA_pullback",
+            result,
+        ),
+        (
+            "reacceleration_pullback",
+            reacceleration_result,
+        ),
+        (
+            "initial_breakout_pullback",
+            initial_breakout_result,
+        ),
+        (
+            "volume_initial_catch",
+            volume_initial_result,
+        ),
+    ]
+
+    stock_map = {}
+
+    for strategy, df in strategy_frames:
+
+        if df is None or df.empty:
+            continue
+
+        for _, row in df.iterrows():
+
+            item = row.to_dict()
+
+            code = str(
+                item.get(
+                    "code",
+                    ""
+                )
+            ).strip()
+
+            if not code:
+                continue
+
+            if code not in stock_map:
+
+                stock_map[code] = {
+                    "code": code,
+                    "name": item.get(
+                        "name",
+                        ""
+                    ),
+                    "base_date": item.get(
+                        "base_date"
+                    ),
+
+                    # 個別指標は元データを保持
+                    "metrics": {
+                        key: value
+                        for key, value
+                        in item.items()
+                        if key not in {
+                            "base_grade",
+                            "strategy_score",
+                            "condition_flags",
+                            "grade_reasons",
+                        }
+                    },
+
+                    # ヒットした戦略をすべて保存
+                    "strategy_hits": [],
+                }
+
+            stock_map[
+                code
+            ][
+                "strategy_hits"
+            ].append(
+                {
+                    "strategy":
+                        strategy,
+
+                    "strategy_score_raw":
+                        item.get(
+                            "strategy_score"
+                        ),
+
+                    "base_grade_raw":
+                        item.get(
+                            "base_grade"
+                        ),
+
+                    "condition_flags":
+                        item.get(
+                            "condition_flags",
+                            {}
+                        ),
+
+                    "grade_reasons":
+                        item.get(
+                            "grade_reasons",
+                            []
+                        ),
+                }
+            )
+
+    results = []
+
+    for code, stock in stock_map.items():
+
+        hits = stock[
+            "strategy_hits"
+        ]
+
+        # 現時点では既存strategy_scoreが
+        # 最も高いものを仮の主戦略とする。
+        # 最終100点評価時に正式決定する。
+        hits = sorted(
+            hits,
+            key=lambda x: (
+                x.get(
+                    "strategy_score_raw"
+                )
+                if x.get(
+                    "strategy_score_raw"
+                ) is not None
+                else -1
+            ),
+            reverse=True,
+        )
+
+        stock[
+            "strategy_hits"
+        ] = hits
+
+        stock[
+            "hit_count"
+        ] = len(hits)
+
+        stock[
+            "hit_strategies"
+        ] = [
+            x["strategy"]
+            for x in hits
+        ]
+
+        stock[
+            "primary_strategy_raw"
+        ] = (
+            hits[0]["strategy"]
+            if hits
+            else None
+        )
+
+        stock[
+            "secondary_strategies_raw"
+        ] = [
+            x["strategy"]
+            for x in hits[1:]
+        ]
+
+        results.append(
+            stock
+        )
+
+    results.sort(
+        key=lambda x: (
+            -x[
+                "hit_count"
+            ],
+            -(
+                x[
+                    "strategy_hits"
+                ][0].get(
+                    "strategy_score_raw"
+                )
+                or 0
+            ),
+            x[
+                "code"
+            ],
+        )
+    )
+
+    return results    
+# ============================================================
 # JSON用
 # ============================================================
 
@@ -2124,6 +2324,78 @@ def main():
         volume_initial_result,
         "volume_initial_catch"
     )
+    # ========================================================
+    # 4戦略ヒット銘柄を統合
+    # ========================================================
+
+    strategy_hits = build_strategy_hits(
+        result,
+        reacceleration_result,
+        initial_breakout_result,
+        volume_initial_result,
+    )
+
+    strategy_hits_json = {
+        "generated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+
+        "base_date": (
+            base_date.strftime("%Y-%m-%d")
+            if base_date is not None
+            else None
+        ),
+
+        "strategy_count": 4,
+
+        "unique_stock_count": len(
+            strategy_hits
+        ),
+
+        "results": make_json_safe(
+            strategy_hits
+        ),
+    }
+
+    strategy_hits_path = (
+        OUTPUT_DIR
+        / "strategy_hits_latest.json"
+    )
+
+    with open(
+        strategy_hits_path,
+        "w",
+        encoding="utf-8",
+    ) as f:
+        json.dump(
+            strategy_hits_json,
+            f,
+            ensure_ascii=False,
+            indent=2,
+            allow_nan=False,
+        )
+
+    print()
+    print(
+        "=== 4 STRATEGY HITS ==="
+    )
+    print(
+        "Unique stocks:",
+        len(strategy_hits),
+    )
+    print(
+        "Saved:",
+        strategy_hits_path,
+    )
+
+    for stock in strategy_hits:
+        print(
+            stock["code"],
+            stock["name"],
+            "hits:",
+            stock["hit_count"],
+            stock["hit_strategies"],
+        )    
     # 6. Failure table
     failure_rows = []
 
