@@ -6,11 +6,11 @@
       "category": "futures",
       "symbol": "5040469.O",
       "source": "yahoo_japan",
-      "value": 70880.0,
-      "previous_close": 70900.0,
-      "change": -20.0,
-      "change_pct": -0.03,
-      "as_of": "2026-10-07T09:18:00+09:00",
+      "value": 69560.0,
+      "previous_close": 70360.0,
+      "change": -800.0,
+      "change_pct": -1.14,
+      "as_of": "2026-10-08T10:12:00+09:00",
       "status": "ok"
     },
     {
@@ -19,11 +19,11 @@
       "category": "futures",
       "symbol": "NKD=F",
       "source": "yfinance",
-      "value": 70945.0,
-      "previous_close": 70150.0,
-      "change": 795.0,
-      "change_pct": 1.1332858161083392,
-      "as_of": "2026-10-06T20:00:00-04:00",
+      "value": 69605.0,
+      "previous_close": 70895.0,
+      "change": -1290.0,
+      "change_pct": -1.819592354891036,
+      "as_of": "2026-10-07T21:00:00-04:00",
       "status": "ok"
     }
   ]
