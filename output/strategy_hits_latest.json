@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-08T22:28:11.881473+00:00",
+  "generated_at": "2026-10-09T14:29:56.604559+00:00",
   "base_date": "2026-10-08",
   "strategy_count": 4,
   "unique_stock_count": 13,
@@ -250,14 +250,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -461,14 +461,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -678,14 +678,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -891,14 +891,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -1108,14 +1108,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -1321,14 +1321,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -1528,14 +1528,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -1741,14 +1741,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -1950,14 +1950,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -2171,14 +2171,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -2376,14 +2376,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -2581,14 +2581,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -2792,14 +2792,14 @@
           "osaka": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.14,
-            "as_of": "2026-10-08T10:12:00+09:00"
+            "change_pct": -1.0,
+            "as_of": "2026-10-09T10:20:00+09:00"
           },
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -1.819592354891036,
-            "as_of": "2026-10-07T21:00:00-04:00"
+            "change_pct": -1.881932021466905,
+            "as_of": "2026-10-08T21:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
