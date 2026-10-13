@@ -6,12 +6,12 @@
       "category": "futures",
       "symbol": "5040469.O",
       "source": "yahoo_japan",
-      "value": 69470.0,
-      "previous_close": 69100.0,
-      "change": 370.0,
-      "change_pct": 0.54,
-      "as_of": "2026-10-09T15:45:00+09:00",
-      "status": "stale"
+      "value": 67430.0,
+      "previous_close": 69470.0,
+      "change": -2040.0,
+      "change_pct": -2.94,
+      "as_of": "2026-10-13T11:32:00+09:00",
+      "status": "ok"
     },
     {
       "key": "nikkei225_futures_cme",
@@ -19,12 +19,12 @@
       "category": "futures",
       "symbol": "NKD=F",
       "source": "yfinance",
-      "value": 69315.0,
+      "value": 67450.0,
       "previous_close": 69120.0,
-      "change": 195.0,
-      "change_pct": 0.2821180555555555,
-      "as_of": "2026-10-11T20:00:00-04:00",
-      "status": "stale"
+      "change": -1670.0,
+      "change_pct": -2.416087962962963,
+      "as_of": "2026-10-12T22:00:00-04:00",
+      "status": "ok"
     }
   ]
 }
