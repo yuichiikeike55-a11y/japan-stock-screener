@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T22:17:07.768165+00:00",
+  "generated_at": "2026-10-15T13:36:20.667241+00:00",
   "sector_count": 18,
   "processed_count": 18,
   "failure_count": 0,
@@ -160,8 +160,10 @@
       "proxy_type": "ETF",
       "source": "yfinance",
       "base_date": "2026-10-14",
-      "data_quality_status": "ok",
-      "data_quality_flags": [],
+      "data_quality_status": "warning",
+      "data_quality_flags": [
+        "ohlc_inconsistency"
+      ],
       "open": 29565.0,
       "high": 29795.0,
       "low": 29520.0,
