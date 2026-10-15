@@ -1,7 +1,7 @@
 {
   "strategy": "volume_initial_catch",
-  "base_date": "2026-10-14",
-  "generated_at": "2026-10-14T22:19:47.332099+00:00",
+  "base_date": "2026-10-15",
+  "generated_at": "2026-10-15T11:07:39.802929+00:00",
   "universe_count": 1524,
   "processed_count": 1524,
   "coverage_pct": 100.0,
