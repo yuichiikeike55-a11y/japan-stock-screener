@@ -25,6 +25,12 @@ EVALUATION_CUTOFF = datetime.combine(
     time(20, 30),
     tzinfo=JST,
 )
+if BASE_DATE > datetime.now(JST).date():
+    raise RuntimeError(
+        f"Future BASE_DATE is not allowed: "
+        f"{BASE_DATE.isoformat()} "
+        f"current_jst_date={datetime.now(JST).date().isoformat()}"
+    )
 
 from market_data.providers import (
     fetch_yahoo_japan_osaka_futures,
