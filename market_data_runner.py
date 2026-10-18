@@ -2,18 +2,18 @@
 """
 無料運用版：CME先物のみ取得。
 
-大阪先物は必須条件から除外。
-取得失敗・鮮度不足なら保存せず停止。
+通常時は180分以内の鮮度を要求。
+土日は直近の金曜CME取引終了後のデータに限り、
+週末の休場を考慮する。
 
-出力:
-    output/market_data.json
-    output/market_data_history/market_data_YYYY-MM-DD.json
+過去・未来のBASE_DATEは検証済み保存データがない限り停止。
+取得失敗・日付不整合・不正データでは保存しない。
 """
 
 import json
 import os
 
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -21,24 +21,76 @@ from market_data.providers import (
     fetch_yfinance,
     fetch_yfinance_daily,
 )
-
-from market_data.normalizers import (
-    normalize_yfinance,
-)
-
-from market_data.validators import (
-    validate_freshness,
-)
+from market_data.normalizers import normalize_yfinance
+from market_data.validators import validate_freshness
 
 
 JST = ZoneInfo("Asia/Tokyo")
 
 OUTPUT_DIR = Path("output")
 OUTPUT_FILE = OUTPUT_DIR / "market_data.json"
+HISTORY_DIR = OUTPUT_DIR / "market_data_history"
 
-HISTORY_DIR = (
-    OUTPUT_DIR / "market_data_history"
-)
+CME_SYMBOL = "NKD=F"
+CME_KEY = "nikkei225_futures_cme"
+
+NORMAL_MAX_AGE_MINUTES = 180
+WEEKEND_MAX_AGE_MINUTES = 60 * 72
+
+
+def parse_datetime(value):
+    if not value:
+        raise RuntimeError("CME observation time is missing")
+
+    result = datetime.fromisoformat(str(value))
+
+    if result.tzinfo is None:
+        raise RuntimeError(
+            "CME observation has no timezone"
+        )
+
+    return result.astimezone(JST)
+
+
+def weekend_freshness_allowed(
+    now_jst,
+    observation_jst,
+):
+    """
+    土日のみ適用する限定的な例外。
+
+    直近の金曜05:00 JST以降の観測値で、
+    72時間以内の場合だけ候補とする。
+
+    これは祝日・臨時休場の完全な判定ではない。
+    """
+    if now_jst.weekday() not in (5, 6):
+        return False
+
+    days_since_friday = (
+        now_jst.weekday() - 4
+    )
+
+    friday = (
+        now_jst.date()
+        - timedelta(days=days_since_friday)
+    )
+
+    earliest = datetime.combine(
+        friday,
+        time(5, 0),
+        tzinfo=JST,
+    )
+
+    age_minutes = (
+        now_jst - observation_jst
+    ).total_seconds() / 60
+
+    return (
+        earliest <= observation_jst <= now_jst
+        and 0 <= age_minutes
+        <= WEEKEND_MAX_AGE_MINUTES
+    )
 
 
 def main():
@@ -77,22 +129,16 @@ def main():
         evaluation_cutoff,
     )
 
-    # =====================================
-    # CME先物のみ取得
-    # =====================================
-
-    symbol = "NKD=F"
-
     print(
         "Fetching CME futures:",
-        symbol,
+        CME_SYMBOL,
     )
 
-    hourly = fetch_yfinance(symbol)
-    daily = fetch_yfinance_daily(symbol)
+    hourly = fetch_yfinance(CME_SYMBOL)
+    daily = fetch_yfinance_daily(CME_SYMBOL)
 
     normalized = normalize_yfinance(
-        symbol,
+        CME_SYMBOL,
         hourly,
         daily,
         cutoff=effective_cutoff,
@@ -100,7 +146,7 @@ def main():
 
     validated = validate_freshness(
         normalized,
-        180,
+        NORMAL_MAX_AGE_MINUTES,
         now=effective_cutoff,
     )
 
@@ -112,26 +158,56 @@ def main():
     )
 
     if validated.get("status") != "ok":
-        raise RuntimeError(
-            "CME futures unavailable or stale: "
-            f"{validated.get('reason')}"
+        reason = validated.get("reason")
+
+        if reason != "age_exceeds_max_age":
+            raise RuntimeError(
+                "CME futures unavailable: "
+                f"{reason}"
+            )
+
+        observation_jst = parse_datetime(
+            validated.get("as_of")
         )
 
-    as_of_jst = datetime.fromisoformat(
-        validated["as_of"]
-    ).astimezone(JST)
+        if not weekend_freshness_allowed(
+            effective_cutoff,
+            observation_jst,
+        ):
+            raise RuntimeError(
+                "CME futures stale and "
+                "weekend exception not applicable"
+            )
+
+        print(
+            "Weekend CME freshness exception "
+            "accepted:",
+            observation_jst.isoformat(),
+        )
+
+        validated = dict(validated)
+        validated["status"] = "ok"
+        validated["reason"] = (
+            "weekend_market_closed"
+        )
+        validated["freshness_exception"] = True
+
+    as_of_jst = parse_datetime(
+        validated.get("as_of")
+    )
 
     if as_of_jst > effective_cutoff:
         raise RuntimeError(
             "CME observation after cutoff"
         )
 
-    # =====================================
-    # 正式出力
-    # =====================================
+    if validated.get("change_pct") is None:
+        raise RuntimeError(
+            "CME change_pct is missing"
+        )
 
     result = {
-        "key": "nikkei225_futures_cme",
+        "key": CME_KEY,
         "name": "日経225先物（CME）",
         "category": "futures",
         **validated,
@@ -150,50 +226,37 @@ def main():
 
     snapshot_file = (
         HISTORY_DIR
-        / (
-            "market_data_"
-            f"{base_date.isoformat()}.json"
-        )
+        / f"market_data_{base_date.isoformat()}.json"
     )
 
-    # =====================================
-    # 古いデータで上書きしない
-    # =====================================
-
     if snapshot_file.exists():
-        with open(
-            snapshot_file,
-            encoding="utf-8",
-        ) as f:
-            existing = json.load(f)
-
-        previous_results = {
-            item["key"]: item
-            for item in existing.get(
-                "results", []
+        existing = json.loads(
+            snapshot_file.read_text(
+                encoding="utf-8"
             )
-        }
+        )
 
-        previous = previous_results.get(
-            "nikkei225_futures_cme"
+        previous = next(
+            (
+                item
+                for item in existing.get(
+                    "results", []
+                )
+                if item.get("key") == CME_KEY
+            ),
+            None,
         )
 
         if previous is not None:
-            previous_time = (
-                datetime.fromisoformat(
-                    previous["as_of"]
-                ).astimezone(JST)
+            previous_time = parse_datetime(
+                previous.get("as_of")
             )
 
             if as_of_jst < previous_time:
                 raise RuntimeError(
-                    "Existing CME snapshot "
-                    "is newer. Refusing overwrite."
+                    "Existing CME snapshot is newer. "
+                    "Refusing overwrite."
                 )
-
-    # =====================================
-    # 保存
-    # =====================================
 
     OUTPUT_DIR.mkdir(
         parents=True,
@@ -211,16 +274,12 @@ def main():
         indent=2,
     )
 
-    snapshot_tmp = (
-        snapshot_file.with_suffix(
-            ".json.tmp"
-        )
+    snapshot_tmp = snapshot_file.with_suffix(
+        ".json.tmp"
     )
 
-    output_tmp = (
-        OUTPUT_FILE.with_suffix(
-            ".json.tmp"
-        )
+    output_tmp = OUTPUT_FILE.with_suffix(
+        ".json.tmp"
     )
 
     snapshot_tmp.write_text(
