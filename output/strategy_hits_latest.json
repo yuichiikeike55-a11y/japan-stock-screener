@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T02:42:57.032317+00:00",
+  "generated_at": "2026-10-18T02:53:18.474973+00:00",
   "base_date": "2026-10-16",
   "strategy_count": 4,
   "unique_stock_count": 9,
@@ -126,15 +126,15 @@
         "stop_reason": null
       },
       "market_evaluation": {
-        "market_score": 6,
-        "market_condition": "neutral",
+        "market_score": 10,
+        "market_condition": "positive",
         "market_score_breakdown": {
           "internal": 6,
           "above_ma25": 2,
           "ma25_up": 1,
           "advancing": 3,
-          "futures": 0,
-          "osaka_futures": 0,
+          "futures": 4,
+          "osaka_futures": 4,
           "cme_futures": 0
         },
         "market_internal": {
@@ -146,15 +146,15 @@
         "futures": {
           "osaka": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.27,
-            "as_of": "2026-10-15T08:57:00+09:00"
+            "status": "closed",
+            "change_pct": 1.11,
+            "as_of": "2026-10-16T15:45:00+09:00"
           },
           "cme": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.157971864009378,
-            "as_of": "2026-10-14T20:00:00-04:00"
+            "status": "closed",
+            "change_pct": -2.8104823395366503,
+            "as_of": "2026-10-16T16:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -198,16 +198,16 @@
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 75.0,
+        "final_score": 79.0,
         "final_rank": "B",
         "uncapped_rank": "B",
-        "base_score": 75.0,
+        "base_score": 79.0,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
           "strategy_fit": 35.0,
           "sector": 16.0,
           "technical": 14.0,
-          "market": 6.0,
+          "market": 10.0,
           "volume_supply": 4.0
         },
         "safety": {
@@ -347,15 +347,15 @@
         "stop_reason": null
       },
       "market_evaluation": {
-        "market_score": 6,
-        "market_condition": "neutral",
+        "market_score": 10,
+        "market_condition": "positive",
         "market_score_breakdown": {
           "internal": 6,
           "above_ma25": 2,
           "ma25_up": 1,
           "advancing": 3,
-          "futures": 0,
-          "osaka_futures": 0,
+          "futures": 4,
+          "osaka_futures": 4,
           "cme_futures": 0
         },
         "market_internal": {
@@ -367,15 +367,15 @@
         "futures": {
           "osaka": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.27,
-            "as_of": "2026-10-15T08:57:00+09:00"
+            "status": "closed",
+            "change_pct": 1.11,
+            "as_of": "2026-10-16T15:45:00+09:00"
           },
           "cme": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.157971864009378,
-            "as_of": "2026-10-14T20:00:00-04:00"
+            "status": "closed",
+            "change_pct": -2.8104823395366503,
+            "as_of": "2026-10-16T16:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -425,16 +425,16 @@
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 74.0,
+        "final_score": 78.0,
         "final_rank": "B",
         "uncapped_rank": "B",
-        "base_score": 74.0,
+        "base_score": 78.0,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
           "strategy_fit": 35.0,
           "sector": 13.0,
           "technical": 14.0,
-          "market": 6.0,
+          "market": 10.0,
           "volume_supply": 6.0
         },
         "safety": {
@@ -564,15 +564,15 @@
         "stop_reason": null
       },
       "market_evaluation": {
-        "market_score": 6,
-        "market_condition": "neutral",
+        "market_score": 10,
+        "market_condition": "positive",
         "market_score_breakdown": {
           "internal": 6,
           "above_ma25": 2,
           "ma25_up": 1,
           "advancing": 3,
-          "futures": 0,
-          "osaka_futures": 0,
+          "futures": 4,
+          "osaka_futures": 4,
           "cme_futures": 0
         },
         "market_internal": {
@@ -584,15 +584,15 @@
         "futures": {
           "osaka": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.27,
-            "as_of": "2026-10-15T08:57:00+09:00"
+            "status": "closed",
+            "change_pct": 1.11,
+            "as_of": "2026-10-16T15:45:00+09:00"
           },
           "cme": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.157971864009378,
-            "as_of": "2026-10-14T20:00:00-04:00"
+            "status": "closed",
+            "change_pct": -2.8104823395366503,
+            "as_of": "2026-10-16T16:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -636,16 +636,16 @@
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 58.2,
-        "final_rank": "D",
-        "uncapped_rank": "D",
-        "base_score": 58.2,
+        "final_score": 62.2,
+        "final_rank": "C",
+        "uncapped_rank": "C",
+        "base_score": 62.2,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
           "strategy_fit": 18.2,
           "sector": 16.0,
           "technical": 13.0,
-          "market": 6.0,
+          "market": 10.0,
           "volume_supply": 5.0
         },
         "safety": {
@@ -777,15 +777,15 @@
         "stop_reason": null
       },
       "market_evaluation": {
-        "market_score": 6,
-        "market_condition": "neutral",
+        "market_score": 10,
+        "market_condition": "positive",
         "market_score_breakdown": {
           "internal": 6,
           "above_ma25": 2,
           "ma25_up": 1,
           "advancing": 3,
-          "futures": 0,
-          "osaka_futures": 0,
+          "futures": 4,
+          "osaka_futures": 4,
           "cme_futures": 0
         },
         "market_internal": {
@@ -797,15 +797,15 @@
         "futures": {
           "osaka": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.27,
-            "as_of": "2026-10-15T08:57:00+09:00"
+            "status": "closed",
+            "change_pct": 1.11,
+            "as_of": "2026-10-16T15:45:00+09:00"
           },
           "cme": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.157971864009378,
-            "as_of": "2026-10-14T20:00:00-04:00"
+            "status": "closed",
+            "change_pct": -2.8104823395366503,
+            "as_of": "2026-10-16T16:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -849,16 +849,16 @@
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 56.2,
-        "final_rank": "D",
-        "uncapped_rank": "D",
-        "base_score": 56.2,
+        "final_score": 60.2,
+        "final_rank": "C",
+        "uncapped_rank": "C",
+        "base_score": 60.2,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
           "strategy_fit": 12.2,
           "sector": 22.0,
           "technical": 9.0,
-          "market": 6.0,
+          "market": 10.0,
           "volume_supply": 7.0
         },
         "safety": {
@@ -984,15 +984,15 @@
         "stop_reason": null
       },
       "market_evaluation": {
-        "market_score": 6,
-        "market_condition": "neutral",
+        "market_score": 10,
+        "market_condition": "positive",
         "market_score_breakdown": {
           "internal": 6,
           "above_ma25": 2,
           "ma25_up": 1,
           "advancing": 3,
-          "futures": 0,
-          "osaka_futures": 0,
+          "futures": 4,
+          "osaka_futures": 4,
           "cme_futures": 0
         },
         "market_internal": {
@@ -1004,15 +1004,15 @@
         "futures": {
           "osaka": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.27,
-            "as_of": "2026-10-15T08:57:00+09:00"
+            "status": "closed",
+            "change_pct": 1.11,
+            "as_of": "2026-10-16T15:45:00+09:00"
           },
           "cme": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.157971864009378,
-            "as_of": "2026-10-14T20:00:00-04:00"
+            "status": "closed",
+            "change_pct": -2.8104823395366503,
+            "as_of": "2026-10-16T16:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -1056,16 +1056,16 @@
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 52.2,
+        "final_score": 56.2,
         "final_rank": "D",
         "uncapped_rank": "D",
-        "base_score": 52.2,
+        "base_score": 56.2,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
           "strategy_fit": 11.2,
           "sector": 17.0,
           "technical": 13.0,
-          "market": 6.0,
+          "market": 10.0,
           "volume_supply": 5.0
         },
         "safety": {
@@ -1189,15 +1189,15 @@
         "stop_reason": null
       },
       "market_evaluation": {
-        "market_score": 6,
-        "market_condition": "neutral",
+        "market_score": 10,
+        "market_condition": "positive",
         "market_score_breakdown": {
           "internal": 6,
           "above_ma25": 2,
           "ma25_up": 1,
           "advancing": 3,
-          "futures": 0,
-          "osaka_futures": 0,
+          "futures": 4,
+          "osaka_futures": 4,
           "cme_futures": 0
         },
         "market_internal": {
@@ -1209,15 +1209,15 @@
         "futures": {
           "osaka": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.27,
-            "as_of": "2026-10-15T08:57:00+09:00"
+            "status": "closed",
+            "change_pct": 1.11,
+            "as_of": "2026-10-16T15:45:00+09:00"
           },
           "cme": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.157971864009378,
-            "as_of": "2026-10-14T20:00:00-04:00"
+            "status": "closed",
+            "change_pct": -2.8104823395366503,
+            "as_of": "2026-10-16T16:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -1261,16 +1261,16 @@
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 46.0,
-        "final_rank": "E",
-        "uncapped_rank": "E",
-        "base_score": 46.0,
+        "final_score": 50.0,
+        "final_rank": "D",
+        "uncapped_rank": "D",
+        "base_score": 50.0,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
           "strategy_fit": 7.0,
           "sector": 20.0,
           "technical": 7.0,
-          "market": 6.0,
+          "market": 10.0,
           "volume_supply": 6.0
         },
         "safety": {
@@ -1394,15 +1394,15 @@
         "stop_reason": null
       },
       "market_evaluation": {
-        "market_score": 6,
-        "market_condition": "neutral",
+        "market_score": 10,
+        "market_condition": "positive",
         "market_score_breakdown": {
           "internal": 6,
           "above_ma25": 2,
           "ma25_up": 1,
           "advancing": 3,
-          "futures": 0,
-          "osaka_futures": 0,
+          "futures": 4,
+          "osaka_futures": 4,
           "cme_futures": 0
         },
         "market_internal": {
@@ -1414,15 +1414,15 @@
         "futures": {
           "osaka": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.27,
-            "as_of": "2026-10-15T08:57:00+09:00"
+            "status": "closed",
+            "change_pct": 1.11,
+            "as_of": "2026-10-16T15:45:00+09:00"
           },
           "cme": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.157971864009378,
-            "as_of": "2026-10-14T20:00:00-04:00"
+            "status": "closed",
+            "change_pct": -2.8104823395366503,
+            "as_of": "2026-10-16T16:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -1466,16 +1466,16 @@
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 45.0,
+        "final_score": 49.0,
         "final_rank": "E",
         "uncapped_rank": "E",
-        "base_score": 45.0,
+        "base_score": 49.0,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
           "strategy_fit": 7.0,
           "sector": 20.0,
           "technical": 6.0,
-          "market": 6.0,
+          "market": 10.0,
           "volume_supply": 6.0
         },
         "safety": {
@@ -1601,15 +1601,15 @@
         "stop_reason": null
       },
       "market_evaluation": {
-        "market_score": 6,
-        "market_condition": "neutral",
+        "market_score": 10,
+        "market_condition": "positive",
         "market_score_breakdown": {
           "internal": 6,
           "above_ma25": 2,
           "ma25_up": 1,
           "advancing": 3,
-          "futures": 0,
-          "osaka_futures": 0,
+          "futures": 4,
+          "osaka_futures": 4,
           "cme_futures": 0
         },
         "market_internal": {
@@ -1621,15 +1621,15 @@
         "futures": {
           "osaka": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.27,
-            "as_of": "2026-10-15T08:57:00+09:00"
+            "status": "closed",
+            "change_pct": 1.11,
+            "as_of": "2026-10-16T15:45:00+09:00"
           },
           "cme": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.157971864009378,
-            "as_of": "2026-10-14T20:00:00-04:00"
+            "status": "closed",
+            "change_pct": -2.8104823395366503,
+            "as_of": "2026-10-16T16:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -1673,16 +1673,16 @@
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 41.0,
+        "final_score": 45.0,
         "final_rank": "E",
         "uncapped_rank": "E",
-        "base_score": 41.0,
+        "base_score": 45.0,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
           "strategy_fit": 14.0,
           "sector": 5.0,
           "technical": 11.0,
-          "market": 6.0,
+          "market": 10.0,
           "volume_supply": 5.0
         },
         "safety": {
@@ -1808,15 +1808,15 @@
         "stop_reason": null
       },
       "market_evaluation": {
-        "market_score": 6,
-        "market_condition": "neutral",
+        "market_score": 10,
+        "market_condition": "positive",
         "market_score_breakdown": {
           "internal": 6,
           "above_ma25": 2,
           "ma25_up": 1,
           "advancing": 3,
-          "futures": 0,
-          "osaka_futures": 0,
+          "futures": 4,
+          "osaka_futures": 4,
           "cme_futures": 0
         },
         "market_internal": {
@@ -1828,15 +1828,15 @@
         "futures": {
           "osaka": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.27,
-            "as_of": "2026-10-15T08:57:00+09:00"
+            "status": "closed",
+            "change_pct": 1.11,
+            "as_of": "2026-10-16T15:45:00+09:00"
           },
           "cme": {
             "usable": true,
-            "status": "ok",
-            "change_pct": -3.157971864009378,
-            "as_of": "2026-10-14T20:00:00-04:00"
+            "status": "closed",
+            "change_pct": -2.8104823395366503,
+            "as_of": "2026-10-16T16:00:00-04:00"
           }
         },
         "evaluation_status": "ok",
@@ -1880,16 +1880,16 @@
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 38.8,
+        "final_score": 42.8,
         "final_rank": "E",
         "uncapped_rank": "E",
-        "base_score": 38.8,
+        "base_score": 42.8,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
           "strategy_fit": 9.8,
           "sector": 11.0,
           "technical": 7.0,
-          "market": 6.0,
+          "market": 10.0,
           "volume_supply": 5.0
         },
         "safety": {
