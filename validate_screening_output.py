@@ -1,95 +1,147 @@
 
 import json
+import math
 import os
 import sys
-from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
-OUTPUT = Path("output")
-JST = ZoneInfo("Asia/Tokyo")
+FILE = Path("output/strategy_hits_latest.json")
 
 
-def stop(message):
-    print("SCREENING VALIDATION FAILED:", message)
+def fail(message):
+    print("VALIDATION FAILED:", message)
     sys.exit(1)
 
 
-def load_json(filename):
-    path = OUTPUT / filename
-
-    if not path.is_file():
-        stop(f"missing file: {path}")
+def main():
+    if not FILE.is_file():
+        fail(f"missing file: {FILE}")
 
     try:
-        with path.open(encoding="utf-8") as f:
-            data = json.load(f)
-    except Exception as exc:
-        stop(f"invalid JSON: {path}: {exc}")
+        data = json.loads(FILE.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        fail(f"cannot read JSON: {exc}")
 
     if not isinstance(data, dict):
-        stop(f"invalid JSON structure: {path}")
+        fail("JSON root must be an object")
 
-    return data
+    base_date = data.get("base_date")
+    requested_date = os.environ.get("BASE_DATE", "").strip()
 
+    if not isinstance(base_date, str) or not base_date:
+        fail("base_date missing")
 
-def expected_base_date():
-    value = os.environ.get("BASE_DATE", "").strip()
+    if requested_date and base_date != requested_date:
+        fail(
+            f"base date mismatch: {base_date} != {requested_date}"
+        )
 
-    if value:
-        try:
-            return datetime.strptime(
-                value, "%Y-%m-%d"
-            ).date().isoformat()
-        except ValueError:
-            stop(f"invalid BASE_DATE: {value}")
+    if data.get("strategy_count") != 4:
+        fail("strategy_count must be 4")
 
-    return datetime.now(JST).date().isoformat()
+    rows = data.get("results")
 
+    if not isinstance(rows, list):
+        fail("results must be a list")
 
-def main():
-    base_date = expected_base_date()
+    count = data.get("unique_stock_count")
 
-    market = load_json("market_data.json")
-    sectors = load_json("sector_indices_latest.json")
-    hits = load_json("strategy_hits_latest.json")
+    if not isinstance(count, int) or isinstance(count, bool):
+        fail("invalid unique_stock_count")
 
-    if market.get("evaluation_base_date") != base_date:
-        stop("market base date mismatch")
+    if count != len(rows):
+        fail("unique_stock_count does not match results")
 
-    if sectors.get("latest_base_date") != base_date:
-        stop("sector base date mismatch")
+    # 0件は異常と断定せず、公開を停止して確認する
+    if count == 0:
+        fail("zero hits: manual review required before publishing")
 
-    if sectors.get("sector_count") != 18:
-        stop("sector count is not 18")
+    codes = set()
 
-    if sectors.get("processed_count") != 18:
-        stop("sector processed count is not 18")
-
-    if sectors.get("failure_count") != 0:
-        stop("sector failures detected")
-
-    sector_rows = sectors.get("results")
-
-    if not isinstance(sector_rows, list):
-        stop("sector results are missing")
-
-    if len(sector_rows) != 18:
-        stop("sector results count is not 18")
-
-    for row in sector_rows:
+    for index, row in enumerate(rows, start=1):
         if not isinstance(row, dict):
-            stop("invalid sector row")
+            fail(f"row {index}: invalid structure")
+
+        code = str(row.get("code", "")).strip()
+
+        if not code or code in codes:
+            fail(f"row {index}: missing or duplicate code")
+
+        codes.add(code)
 
         if row.get("base_date") != base_date:
-            stop("individual sector base date mismatch")
+            fail(f"{code}: stock base date mismatch")
 
-    if not hits:
-        stop("strategy hits JSON is empty")
+        if row.get("hit_count", 0) < 1:
+            fail(f"{code}: no strategy hit")
 
-    print("SCREENING VALIDATION PASSED")
+        market = row.get("market_evaluation")
+        sector = row.get("sector_evaluation")
+        final = row.get("final_evaluation")
+
+        for name, section in [
+            ("market", market),
+            ("sector", sector),
+            ("final", final),
+        ]:
+            if not isinstance(section, dict):
+                fail(f"{code}: {name} evaluation missing")
+
+            if section.get("evaluation_status") != "ok":
+                fail(f"{code}: {name} evaluation not ok")
+
+        if sector.get("sector_base_date") != base_date:
+            fail(f"{code}: sector base date mismatch")
+
+        if sector.get("sector_count") != 18:
+            fail(f"{code}: sector count mismatch")
+
+        futures = market.get("futures")
+
+        if not isinstance(futures, dict):
+            fail(f"{code}: futures data missing")
+
+        cme = futures.get("cme")
+
+        if not isinstance(cme, dict):
+            fail(f"{code}: CME data missing")
+
+        if cme.get("usable") is not True:
+            fail(f"{code}: CME unusable")
+
+        if cme.get("status") != "ok":
+            fail(f"{code}: CME status not ok")
+
+        change = cme.get("change_pct")
+
+        if (
+            isinstance(change, bool)
+            or not isinstance(change, (int, float))
+            or not math.isfinite(change)
+        ):
+            fail(f"{code}: CME change_pct invalid")
+
+        score = final.get("final_score")
+
+        if (
+            isinstance(score, bool)
+            or not isinstance(score, (int, float))
+            or not math.isfinite(score)
+            or not 0 <= score <= 100
+        ):
+            fail(f"{code}: invalid final score")
+
+        if final.get("final_rank") not in (
+            "S", "A", "B", "C", "D", "E"
+        ):
+            fail(f"{code}: invalid final rank")
+
+    print("VALIDATION PASSED")
     print("Base date:", base_date)
-    print("Sectors:", len(sector_rows))
+    print("Strategies:", data["strategy_count"])
+    print("Sectors: 18 (confirmed in hit evaluations)")
+    print("Final evaluations:", len(rows))
+    print("CME: usable in all evaluated stocks")
 
 
 if __name__ == "__main__":
