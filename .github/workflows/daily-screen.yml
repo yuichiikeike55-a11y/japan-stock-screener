@@ -135,11 +135,23 @@ jobs:
           fi
 
       - name: Commit screening results
+        if: ${{ success() || failure() }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add output/
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "All steps succeeded. Staging screening results."
+            git add output/
+          else
+            echo "Earlier step failed. Staging validated futures snapshots only."
+
+            if [ -d "output/market_data_history" ]; then
+              git add output/market_data_history/
+            else
+              echo "No futures snapshots to commit."
+            fi
+          fi
 
           if git diff --cached --quiet; then
             echo "========================================"
