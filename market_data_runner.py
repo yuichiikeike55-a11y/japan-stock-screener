@@ -213,24 +213,12 @@ def main():
                 f"status={result.get('status')}"
             )    
     # =====================================
-    # Save JSON
+    # Prepare validated output
     # =====================================
 
     output_data = {
         "results": results,
     }
-
-    with open(
-        OUTPUT_FILE,
-        "w",
-        encoding="utf-8",
-    ) as f:
-        json.dump(
-            output_data,
-            f,
-            ensure_ascii=False,
-            indent=2,
-        )
     # =====================================
     # Save dated futures snapshot
     # =====================================
@@ -253,7 +241,19 @@ def main():
             item["key"]: item
             for item in existing_data.get("results", [])
         }
+        current_keys = {
+            item["key"]
+            for item in results
+        }
 
+        existing_keys = set(existing_results)
+
+        if current_keys != existing_keys:
+            raise RuntimeError(
+                "Futures snapshot keys mismatch: "
+                f"current={sorted(current_keys)} "
+                f"existing={sorted(existing_keys)}"
+            )
         for result in results:
             previous = existing_results.get(result["key"])
 
@@ -285,8 +285,33 @@ def main():
                 indent=2,
             )
 
-        print("Saved futures snapshot:", snapshot_file)
     else:
         print("Existing newer snapshot preserved:", snapshot_file)
+
+    # =====================================
+    # Save validated current market data
+    # =====================================
+
+    if should_save:
+        with open(
+            OUTPUT_FILE,
+            "w",
+            encoding="utf-8",
+        ) as f:
+            json.dump(
+                output_data,
+                f,
+                ensure_ascii=False,
+                indent=2,
+            )
+
+        print("Saved market data:", OUTPUT_FILE)
+    else:
+        print(
+            "Current market data not overwritten "
+            "because a newer snapshot exists."
+        )
+
+
 if __name__ == "__main__":
     main()
