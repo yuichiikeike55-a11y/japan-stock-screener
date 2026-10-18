@@ -89,7 +89,21 @@ jobs:
           echo "Target BASE_DATE : $BASE_DATE"
           echo "JST time         : $(TZ=Asia/Tokyo date)"
           echo "========================================"
+      - name: Update futures market data
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+        run: |
+          echo "========================================"
+          echo "Updating Osaka and CME futures data"
+          echo "BASE_DATE: $BASE_DATE"
+          echo "JST time: $(TZ=Asia/Tokyo date)"
+          echo "========================================"
 
+          python market_data_runner.py
+
+          echo "========================================"
+          echo "Futures market data update complete"
+          echo "========================================"
       - name: Run stock screener
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
