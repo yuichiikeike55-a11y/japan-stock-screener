@@ -6377,7 +6377,11 @@ def main():
     debug_result = metrics[
         metrics["code"].isin(debug_codes)
     ].copy()
-
+if metrics is None or metrics.empty or "code" not in metrics.columns:
+    raise RuntimeError(
+        "STOP: stock metrics are empty. "
+        "Screening results must not be published."
+    )
     print()
     print("=== Reacceleration Debug ===")
 
