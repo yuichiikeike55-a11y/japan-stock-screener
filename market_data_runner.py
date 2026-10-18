@@ -122,8 +122,11 @@ def main():
         cme_symbol,
         cme_hourly,
         cme_daily,
+        cutoff=min(
+            datetime.now(JST),
+            EVALUATION_CUTOFF,
+        ),
     )
-
     cme_validated = validate_freshness(
         cme_normalized,
         180,
