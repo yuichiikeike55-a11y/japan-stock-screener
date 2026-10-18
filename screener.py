@@ -3642,67 +3642,69 @@ def score_market_condition_15(
         )
     )
 
-    if (
-        not osaka_usable
-        and not cme_usable
-    ):
+    if not cme_usable:
         return {
             "market_score": None,
             "evaluation_status": "stopped",
-            "stop_reason": "futures_data_unavailable",
+            "stop_reason": "cme_futures_unavailable",
             "market_internal_score": internal_score,
         }
 
+    expected_dates = set(
+        metrics["base_date"].dropna().astype(str)
+    )
+
+    if len(expected_dates) != 1:
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "stock_base_date_invalid",
+        }
+
+    expected_date = next(iter(expected_dates))
+
+    if cme.get("evaluation_base_date") != expected_date:
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "cme_base_date_mismatch",
+        }
+
     # --------------------------------------------------------
-    # 7. 大阪先物 最大4点
+    # --------------------------------------------------------
+    # 7. CME先物専用 最大6点
     # --------------------------------------------------------
 
     osaka_score = 0
     osaka_change_pct = None
+    osaka_usable = False
 
-    if osaka_usable:
+    cme_change_pct = _num(cme, "change_pct")
 
-        osaka_change_pct = _num(
-            osaka,
-            "change_pct",
-        )
+    if cme_change_pct is None:
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "cme_change_pct_missing",
+            "market_internal_score": internal_score,
+        }
 
-        if osaka_change_pct >= 1.0:
-            osaka_score = 4
+    if cme_change_pct >= 1.0:
+        cme_score = 6
+    elif cme_change_pct >= 0.5:
+        cme_score = 5
+    elif cme_change_pct >= 0.2:
+        cme_score = 4
+    elif cme_change_pct >= 0.0:
+        cme_score = 3
+    elif cme_change_pct >= -0.5:
+        cme_score = 2
+    elif cme_change_pct >= -1.0:
+        cme_score = 1
+    else:
+        cme_score = 0
 
-        elif osaka_change_pct >= 0.3:
-            osaka_score = 3
-
-        elif osaka_change_pct >= 0.0:
-            osaka_score = 2
-
-        elif osaka_change_pct >= -0.5:
-            osaka_score = 1
-
-    # --------------------------------------------------------
-    # 8. CME先物 最大2点
-    # --------------------------------------------------------
-
-    cme_score = 0
-    cme_change_pct = None
-
-    if cme_usable:
-
-        cme_change_pct = _num(
-            cme,
-            "change_pct",
-        )
-
-        if cme_change_pct >= 0.5:
-            cme_score = 2
-
-        elif cme_change_pct >= 0.0:
-            cme_score = 1
-
-    futures_score = (
-        osaka_score
-        + cme_score
-    )
+    futures_score = cme_score
 
     # --------------------------------------------------------
     # 9. 合計 15点
@@ -5542,16 +5544,11 @@ def main():
             "futures"
         ),
         "/6",
-        "osaka:",
-        market_breakdown.get(
-            "osaka_futures"
-        ),
-        "/4",
         "cme:",
         market_breakdown.get(
             "cme_futures"
         ),
-        "/2",
+        "/6",
     )
 
     market_internal = (
