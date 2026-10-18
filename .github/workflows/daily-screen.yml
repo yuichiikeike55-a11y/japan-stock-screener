@@ -138,7 +138,8 @@ jobs:
           python -m py_compile \
             market_data_runner.py \
             sector_indices.py \
-            screener.py
+            screener.py \
+            validate_screening_output.py
 
       - name: Update CME futures market data
         env:
@@ -152,6 +153,7 @@ jobs:
         run: |
           python - <<'PY'
           import json
+          import math
           import os
           from pathlib import Path
 
@@ -196,12 +198,20 @@ jobs:
                   "STOP: CME base date mismatch"
               )
 
-          if cme.get("change_pct") is None:
+          change = cme.get("change_pct")
+
+          if (
+              isinstance(change, bool)
+              or not isinstance(change, (int, float))
+              or not math.isfinite(change)
+          ):
               raise SystemExit(
-                  "STOP: CME change_pct missing"
+                  "STOP: CME change_pct invalid"
               )
 
           print("CME validation OK")
+          print("Base date:", expected)
+          print("Change pct:", change)
           PY
 
       - name: Update 18 sector indices
@@ -279,36 +289,10 @@ jobs:
           python screener.py
 
       - name: Validate screening output
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          output = Path("output")
-
-          if not output.is_dir():
-              raise SystemExit(
-                  "STOP: output directory missing"
-              )
-
-          files = [
-              p for p in output.rglob("*")
-              if p.is_file()
-              and p.name not in {
-                  "market_data.json",
-                  "sector_indices_latest.json",
-              }
-              and "market_data_history" not in p.parts
-          ]
-
-          if not files:
-              raise SystemExit(
-                  "STOP: screening output missing"
-              )
-
-          print("Screening output files:")
-          for path in files:
-              print(path)
-          PY
+          python validate_screening_output.py
 
       - name: Show generated files
         run: |
@@ -325,6 +309,11 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
+          fi
+
+          git commit -m "Update validated screening results"
+          git pull --rebase origin main
+          git push origin main
           fi
 
           git commit -m "Update validated screening results"
