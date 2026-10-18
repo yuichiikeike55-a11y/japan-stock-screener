@@ -1,48 +1,26 @@
+
 name: Daily Japan Stock Screener
 
 on:
   workflow_dispatch:
     inputs:
       base_date:
-        description: "Base date YYYY-MM-DD"
+        description: "Base date YYYY-MM-DD (blank = today JST)"
         required: false
         type: string
 
   schedule:
-    # JST 16:30
     - cron: "30 7 * * 1-5"
-
-    # JST 17:00
     - cron: "0 8 * * 1-5"
-
-    # JST 17:30
     - cron: "30 8 * * 1-5"
-
-    # JST 18:00
     - cron: "0 9 * * 1-5"
-
-    # JST 18:30
     - cron: "30 9 * * 1-5"
-
-    # JST 19:00
     - cron: "0 10 * * 1-5"
-
-    # JST 19:30
     - cron: "30 10 * * 1-5"
-
-    # JST 19:40
     - cron: "40 10 * * 1-5"
-
-    # JST 19:50
     - cron: "50 10 * * 1-5"
-
-    # JST 19:55
     - cron: "55 10 * * 1-5"
-
-    # JST 20:10（20時までに取れなかった場合の回復用）
     - cron: "10 11 * * 1-5"
-
-    # JST 20:30（最終回復用）
     - cron: "30 11 * * 1-5"
 
 permissions:
@@ -55,6 +33,7 @@ concurrency:
 jobs:
   screen:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
 
     steps:
       - name: Checkout repository
@@ -83,110 +62,184 @@ jobs:
             BASE_DATE=$(TZ=Asia/Tokyo date +%Y-%m-%d)
           fi
 
-          echo "base_date=$BASE_DATE" >> "$GITHUB_OUTPUT"
-
-          echo "========================================"
-          echo "Target BASE_DATE : $BASE_DATE"
-          echo "JST time         : $(TZ=Asia/Tokyo date)"
-          echo "========================================"
-      - name: Update futures market data
-        id: futures
-        env:
-          BASE_DATE: ${{ steps.date.outputs.base_date }}
-        run: |
-          echo "========================================"
-          echo "Updating Osaka and CME futures data"
-          echo "BASE_DATE: $BASE_DATE"
-          echo "JST time: $(TZ=Asia/Tokyo date)"
-          echo "========================================"
-
-          python market_data_runner.py
-
-          echo "========================================"
-          echo "Futures market data update complete"
-          echo "========================================"
-      - name: Run stock screener
-        id: screening
-        env:
-          BASE_DATE: ${{ steps.date.outputs.base_date }}
-        run: |
-          echo "========================================"
-          echo "Stock screener START"
-          echo "Target date : $BASE_DATE"
-          echo "JST time    : $(TZ=Asia/Tokyo date)"
-          echo "========================================"
-
-          python screener.py
-
-          echo "========================================"
-          echo "Stock screener COMPLETE"
-          echo "JST time : $(TZ=Asia/Tokyo date)"
-          echo "========================================"
-
-      - name: Show generated files
-        run: |
-          echo "========================================"
-          echo "Generated output files"
-          echo "========================================"
-
-          if [ -d "output" ]; then
-            find output -maxdepth 2 -type f -print
-          else
-            echo "ERROR: output directory does not exist."
+          if ! date -d "$BASE_DATE" +%Y-%m-%d | grep -qx "$BASE_DATE"; then
+            echo "::error::Invalid BASE_DATE: $BASE_DATE"
             exit 1
           fi
 
-      - name: Commit screening results
-        if: ${{ success() || failure() }}
+          echo "base_date=$BASE_DATE" >> "$GITHUB_OUTPUT"
+          echo "Target BASE_DATE: $BASE_DATE"
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile \
+            market_data_runner.py \
+            sector_indices.py \
+            screener.py
+
+      - name: Update CME futures market data
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+        run: |
+          python market_data_runner.py
+
+      - name: Validate CME market data
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path("output/market_data.json")
+          if not path.is_file():
+              raise SystemExit("STOP: market_data.json is missing")
+
+          data = json.loads(path.read_text(encoding="utf-8"))
+          rows = data.get("results", [])
+
+          cme = next(
+              (
+                  row for row in rows
+                  if row.get("key") == "nikkei225_futures_cme"
+              ),
+              None,
+          )
+
+          if cme is None:
+              raise SystemExit("STOP: CME futures data is missing")
+
+          if cme.get("status") != "ok":
+              raise SystemExit(
+                  f"STOP: CME status is {cme.get('status')}"
+              )
+
+          expected = os.environ["BASE_DATE"]
+          actual = cme.get("evaluation_base_date")
+
+          if actual != expected:
+              raise SystemExit(
+                  f"STOP: CME base date mismatch: "
+                  f"expected={expected}, actual={actual}"
+              )
+
+          if cme.get("change_pct") is None:
+              raise SystemExit("STOP: CME change_pct is missing")
+
+          print("CME market data validation OK")
+          PY
+
+      - name: Update 18 sector indices
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+        run: |
+          python sector_indices.py
+
+      - name: Validate 18 sector data
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path("output/sector_indices_latest.json")
+          if not path.is_file():
+              raise SystemExit("STOP: sector data is missing")
+
+          data = json.loads(path.read_text(encoding="utf-8"))
+          expected = os.environ["BASE_DATE"]
+
+          if data.get("latest_base_date") != expected:
+              raise SystemExit(
+                  "STOP: sector base date mismatch: "
+                  f"expected={expected}, "
+                  f"actual={data.get('latest_base_date')}"
+              )
+
+          rows = data.get("results", [])
+
+          if data.get("sector_count") != 18:
+              raise SystemExit("STOP: sector_count is not 18")
+
+          if data.get("processed_count") != 18:
+              raise SystemExit("STOP: processed_count is not 18")
+
+          if data.get("failure_count") != 0:
+              raise SystemExit("STOP: sector failure_count is not 0")
+
+          if len(rows) != 18:
+              raise SystemExit("STOP: sector results count is not 18")
+
+          for row in rows:
+              if row.get("base_date") != expected:
+                  raise SystemExit(
+                      "STOP: sector row base date mismatch"
+                  )
+
+          print("18 sector data validation OK")
+          PY
+
+      - name: Run four-strategy stock screener
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+        run: |
+          python screener.py
+
+      - name: Validate screening output
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          output = Path("output")
+          if not output.is_dir():
+              raise SystemExit("STOP: output directory is missing")
+
+          files = [
+              p for p in output.rglob("*")
+              if p.is_file()
+              and p.name not in {
+                  "market_data.json",
+                  "sector_indices_latest.json",
+              }
+              and "market_data_history" not in p.parts
+          ]
+
+          if not files:
+              raise SystemExit(
+                  "STOP: no screening output files were found"
+              )
+
+          print("Screening output files:")
+          for path in files:
+              print(path)
+          PY
+
+      - name: Show generated files
+        run: |
+          find output -maxdepth 3 -type f -print
+
+      - name: Commit validated results
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if [ "${{ steps.futures.outcome }}" != "success" ]; then
-            echo "Futures update failed or was skipped."
-            echo "No output files will be committed."
-            exit 0
-
-          elif [ "${{ steps.futures.outcome }}" = "success" ] && \
-               [ "${{ steps.screening.outcome }}" = "success" ]; then
-            echo "Futures and stock screening succeeded."
-            git add output/
-
-          else
-            echo "Stock screening did not succeed."
-            echo "Staging validated futures snapshots only."
-
-            if [ -d "output/market_data_history" ]; then
-              git add output/market_data_history/
-            else
-              echo "No futures snapshots to commit."
-            fi
-          fi
+          git add output/
 
           if git diff --cached --quiet; then
-            echo "========================================"
-            echo "No changes to commit."
-            echo "========================================"
-          else
-            echo "========================================"
-            echo "Committing screening results..."
-            echo "========================================"
-
-            git commit -m "Update stock screening results ${{ steps.date.outputs.base_date }}"
-
-            echo "========================================"
-            echo "Pull latest main..."
-            echo "========================================"
-
-            git pull --rebase origin main
-
-            echo "========================================"
-            echo "Push results..."
-            echo "========================================"
-
-            git push origin main
-
-            echo "========================================"
-            echo "Screening results pushed successfully."
-            echo "========================================"
+            echo "No changes to commit"
+            exit 0
           fi
+
+          git commit -m "Update validated screening results"
+          git pull --rebase origin main
+          git push origin main
+
+          git commit -m "Update stock screening results ${{ steps.date.outputs.base_date }}"
+          git pull --rebase origin main
+          git push origin main
+
+          echo "Screening results pushed successfully."
