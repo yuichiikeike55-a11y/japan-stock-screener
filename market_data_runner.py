@@ -136,7 +136,13 @@ def main():
         as_of_jst = datetime.fromisoformat(
             as_of_text
         ).astimezone(JST)
-
+        if as_of_jst.date() < BASE_DATE:
+            raise RuntimeError(
+                f"Futures observation is older than BASE_DATE: "
+                f"{result['key']} "
+                f"as_of_jst={as_of_jst.isoformat()} "
+                f"BASE_DATE={BASE_DATE.isoformat()}"
+            )
         result["as_of_jst"] = (
             as_of_jst.isoformat()
         )
@@ -195,28 +201,48 @@ def main():
     # =====================================
 
     SNAPSHOT_DIR = OUTPUT_DIR / "market_data_history"
-
-    SNAPSHOT_DIR.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
 
     snapshot_file = (
         SNAPSHOT_DIR
         / f"market_data_{BASE_DATE.isoformat()}.json"
     )
 
+    should_save = True
+
     if snapshot_file.exists():
-        print(
-            "Existing snapshot preserved:",
-            snapshot_file,
-        )
-    else:
-        with open(
-            snapshot_file,
-            "w",
-            encoding="utf-8",
-        ) as f:
+        with open(snapshot_file, "r", encoding="utf-8") as f:
+            existing_data = json.load(f)
+
+        existing_results = {
+            item["key"]: item
+            for item in existing_data.get("results", [])
+        }
+
+        for result in results:
+            previous = existing_results.get(result["key"])
+
+            if previous is None:
+                continue
+
+            previous_time = datetime.fromisoformat(
+                previous["as_of"]
+            ).astimezone(JST)
+
+            current_time = datetime.fromisoformat(
+                result["as_of"]
+            ).astimezone(JST)
+
+            if current_time < previous_time:
+                should_save = False
+                print(
+                    "Older futures observation detected:",
+                    result["key"],
+                )
+                break
+
+    if should_save:
+        with open(snapshot_file, "w", encoding="utf-8") as f:
             json.dump(
                 output_data,
                 f,
@@ -224,9 +250,8 @@ def main():
                 indent=2,
             )
 
-        print(
-            "Saved futures snapshot:",
-            snapshot_file,
-        )        
+        print("Saved futures snapshot:", snapshot_file)
+    else:
+        print("Existing newer snapshot preserved:", snapshot_file)
 if __name__ == "__main__":
     main()
