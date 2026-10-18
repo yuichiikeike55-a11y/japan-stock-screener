@@ -1,59 +1,40 @@
+
 """
-市場データの取得処理。
+先物市場データ取得。
 
-yfinanceから
-1時間足データと日足データを取得する。
+大阪先物:
+    日付付きの検証済みJSONファイルから取得。
+    日時不明のYahoo価格は正式評価に使用しない。
 
-この段階では鮮度判定や
-正常・異常の最終判定は行わない。
+CME:
+    yfinanceの1時間足と日足を取得。
 """
 
-import re
-import time
+import json
+import os
+from pathlib import Path
 
 import pandas as pd
-import requests
 import yfinance as yf
-from bs4 import BeautifulSoup
 
-def _prepare_dataframe(
-    symbol,
-    df,
-):
-    """
-    yfinanceのDataFrameを
-    最低限扱いやすい形に整える。
-    """
 
-    if df.empty:
+def _prepare_dataframe(symbol, df):
+    if df is None or df.empty:
         raise RuntimeError(
-            f"{symbol}: no data returned from yfinance"
+            f"{symbol}: no data returned"
         )
 
-    # yfinanceのMultiIndex対策
-    if isinstance(
-        df.columns,
-        pd.MultiIndex,
-    ):
-        df.columns = (
-            df.columns
-            .get_level_values(0)
-        )
+    df = df.copy()
 
-    df.index = pd.to_datetime(
-        df.index
-    )
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
 
-    return df
+    df.index = pd.to_datetime(df.index)
+
+    return df.sort_index()
 
 
 def fetch_yfinance(symbol):
-    """
-    yfinanceから1時間足を取得する。
-
-    主に現在値と最新時刻の確認に使用する。
-    """
-
     df = yf.download(
         symbol,
         period="5d",
@@ -63,20 +44,10 @@ def fetch_yfinance(symbol):
         threads=False,
     )
 
-    return _prepare_dataframe(
-        symbol,
-        df,
-    )
+    return _prepare_dataframe(symbol, df)
 
 
 def fetch_yfinance_daily(symbol):
-    """
-    yfinanceから日足を取得する。
-
-    前営業日の終値など、
-    日次基準値の確認に使用する。
-    """
-
     df = yf.download(
         symbol,
         period="10d",
@@ -86,175 +57,77 @@ def fetch_yfinance_daily(symbol):
         threads=False,
     )
 
-    return _prepare_dataframe(
-        symbol,
-        df,
-    )
+    return _prepare_dataframe(symbol, df)
+
 
 def fetch_yahoo_japan_osaka_futures(
     symbol="5040469.O",
 ):
     """
-    Yahoo!ファイナンス日本から
-    大阪の日経平均先物1限月を取得する。
+    互換性維持用。
+
+    Yahooの時刻のみの価格は取引年月日を
+    確定できないため正式評価に使用しない。
+    """
+    raise RuntimeError(
+        "Osaka futures Yahoo source is disabled: "
+        "quote date cannot be verified."
+    )
+
+
+def fetch_verified_osaka_futures(
+    base_date,
+):
+    """
+    許諾済みの取得元から作成された
+    日付付き大阪先物JSONを読み込む。
+
+    環境変数 OSAKA_FUTURES_FILE で
+    入力ファイルを指定できる。
     """
 
-    url = (
-        "https://finance.yahoo.co.jp/quote/"
-        f"{symbol}"
+    file_path = Path(
+        os.getenv(
+            "OSAKA_FUTURES_FILE",
+            "input/osaka_futures.json",
+        )
     )
 
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 "
-            "(Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 "
-            "(KHTML, like Gecko) "
-            "Chrome/120.0 Safari/537.36"
-        )
-    }
-
-    response = None
-
-    for attempt in range(1, 4):
-        print(
-            f"{symbol}: HTTP attempt "
-            f"{attempt}/3"
-        )
-
-        response = requests.get(
-            url,
-            headers=headers,
-            timeout=20,
-        )
-
-        print(
-            f"{symbol}: HTTP status "
-            f"{response.status_code}"
-        )
-
-        if response.status_code == 200:
-            break
-
-        if attempt < 3:
-            time.sleep(5)
-
-    if response is None:
+    if not file_path.is_file():
         raise RuntimeError(
-            f"{symbol}: no HTTP response"
+            "Verified Osaka futures input missing: "
+            f"{file_path}"
         )
 
-    response.raise_for_status()
+    with open(file_path, encoding="utf-8") as f:
+        data = json.load(f)
 
-    soup = BeautifulSoup(
-        response.text,
-        "html.parser",
+    required = (
+        "symbol",
+        "source",
+        "trading_date",
+        "contract_month",
+        "quote_datetime",
+        "value",
+        "previous_close",
     )
 
-    text = soup.get_text(
-        " ",
-        strip=True,
-    )
+    missing = [
+        field
+        for field in required
+        if data.get(field) is None
+    ]
 
-    if symbol not in text:
+    if missing:
         raise RuntimeError(
-            f"{symbol}: symbol not found"
+            f"Osaka futures missing fields: {missing}"
         )
 
-    if "日経平均先物1限月" not in text:
+    if str(data["trading_date"]) != base_date.isoformat():
         raise RuntimeError(
-            f"{symbol}: futures name not found"
+            "Osaka trading date mismatch: "
+            f"expected={base_date} "
+            f"actual={data['trading_date']}"
         )
 
-    quote_match = re.search(
-        r"([0-9,]+\.\d+)\s+"
-        r"前日比\s+"
-        r"([+-]?[0-9,]+\.\d+)\s+"
-        r"\(\s*([+-]?[0-9.]+)\s*%\s*\)\s+"
-        r"15分ディレイ株価\s+"
-        r"(\d{1,2}:\d{2})",
-        text,
-    )
-
-    detail_match = re.search(
-        r"前日終値\s+用語\s+"
-        r"([0-9,]+\.\d+)\s+"
-        r"\(\s*([0-9]{1,2}/[0-9]{1,2})\s*\)\s+"
-        r"始値\s+用語\s+"
-        r"([0-9,]+\.\d+)\s+"
-        r"\(\s*\d{1,2}:\d{2}\s*\)\s+"
-        r"高値\s+用語\s+"
-        r"([0-9,]+\.\d+)\s+"
-        r"\(\s*\d{1,2}:\d{2}\s*\)\s+"
-        r"安値\s+用語\s+"
-        r"([0-9,]+\.\d+)\s+"
-        r"\(\s*\d{1,2}:\d{2}\s*\)\s+"
-        r"出来高\s+用語\s+"
-        r"([0-9,]+)\s+株",
-        text,
-    )
-
-    if quote_match is None:
-        raise RuntimeError(
-            f"{symbol}: current quote parse failed"
-        )
-
-    if detail_match is None:
-        raise RuntimeError(
-            f"{symbol}: OHLCV parse failed"
-        )
-
-    return {
-        "symbol": symbol,
-        "source": "yahoo_japan",
-        "value": float(
-            quote_match.group(1).replace(",", "")
-        ),
-        "change": float(
-            quote_match.group(2).replace(",", "")
-        ),
-        "change_pct": float(
-            quote_match.group(3)
-        ),
-        "quote_time": quote_match.group(4),
-        "previous_close": float(
-            detail_match.group(1).replace(",", "")
-        ),
-        "previous_close_date":
-            detail_match.group(2),
-        "open": float(
-            detail_match.group(3).replace(",", "")
-        ),
-        "high": float(
-            detail_match.group(4).replace(",", "")
-        ),
-        "low": float(
-            detail_match.group(5).replace(",", "")
-        ),
-        "volume": int(
-            detail_match.group(6).replace(",", "")
-        ),
-    }
-if __name__ == "__main__":
-    symbol = "NIY=F"
-
-    print("=== Hourly Data ===")
-
-    hourly = fetch_yfinance(
-        symbol
-    )
-
-    print(
-        hourly.tail()
-    )
-
-    print()
-    print("=== Daily Data ===")
-
-    daily = fetch_yfinance_daily(
-        symbol
-    )
-
-    print(
-        daily.tail()
-    )
+    return data
