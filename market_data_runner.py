@@ -31,7 +31,14 @@ if BASE_DATE > datetime.now(JST).date():
         f"{BASE_DATE.isoformat()} "
         f"current_jst_date={datetime.now(JST).date().isoformat()}"
     )
-
+# Historical futures snapshots must be reused.
+# Current live data cannot reproduce a past evaluation.
+if BASE_DATE < datetime.now(JST).date():
+    raise RuntimeError(
+        f"Historical BASE_DATE requires a saved futures snapshot: "
+        f"BASE_DATE={BASE_DATE.isoformat()}. "
+        f"Live futures data must not be used for backtesting."
+    )
 from market_data.providers import (
     fetch_yahoo_japan_osaka_futures,
     fetch_yfinance,
@@ -79,6 +86,13 @@ def main():
             ),
         )
     )
+    print(
+        "Osaka futures freshness:",
+        "status=", osaka_validated.get("status"),
+        "as_of=", osaka_validated.get("as_of"),
+        "reason=", osaka_validated.get("reason"),
+        "age_minutes=", osaka_validated.get("age_minutes"),
+    )    
 
     osaka_result = {
         "key": "nikkei225_futures_osaka",
@@ -118,7 +132,13 @@ def main():
             EVALUATION_CUTOFF,
         ),
     )
-
+    print(
+        "CME futures freshness:",
+        "status=", cme_validated.get("status"),
+        "as_of=", cme_validated.get("as_of"),
+        "reason=", cme_validated.get("reason"),
+        "age_minutes=", cme_validated.get("age_minutes"),
+    )
     cme_result = {
         "key": "nikkei225_futures_cme",
         "name": "日経225先物（CME）",
