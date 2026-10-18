@@ -5331,7 +5331,26 @@ def main():
             base_date
         )
     )
+    print("Calculated metrics:", len(metrics))
+    print("Metric failures:", len(metric_failures))
 
+    from collections import Counter
+
+    print(
+        "Metric failure reasons:",
+        dict(
+            Counter(
+                x.get("reason", "unknown")
+                for x in metric_failures
+            )
+        )
+    )
+
+    if metrics.empty or "code" not in metrics.columns:
+        raise RuntimeError(
+            "No valid stock metrics. "
+            "Screening stopped before publishing results."
+        )
     # 5. Screen
     result = apply_screen(metrics)
     reacceleration_result = apply_reacceleration_screen(metrics)
