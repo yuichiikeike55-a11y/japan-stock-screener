@@ -144,8 +144,7 @@ jobs:
       - name: Update CME futures market data
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
-        run: |
-          python market_data_runner.py
+        run: python market_data_runner.py
 
       - name: Validate CME market data
         env:
@@ -210,15 +209,12 @@ jobs:
               )
 
           print("CME validation OK")
-          print("Base date:", expected)
-          print("Change pct:", change)
           PY
 
       - name: Update 18 sector indices
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
-        run: |
-          python sector_indices.py
+        run: python sector_indices.py
 
       - name: Validate 18 sector data
         env:
@@ -285,37 +281,32 @@ jobs:
       - name: Run four-strategy stock screener
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
-        run: |
-          python screener.py
+        run: python screener.py
 
       - name: Validate screening output
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
-        run: |
-          python validate_screening_output.py
+        run: python validate_screening_output.py
 
       - name: Show generated files
-        run: |
-          find output -maxdepth 3 -type f -print
+        run: find output -maxdepth 3 -type f -print
 
       - name: Commit validated results
+        shell: bash
         run: |
+          set -euo pipefail
+
           git config user.name "github-actions[bot]"
-          git config user.email \
-            "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add output/
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
-            exit 0
+          else
+            git commit -m "Update validated screening results"
+            git pull --rebase origin main
+            git push origin main
           fi
 
-          git commit -m "Update validated screening results"
-          git pull --rebase origin main
-          git push origin main
-          fi
-
-          git commit -m "Update validated screening results"
-          git pull --rebase origin main
-          git push origin main
+          echo "Commit step completed successfully"
