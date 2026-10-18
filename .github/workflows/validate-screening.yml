@@ -1,0 +1,32 @@
+
+name: Validate Screening Output
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_date:
+        description: "Screening base date (YYYY-MM-DD)"
+        required: true
+        default: "2026-10-16"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate screening output
+        env:
+          BASE_DATE: ${{ inputs.base_date }}
+        run: python validate_screening_output.py
