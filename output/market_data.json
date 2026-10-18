@@ -1,30 +1,24 @@
 {
   "results": [
     {
-      "key": "nikkei225_futures_osaka",
-      "name": "日経225先物（大阪）",
-      "category": "futures",
-      "symbol": "5040469.O",
-      "source": "yahoo_japan",
-      "value": 65520.0,
-      "previous_close": 64800.0,
-      "change": 720.0,
-      "change_pct": 1.11,
-      "as_of": "2026-10-16T15:45:00+09:00",
-      "status": "closed"
-    },
-    {
       "key": "nikkei225_futures_cme",
       "name": "日経225先物（CME）",
       "category": "futures",
       "symbol": "NKD=F",
       "source": "yfinance",
-      "value": 63975.0,
+      "value": 65520.0,
       "previous_close": 65825.0,
-      "change": -1850.0,
-      "change_pct": -2.8104823395366503,
-      "as_of": "2026-10-16T16:00:00-04:00",
-      "status": "closed"
+      "change": -305.0,
+      "change_pct": -0.4633497911127991,
+      "as_of": "2026-10-16T20:00:00+09:00",
+      "bar_start_jst": "2026-10-16T19:00:00+09:00",
+      "bar_completed_jst": "2026-10-16T20:00:00+09:00",
+      "age_minutes": 30.0,
+      "status": "ok",
+      "reason": "within_age_limit",
+      "as_of_jst": "2026-10-16T20:00:00+09:00",
+      "evaluation_base_date": "2026-10-16",
+      "evaluation_cutoff_jst": "2026-10-16T20:30:00+09:00"
     }
   ]
 }
