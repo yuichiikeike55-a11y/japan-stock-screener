@@ -1,16 +1,19 @@
+
 """
 市場データの標準化処理。
 
-1時間足と日足の生DataFrameを、
-後続処理で共通して扱える形式へ変換する。
+CME:
+    評価時刻以前の確定済み1時間足を使用する。
 
-この段階では鮮度判定や
-正常・異常の最終判定は行わない。
+大阪:
+    取得元に現在値の年月日がない場合、
+    日付を推測せず停止する。
 """
 
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+
+import pandas as pd
 
 
 JST = ZoneInfo("Asia/Tokyo")
@@ -20,169 +23,90 @@ def normalize_yfinance(
     symbol,
     hourly_df,
     daily_df,
+    cutoff=None,
 ):
-    """
-    yfinanceの1時間足と日足を
-    共通市場データ形式へ変換する。
+    if hourly_df is None or hourly_df.empty:
+        raise RuntimeError(f"{symbol}: empty hourly data")
 
-    value:
-        最新1時間足のClose
-
-    previous_close:
-        最新1時間足の日付より前にある
-        最新の日足Close
-    """
-
-    # =====================================
-    # 1時間足チェック
-    # =====================================
-
-    if (
-        hourly_df is None
-        or hourly_df.empty
-    ):
-        raise RuntimeError(
-            f"{symbol}: empty hourly DataFrame"
-        )
+    if daily_df is None or daily_df.empty:
+        raise RuntimeError(f"{symbol}: empty daily data")
 
     if "Close" not in hourly_df.columns:
-        raise RuntimeError(
-            f"{symbol}: hourly Close column is missing"
-        )
-
-    valid_hourly = hourly_df.dropna(
-        subset=["Close"]
-    )
-
-    if valid_hourly.empty:
-        raise RuntimeError(
-            f"{symbol}: no valid hourly Close data"
-        )
-
-    # =====================================
-    # 日足チェック
-    # =====================================
-
-    if (
-        daily_df is None
-        or daily_df.empty
-    ):
-        raise RuntimeError(
-            f"{symbol}: empty daily DataFrame"
-        )
+        raise RuntimeError(f"{symbol}: hourly Close missing")
 
     if "Close" not in daily_df.columns:
+        raise RuntimeError(f"{symbol}: daily Close missing")
+
+    hourly = hourly_df.dropna(subset=["Close"]).copy()
+    daily = daily_df.dropna(subset=["Close"]).copy()
+
+    if hourly.empty or daily.empty:
+        raise RuntimeError(f"{symbol}: no valid Close data")
+
+    if cutoff is None:
+        cutoff = datetime.now(JST)
+
+    if cutoff.tzinfo is None:
+        raise RuntimeError("cutoff must include timezone")
+
+    cutoff = cutoff.astimezone(JST)
+
+    if hourly.index.tz is None:
         raise RuntimeError(
-            f"{symbol}: daily Close column is missing"
+            f"{symbol}: hourly index must include timezone"
         )
 
-    valid_daily = daily_df.dropna(
-        subset=["Close"]
-    )
+    hourly = hourly.sort_index()
+    hourly.index = hourly.index.tz_convert(JST)
 
-    if valid_daily.empty:
+    # yfinanceの1時間足は通常、足の開始時刻。
+    # 1時間後に確定した足のみ使用する。
+    completed_at = hourly.index + pd.Timedelta(hours=1)
+
+    hourly = hourly.loc[completed_at <= cutoff]
+
+    if hourly.empty:
         raise RuntimeError(
-            f"{symbol}: no valid daily Close data"
+            f"{symbol}: no completed hourly bar before cutoff"
         )
 
-    # =====================================
-    # 最新値
-    # =====================================
+    latest_timestamp = hourly.index[-1]
+    latest_completed_at = latest_timestamp + timedelta(hours=1)
 
-    latest_hourly = valid_hourly.iloc[-1]
+    value = float(hourly.iloc[-1]["Close"])
 
-    value = float(
-        latest_hourly["Close"]
-    )
+    daily = daily.sort_index()
 
-    latest_timestamp = (
-        valid_hourly.index[-1]
-    )
+    # 日足の取引日ラベルは取得元の仕様に依存する。
+    # JSTに変換して日付を決め打ちしない。
+    latest_date = latest_timestamp.date()
 
-    latest_date = (
-        latest_timestamp.date()
-    )
+    previous_rows = daily.loc[
+        [timestamp.date() < latest_date for timestamp in daily.index]
+    ]
 
-    # =====================================
-    # 前営業日終値
-    # =====================================
-
-    previous_daily_rows = (
-        valid_daily[
-            valid_daily.index.map(
-                lambda x:
-                    x.date()
-                    < latest_date
-            )
-        ]
-    )
-
-    if previous_daily_rows.empty:
+    if previous_rows.empty:
         raise RuntimeError(
             f"{symbol}: previous daily Close not found"
         )
 
-    previous_daily = (
-        previous_daily_rows.iloc[-1]
-    )
-
-    previous_close = float(
-        previous_daily["Close"]
-    )
+    previous_close = float(previous_rows.iloc[-1]["Close"])
 
     if previous_close == 0:
-        raise RuntimeError(
-            f"{symbol}: previous Close is zero"
-        )
+        raise RuntimeError(f"{symbol}: previous Close is zero")
 
-    # =====================================
-    # 前日比
-    # =====================================
-
-    change = (
-        value
-        - previous_close
-    )
-
-    change_pct = (
-        change
-        / previous_close
-        * 100
-    )
-
-    # =====================================
-    # 最新時刻
-    # =====================================
-
-    as_of = (
-        latest_timestamp.isoformat()
-    )
-
-    # =====================================
-    # 共通形式
-    # =====================================
+    change = value - previous_close
 
     return {
-        "symbol":
-            symbol,
-
-        "source":
-            "yfinance",
-
-        "value":
-            value,
-
-        "previous_close":
-            previous_close,
-
-        "change":
-            change,
-
-        "change_pct":
-            change_pct,
-
-        "as_of":
-            as_of,
+        "symbol": symbol,
+        "source": "yfinance",
+        "value": value,
+        "previous_close": previous_close,
+        "change": change,
+        "change_pct": change / previous_close * 100,
+        "as_of": latest_completed_at.isoformat(),
+        "bar_start_jst": latest_timestamp.isoformat(),
+        "bar_completed_jst": latest_completed_at.isoformat(),
     }
 
 
@@ -190,12 +114,6 @@ def normalize_yahoo_japan_osaka(
     raw_data,
     now=None,
 ):
-    """
-    Yahoo!ファイナンス日本の
-    大阪日経225先物データを
-    共通市場データ形式へ変換する。
-    """
-
     required = [
         "symbol",
         "source",
@@ -207,8 +125,7 @@ def normalize_yahoo_japan_osaka(
     ]
 
     missing = [
-        key
-        for key in required
+        key for key in required
         if raw_data.get(key) is None
     ]
 
@@ -217,91 +134,29 @@ def normalize_yahoo_japan_osaka(
             f"Osaka futures missing fields: {missing}"
         )
 
-    # =====================================
-    # 現在時刻
-    # =====================================
+    # quote_timeだけでは取引日を確定できない。
+    # 取得元に明示的な日時がない限り使用しない。
+    quote_datetime = raw_data.get("quote_datetime")
 
-    if now is None:
-        now = datetime.now(JST)
-
-    elif now.tzinfo is None:
+    if not quote_datetime:
         raise RuntimeError(
-            "now must include timezone"
+            "Osaka futures quote date is unverified. "
+            "A dated quote source is required."
         )
 
-    else:
-        now = now.astimezone(JST)
+    as_of = datetime.fromisoformat(quote_datetime)
 
-    # =====================================
-    # Yahoo Japanの表示時刻
-    # =====================================
-
-    try:
-        quote_clock = datetime.strptime(
-            raw_data["quote_time"],
-            "%H:%M",
-        ).time()
-
-    except (TypeError, ValueError) as e:
+    if as_of.tzinfo is None:
         raise RuntimeError(
-            "invalid Osaka futures quote_time: "
-            f"{raw_data['quote_time']}"
-        ) from e
-
-    # =====================================
-    # as_of作成
-    # =====================================
-
-    as_of = datetime.combine(
-        now.date(),
-        quote_clock,
-        tzinfo=JST,
-    )
-
-    # quote_timeが現在時刻より未来なら、
-    # 日付をまたいだ前日のデータとして扱う。
-    if as_of > now:
-        as_of = (
-            as_of
-            - timedelta(days=1)
+            "Osaka quote_datetime must include timezone"
         )
-    # 土日の場合は直近金曜日へ戻す。
-    while as_of.weekday() >= 5:
-        as_of = (
-            as_of
-            - timedelta(days=1)
-        )
-    # =====================================
-    # 共通形式
-    # =====================================
 
     return {
-        "symbol":
-            raw_data["symbol"],
-
-        "source":
-            raw_data["source"],
-
-        "value":
-            float(
-                raw_data["value"]
-            ),
-
-        "previous_close":
-            float(
-                raw_data["previous_close"]
-            ),
-
-        "change":
-            float(
-                raw_data["change"]
-            ),
-
-        "change_pct":
-            float(
-                raw_data["change_pct"]
-            ),
-
-        "as_of":
-            as_of.isoformat(),
+        "symbol": raw_data["symbol"],
+        "source": raw_data["source"],
+        "value": float(raw_data["value"]),
+        "previous_close": float(raw_data["previous_close"]),
+        "change": float(raw_data["change"]),
+        "change_pct": float(raw_data["change_pct"]),
+        "as_of": as_of.astimezone(JST).isoformat(),
     }
