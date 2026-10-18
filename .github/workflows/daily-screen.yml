@@ -90,6 +90,7 @@ jobs:
           echo "JST time         : $(TZ=Asia/Tokyo date)"
           echo "========================================"
       - name: Update futures market data
+        id: futures
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: |
@@ -105,6 +106,7 @@ jobs:
           echo "Futures market data update complete"
           echo "========================================"
       - name: Run stock screener
+        id: screening
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: |
@@ -140,11 +142,19 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if [ "${{ job.status }}" = "success" ]; then
-            echo "All steps succeeded. Staging screening results."
+          if [ "${{ steps.futures.outcome }}" != "success" ]; then
+            echo "Futures update failed or was skipped."
+            echo "No output files will be committed."
+            exit 0
+
+          elif [ "${{ steps.futures.outcome }}" = "success" ] && \
+               [ "${{ steps.screening.outcome }}" = "success" ]; then
+            echo "Futures and stock screening succeeded."
             git add output/
+
           else
-            echo "Earlier step failed. Staging validated futures snapshots only."
+            echo "Stock screening did not succeed."
+            echo "Staging validated futures snapshots only."
 
             if [ -d "output/market_data_history" ]; then
               git add output/market_data_history/
