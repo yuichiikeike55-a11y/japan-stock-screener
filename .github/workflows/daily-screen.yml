@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       base_date:
-        description: "Base date YYYY-MM-DD (blank = today JST)"
+        description: "Base date YYYY-MM-DD (blank = latest JP trading day)"
         required: false
         type: string
 
@@ -49,26 +49,89 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas numpy yfinance openpyxl xlrd requests beautifulsoup4 lxml
+          pip install \
+            pandas \
+            numpy \
+            yfinance \
+            openpyxl \
+            xlrd \
+            requests \
+            beautifulsoup4 \
+            lxml \
+            exchange-calendars
 
       - name: Determine base date
         id: date
         env:
           MANUAL_BASE_DATE: ${{ github.event.inputs.base_date }}
         run: |
-          if [ -n "$MANUAL_BASE_DATE" ]; then
-            BASE_DATE="$MANUAL_BASE_DATE"
-          else
-            BASE_DATE=$(TZ=Asia/Tokyo date +%Y-%m-%d)
-          fi
+          python - <<'PY'
+          import os
+          from datetime import datetime, timedelta
+          from zoneinfo import ZoneInfo
 
-          if ! date -d "$BASE_DATE" +%Y-%m-%d | grep -qx "$BASE_DATE"; then
-            echo "::error::Invalid BASE_DATE: $BASE_DATE"
-            exit 1
-          fi
+          import pandas as pd
+          import exchange_calendars as xcals
 
-          echo "base_date=$BASE_DATE" >> "$GITHUB_OUTPUT"
-          echo "Target BASE_DATE: $BASE_DATE"
+          today = datetime.now(
+              ZoneInfo("Asia/Tokyo")
+          ).date()
+
+          manual = os.getenv(
+              "MANUAL_BASE_DATE", ""
+          ).strip()
+
+          calendar = xcals.get_calendar("XTKS")
+
+          if manual:
+              requested = datetime.strptime(
+                  manual, "%Y-%m-%d"
+              ).date()
+
+              if requested > today:
+                  raise RuntimeError(
+                      "STOP: future BASE_DATE"
+                  )
+
+              if not calendar.is_session(
+                  pd.Timestamp(requested)
+              ):
+                  raise RuntimeError(
+                      "STOP: BASE_DATE is not "
+                      "a Tokyo Stock Exchange trading day"
+                  )
+
+              base_date = requested
+
+          else:
+              start = pd.Timestamp(
+                  today - timedelta(days=30)
+              )
+              end = pd.Timestamp(today)
+
+              sessions = calendar.sessions_in_range(
+                  start, end
+              )
+
+              if len(sessions) == 0:
+                  raise RuntimeError(
+                      "STOP: no trading session found"
+                  )
+
+              base_date = sessions[-1].date()
+
+          with open(
+              os.environ["GITHUB_OUTPUT"],
+              "a",
+              encoding="utf-8",
+          ) as f:
+              f.write(
+                  f"base_date={base_date.isoformat()}\n"
+              )
+
+          print("JST today:", today)
+          print("Selected BASE_DATE:", base_date)
+          PY
 
       - name: Check Python syntax
         run: |
@@ -93,41 +156,52 @@ jobs:
           from pathlib import Path
 
           path = Path("output/market_data.json")
-          if not path.is_file():
-              raise SystemExit("STOP: market_data.json is missing")
 
-          data = json.loads(path.read_text(encoding="utf-8"))
+          if not path.is_file():
+              raise SystemExit(
+                  "STOP: market_data.json missing"
+              )
+
+          data = json.loads(
+              path.read_text(encoding="utf-8")
+          )
+
           rows = data.get("results", [])
 
           cme = next(
               (
                   row for row in rows
-                  if row.get("key") == "nikkei225_futures_cme"
+                  if row.get("key")
+                  == "nikkei225_futures_cme"
               ),
               None,
           )
 
           if cme is None:
-              raise SystemExit("STOP: CME futures data is missing")
+              raise SystemExit(
+                  "STOP: CME futures missing"
+              )
 
           if cme.get("status") != "ok":
               raise SystemExit(
-                  f"STOP: CME status is {cme.get('status')}"
+                  "STOP: CME status is not ok"
               )
 
           expected = os.environ["BASE_DATE"]
-          actual = cme.get("evaluation_base_date")
 
-          if actual != expected:
+          if cme.get(
+              "evaluation_base_date"
+          ) != expected:
               raise SystemExit(
-                  f"STOP: CME base date mismatch: "
-                  f"expected={expected}, actual={actual}"
+                  "STOP: CME base date mismatch"
               )
 
           if cme.get("change_pct") is None:
-              raise SystemExit("STOP: CME change_pct is missing")
+              raise SystemExit(
+                  "STOP: CME change_pct missing"
+              )
 
-          print("CME market data validation OK")
+          print("CME validation OK")
           PY
 
       - name: Update 18 sector indices
@@ -145,41 +219,57 @@ jobs:
           import os
           from pathlib import Path
 
-          path = Path("output/sector_indices_latest.json")
-          if not path.is_file():
-              raise SystemExit("STOP: sector data is missing")
+          path = Path(
+              "output/sector_indices_latest.json"
+          )
 
-          data = json.loads(path.read_text(encoding="utf-8"))
+          if not path.is_file():
+              raise SystemExit(
+                  "STOP: sector data missing"
+              )
+
+          data = json.loads(
+              path.read_text(encoding="utf-8")
+          )
+
           expected = os.environ["BASE_DATE"]
 
-          if data.get("latest_base_date") != expected:
+          if data.get(
+              "latest_base_date"
+          ) != expected:
               raise SystemExit(
-                  "STOP: sector base date mismatch: "
-                  f"expected={expected}, "
-                  f"actual={data.get('latest_base_date')}"
+                  "STOP: sector base date mismatch"
               )
 
           rows = data.get("results", [])
 
           if data.get("sector_count") != 18:
-              raise SystemExit("STOP: sector_count is not 18")
+              raise SystemExit(
+                  "STOP: sector_count != 18"
+              )
 
           if data.get("processed_count") != 18:
-              raise SystemExit("STOP: processed_count is not 18")
+              raise SystemExit(
+                  "STOP: processed_count != 18"
+              )
 
           if data.get("failure_count") != 0:
-              raise SystemExit("STOP: sector failure_count is not 0")
+              raise SystemExit(
+                  "STOP: sector failures detected"
+              )
 
           if len(rows) != 18:
-              raise SystemExit("STOP: sector results count is not 18")
+              raise SystemExit(
+                  "STOP: sector results != 18"
+              )
 
           for row in rows:
               if row.get("base_date") != expected:
                   raise SystemExit(
-                      "STOP: sector row base date mismatch"
+                      "STOP: sector row date mismatch"
                   )
 
-          print("18 sector data validation OK")
+          print("18 sector validation OK")
           PY
 
       - name: Run four-strategy stock screener
@@ -194,8 +284,11 @@ jobs:
           from pathlib import Path
 
           output = Path("output")
+
           if not output.is_dir():
-              raise SystemExit("STOP: output directory is missing")
+              raise SystemExit(
+                  "STOP: output directory missing"
+              )
 
           files = [
               p for p in output.rglob("*")
@@ -209,7 +302,7 @@ jobs:
 
           if not files:
               raise SystemExit(
-                  "STOP: no screening output files were found"
+                  "STOP: screening output missing"
               )
 
           print("Screening output files:")
@@ -237,9 +330,3 @@ jobs:
           git commit -m "Update validated screening results"
           git pull --rebase origin main
           git push origin main
-
-          git commit -m "Update stock screening results ${{ steps.date.outputs.base_date }}"
-          git pull --rebase origin main
-          git push origin main
-
-          echo "Screening results pushed successfully."
