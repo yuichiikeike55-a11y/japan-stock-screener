@@ -73,6 +73,10 @@ def main():
         validate_freshness(
             osaka_normalized,
             180,
+            now=min(
+                datetime.now(JST),
+                EVALUATION_CUTOFF,
+            ),
         )
     )
 
@@ -109,6 +113,10 @@ def main():
     cme_validated = validate_freshness(
         cme_normalized,
         180,
+        now=min(
+            datetime.now(JST),
+            EVALUATION_CUTOFF,
+        ),
     )
 
     cme_result = {
