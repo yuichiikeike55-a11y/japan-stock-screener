@@ -5083,22 +5083,9 @@ def main():
     ).strip()
 
     if requested_date_raw:
-        action_date = pd.Timestamp(
+        requested_date = pd.Timestamp(
             requested_date_raw
         ).normalize()
-
-        previous_trading_date = get_previous_trading_date(
-            action_date.date()
-        )
-
-        requested_date = pd.Timestamp(
-            previous_trading_date
-        ).normalize()
-
-        print(
-            "Action date:",
-            action_date.date()
-        )
 
         print(
             "Requested base date:",
