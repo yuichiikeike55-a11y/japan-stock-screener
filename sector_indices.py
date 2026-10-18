@@ -850,6 +850,7 @@ def build_history_records(df):
     return records
 
 
+
 def main():
     requested_base_date_raw = os.environ.get(
         "BASE_DATE",
@@ -859,25 +860,12 @@ def main():
     requested_base_date = None
 
     if requested_base_date_raw:
-        action_date = pd.Timestamp(
+        requested_base_date = pd.Timestamp(
             requested_base_date_raw
         ).normalize()
 
-        previous_trading_date = get_previous_trading_date(
-            action_date.date()
-        )
-
-        requested_base_date = pd.Timestamp(
-            previous_trading_date
-        ).normalize()
-
         print(
-            "Action date:",
-            action_date.date()
-        )
-
-        print(
-            "Required previous trading date:",
+            "Requested base date:",
             requested_base_date.date()
         )
 
