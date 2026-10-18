@@ -155,17 +155,24 @@ def main():
             EVALUATION_CUTOFF.isoformat()
         )
 
-        if as_of_jst > EVALUATION_CUTOFF:
+        now_jst = datetime.now(JST)
+
+        effective_cutoff = min(
+            now_jst,
+            EVALUATION_CUTOFF,
+        )
+
+        if as_of_jst > effective_cutoff:
             result["status"] = "stale"
             result["reason"] = (
-                "data_after_evaluation_cutoff"
+                "data_after_effective_cutoff"
             )
 
             raise RuntimeError(
-                f"Futures data after cutoff: "
+                f"Futures data after effective cutoff: "
                 f"{result['key']} "
                 f"as_of={as_of_jst.isoformat()} "
-                f"cutoff={EVALUATION_CUTOFF.isoformat()}"
+                f"cutoff={effective_cutoff.isoformat()}"
             )
 
         if result.get("status") not in (
