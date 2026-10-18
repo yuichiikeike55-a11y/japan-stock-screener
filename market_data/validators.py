@@ -164,17 +164,11 @@ def validate_freshness(
 
     result = dict(data)
 
-    if (
-        age_minutes
-        <= max_age_minutes
-    ):
-        result["status"] = (
-            "ok"
-        )
-
+    if age_minutes <= max_age_minutes:
+        result["status"] = "ok"
     else:
-        result["status"] = (
-            "stale"
-        )
+        result["status"] = "stale"
+        result["reason"] = "age_exceeds_max_age"
+        result["age_minutes"] = round(age_minutes, 1)
 
     return result
