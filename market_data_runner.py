@@ -1,5 +1,30 @@
 import json
+import os
+
+from datetime import datetime, time, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
+
+JST = ZoneInfo("Asia/Tokyo")
+
+BASE_DATE_TEXT = os.getenv(
+    "BASE_DATE",
+    "",
+).strip()
+
+if BASE_DATE_TEXT:
+    BASE_DATE = datetime.strptime(
+        BASE_DATE_TEXT,
+        "%Y-%m-%d",
+    ).date()
+else:
+    BASE_DATE = datetime.now(JST).date()
+
+EVALUATION_CUTOFF = datetime.combine(
+    BASE_DATE,
+    time(20, 30),
+    tzinfo=JST,
+)
 
 from market_data.providers import (
     fetch_yahoo_japan_osaka_futures,
@@ -90,6 +115,56 @@ def main():
     results.append(
         cme_result
     )
+    # =====================================
+    # Futures evaluation cutoff validation
+    # =====================================
+
+    for result in results:
+        as_of_text = result.get("as_of")
+
+        if not as_of_text:
+            raise RuntimeError(
+                f"Missing futures as_of: {result.get('key')}"
+            )
+
+        as_of_jst = datetime.fromisoformat(
+            as_of_text
+        ).astimezone(JST)
+
+        result["as_of_jst"] = (
+            as_of_jst.isoformat()
+        )
+
+        result["evaluation_base_date"] = (
+            BASE_DATE.isoformat()
+        )
+
+        result["evaluation_cutoff_jst"] = (
+            EVALUATION_CUTOFF.isoformat()
+        )
+
+        if as_of_jst > EVALUATION_CUTOFF:
+            result["status"] = "stale"
+            result["reason"] = (
+                "data_after_evaluation_cutoff"
+            )
+
+            raise RuntimeError(
+                f"Futures data after cutoff: "
+                f"{result['key']} "
+                f"as_of={as_of_jst.isoformat()} "
+                f"cutoff={EVALUATION_CUTOFF.isoformat()}"
+            )
+
+        if result.get("status") not in (
+            "ok",
+            "closed",
+        ):
+            raise RuntimeError(
+                f"Futures data unavailable: "
+                f"{result['key']} "
+                f"status={result.get('status')}"
+            )    
     # =====================================
     # Save JSON
     # =====================================
