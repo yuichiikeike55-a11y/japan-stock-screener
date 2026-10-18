@@ -354,16 +354,38 @@ def validate_ohlcv(df, symbol):
     )
 
     return x, flags
+
 def download_history(symbol):
+    requested_base_date_raw = os.environ.get(
+        "BASE_DATE", ""
+    ).strip()
+
+    download_args = {
+        "interval": "1d",
+        "auto_adjust": False,
+        "progress": False,
+        "threads": False,
+    }
+
+    if requested_base_date_raw:
+        base_date = pd.Timestamp(
+            requested_base_date_raw
+        ).normalize()
+
+        download_args["start"] = (
+            base_date - pd.Timedelta(days=800)
+        ).strftime("%Y-%m-%d")
+
+        download_args["end"] = (
+            base_date + pd.Timedelta(days=1)
+        ).strftime("%Y-%m-%d")
+    else:
+        download_args["period"] = "2y"
+
     df = yf.download(
         symbol,
-        period="2y",
-        interval="1d",
-        auto_adjust=False,
-        progress=False,
-        threads=False,
+        **download_args,
     )
-
     if df.empty:
         return pd.DataFrame()
 
