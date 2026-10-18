@@ -1,11 +1,14 @@
 
 """
 市場データの鮮度検証。
-
-不明な取引時間を推測してclosed扱いにしない。
+CME先物の確定済み1時間足を評価する。
 """
 
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+
+JST = ZoneInfo("Asia/Tokyo")
 
 
 def get_latest_trading_date(now):
@@ -24,7 +27,14 @@ def validate_freshness(
     if not data.get("as_of"):
         raise RuntimeError("as_of is missing")
 
-    as_of = datetime.fromisoformat(data["as_of"])
+    try:
+        as_of = datetime.fromisoformat(
+            data["as_of"]
+        )
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError(
+            "Invalid as_of timestamp"
+        ) from exc
 
     if as_of.tzinfo is None:
         raise RuntimeError(
@@ -32,14 +42,15 @@ def validate_freshness(
         )
 
     if now is None:
-        now = datetime.now(as_of.tzinfo)
+        now = datetime.now(JST)
 
     if now.tzinfo is None:
         raise RuntimeError(
             "now must include timezone"
         )
 
-    now = now.astimezone(as_of.tzinfo)
+    as_of = as_of.astimezone(JST)
+    now = now.astimezone(JST)
 
     if as_of > now:
         raise RuntimeError(
@@ -51,7 +62,9 @@ def validate_freshness(
     ).total_seconds() / 60
 
     result = dict(data)
-    result["age_minutes"] = round(age_minutes, 1)
+    result["age_minutes"] = round(
+        age_minutes, 1
+    )
 
     if age_minutes <= max_age_minutes:
         result["status"] = "ok"
