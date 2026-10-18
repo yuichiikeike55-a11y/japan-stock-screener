@@ -184,5 +184,43 @@ def main():
             ensure_ascii=False,
             indent=2,
         )
+    # =====================================
+    # Save dated futures snapshot
+    # =====================================
+
+    SNAPSHOT_DIR = OUTPUT_DIR / "market_data_history"
+
+    SNAPSHOT_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    snapshot_file = (
+        SNAPSHOT_DIR
+        / f"market_data_{BASE_DATE.isoformat()}.json"
+    )
+
+    if snapshot_file.exists():
+        print(
+            "Existing snapshot preserved:",
+            snapshot_file,
+        )
+    else:
+        with open(
+            snapshot_file,
+            "w",
+            encoding="utf-8",
+        ) as f:
+            json.dump(
+                output_data,
+                f,
+                ensure_ascii=False,
+                indent=2,
+            )
+
+        print(
+            "Saved futures snapshot:",
+            snapshot_file,
+        )        
 if __name__ == "__main__":
     main()
