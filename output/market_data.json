@@ -6,19 +6,19 @@
       "category": "futures",
       "symbol": "NKD=F",
       "source": "yfinance",
-      "value": 64980.0,
-      "previous_close": 63975.0,
-      "change": 1005.0,
-      "change_pct": 1.570926143024619,
-      "as_of": "2026-10-19T20:00:00+09:00",
-      "bar_start_jst": "2026-10-19T19:00:00+09:00",
-      "bar_completed_jst": "2026-10-19T20:00:00+09:00",
+      "value": 64165.0,
+      "previous_close": 64740.0,
+      "change": -575.0,
+      "change_pct": -0.8881680568427556,
+      "as_of": "2026-10-20T20:00:00+09:00",
+      "bar_start_jst": "2026-10-20T19:00:00+09:00",
+      "bar_completed_jst": "2026-10-20T20:00:00+09:00",
       "age_minutes": 30.0,
       "status": "ok",
       "reason": "within_age_limit",
-      "as_of_jst": "2026-10-19T20:00:00+09:00",
-      "evaluation_base_date": "2026-10-19",
-      "evaluation_cutoff_jst": "2026-10-19T20:30:00+09:00"
+      "as_of_jst": "2026-10-20T20:00:00+09:00",
+      "evaluation_base_date": "2026-10-20",
+      "evaluation_cutoff_jst": "2026-10-20T20:30:00+09:00"
     }
   ]
 }
