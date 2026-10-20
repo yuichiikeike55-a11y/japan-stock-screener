@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-20",
-  "generated_at": "2026-10-20T13:50:45.501232+00:00",
+  "generated_at": "2026-10-20T14:12:22.100998+00:00",
   "code": "8739",
   "data": {
     "code": "8739",
@@ -13,7 +13,7 @@
     "high52_available": true,
     "open": 2606.0,
     "high": 2615.0,
-    "low": 2511.0,
+    "low": 2514.0,
     "close": 2516.0,
     "previous_open": 2630.0,
     "previous_high": 2640.0,
@@ -30,7 +30,7 @@
     "rsi14": 44.820717131474105,
     "high52": 2710.0,
     "high20": 2710.0,
-    "low20": 2511.0,
+    "low20": 2514.0,
     "ma5_gap_pct": -3.579366904269188,
     "ma25_gap_pct": -4.38113769724241,
     "high52_gap_pct": -7.158671586715871,
