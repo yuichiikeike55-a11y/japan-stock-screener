@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-20",
-  "generated_at": "2026-10-20T12:52:03.349460+00:00",
+  "generated_at": "2026-10-20T13:32:34.882066+00:00",
   "code": "2871",
   "data": {
     "code": "2871",
@@ -13,7 +13,7 @@
     "high52_available": true,
     "open": 2134.0,
     "high": 2163.5,
-    "low": 2131.0,
+    "low": 2131.5,
     "close": 2149.5,
     "previous_open": 2168.5,
     "previous_high": 2172.5,

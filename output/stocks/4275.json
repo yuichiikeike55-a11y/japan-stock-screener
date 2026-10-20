@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-20",
-  "generated_at": "2026-10-20T12:52:03.417814+00:00",
+  "generated_at": "2026-10-20T13:32:34.973456+00:00",
   "code": "4275",
   "data": {
     "code": "4275",
@@ -13,7 +13,7 @@
     "high52_available": true,
     "open": 1750.0,
     "high": 1750.0,
-    "low": 1686.0,
+    "low": 1683.0,
     "close": 1688.0,
     "previous_open": 1720.0,
     "previous_high": 1759.0,
@@ -30,7 +30,7 @@
     "rsi14": 31.06796116504854,
     "high52": 3095.0,
     "high20": 2100.0,
-    "low20": 1686.0,
+    "low20": 1683.0,
     "ma5_gap_pct": -3.0108021144564567,
     "ma25_gap_pct": -10.73128424259091,
     "high52_gap_pct": -45.460420032310175,

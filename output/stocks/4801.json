@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-20",
-  "generated_at": "2026-10-20T12:52:03.447395+00:00",
+  "generated_at": "2026-10-20T13:32:35.016738+00:00",
   "code": "4801",
   "data": {
     "code": "4801",
@@ -13,7 +13,7 @@
     "high52_available": true,
     "open": 2320.0,
     "high": 2329.0,
-    "low": 2294.0,
+    "low": 2291.0,
     "close": 2301.0,
     "previous_open": 2335.0,
     "previous_high": 2352.0,
@@ -30,7 +30,7 @@
     "rsi14": 31.336405529953915,
     "high52": 2562.0,
     "high20": 2439.0,
-    "low20": 2294.0,
+    "low20": 2291.0,
     "ma5_gap_pct": -1.0748065348237357,
     "ma25_gap_pct": -2.5313881970213115,
     "high52_gap_pct": -10.187353629976581,
