@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-20",
-  "generated_at": "2026-10-20T13:32:34.819756+00:00",
+  "generated_at": "2026-10-20T13:50:45.141564+00:00",
   "code": "1803",
   "data": {
     "code": "1803",
@@ -13,7 +13,7 @@
     "high52_available": true,
     "open": 2015.0,
     "high": 2018.5,
-    "low": 1989.0,
+    "low": 1989.5,
     "close": 1996.5,
     "previous_open": 2020.0,
     "previous_high": 2025.0,
