@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-21",
-  "generated_at": "2026-10-21T13:05:35.173441+00:00",
+  "generated_at": "2026-10-21T13:43:10.535835+00:00",
   "code": "9612",
   "data": {
     "code": "9612",
@@ -12,7 +12,7 @@
     "history_days": 400,
     "high52_available": true,
     "open": 1218.0,
-    "high": 1230.0,
+    "high": 1233.0,
     "low": 1211.0,
     "close": 1221.0,
     "previous_open": 1238.0,
