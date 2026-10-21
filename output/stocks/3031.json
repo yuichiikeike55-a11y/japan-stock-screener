@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-21",
-  "generated_at": "2026-10-21T13:43:09.989092+00:00",
+  "generated_at": "2026-10-21T14:05:45.808496+00:00",
   "code": "3031",
   "data": {
     "code": "3031",
@@ -13,7 +13,7 @@
     "high52_available": true,
     "open": 678.0,
     "high": 681.0,
-    "low": 662.0,
+    "low": 665.0,
     "close": 668.0,
     "previous_open": 695.0,
     "previous_high": 697.0,
@@ -30,7 +30,7 @@
     "rsi14": 25.252525252525253,
     "high52": 736.0,
     "high20": 721.0,
-    "low20": 662.0,
+    "low20": 665.0,
     "ma5_gap_pct": -2.737332556785088,
     "ma25_gap_pct": -3.373256957704107,
     "high52_gap_pct": -9.239130434782606,

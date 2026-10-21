@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-21",
-  "generated_at": "2026-10-21T13:43:09.995660+00:00",
+  "generated_at": "2026-10-21T14:05:45.812891+00:00",
   "code": "3093",
   "data": {
     "code": "3093",
@@ -13,7 +13,7 @@
     "high52_available": true,
     "open": 1905.0,
     "high": 1905.0,
-    "low": 1849.0,
+    "low": 1850.0,
     "close": 1888.0,
     "previous_open": 1912.0,
     "previous_high": 1928.0,
@@ -30,7 +30,7 @@
     "rsi14": 37.362637362637365,
     "high52": 2349.0,
     "high20": 2004.0,
-    "low20": 1849.0,
+    "low20": 1850.0,
     "ma5_gap_pct": -1.0378446378026984,
     "ma25_gap_pct": -2.097031797722515,
     "high52_gap_pct": -19.62537249893572,
