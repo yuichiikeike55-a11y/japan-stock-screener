@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-22",
-  "generated_at": "2026-10-22T13:43:42.831089+00:00",
+  "generated_at": "2026-10-22T14:25:53.992537+00:00",
   "code": "5981",
   "data": {
     "code": "5981",
@@ -13,7 +13,7 @@
     "high52_available": true,
     "open": 1782.0,
     "high": 1801.0,
-    "low": 1747.0,
+    "low": 1742.0,
     "close": 1772.0,
     "previous_open": 1784.0,
     "previous_high": 1796.0,
@@ -30,7 +30,7 @@
     "rsi14": 35.215053763440864,
     "high52": 2162.0,
     "high20": 1953.0,
-    "low20": 1747.0,
+    "low20": 1742.0,
     "ma5_gap_pct": -0.8726784515551533,
     "ma25_gap_pct": -4.050249079488843,
     "high52_gap_pct": -18.03885291396855,

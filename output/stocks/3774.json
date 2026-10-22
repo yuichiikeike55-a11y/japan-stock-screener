@@ -1,7 +1,7 @@
 {
   "strategy": "individual_stock_metrics",
   "base_date": "2026-10-22",
-  "generated_at": "2026-10-22T13:43:42.717206+00:00",
+  "generated_at": "2026-10-22T14:25:53.892227+00:00",
   "code": "3774",
   "data": {
     "code": "3774",
@@ -12,7 +12,7 @@
     "history_days": 401,
     "high52_available": true,
     "open": 3516.0,
-    "high": 3637.0,
+    "high": 3636.0,
     "low": 3516.0,
     "close": 3573.0,
     "previous_open": 3527.0,
