@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "key": "nikkei225_futures_cme",
+      "name": "日経225先物（CME）",
+      "category": "futures",
+      "symbol": "NKD=F",
+      "source": "yfinance",
+      "value": 63160.0,
+      "previous_close": 65055.0,
+      "change": -1895.0,
+      "change_pct": -2.912919837060948,
+      "as_of": "2026-10-22T20:00:00+09:00",
+      "bar_start_jst": "2026-10-22T19:00:00+09:00",
+      "bar_completed_jst": "2026-10-22T20:00:00+09:00",
+      "age_minutes": 30.0,
+      "status": "ok",
+      "reason": "within_age_limit",
+      "as_of_jst": "2026-10-22T20:00:00+09:00",
+      "evaluation_base_date": "2026-10-22",
+      "evaluation_cutoff_jst": "2026-10-22T20:30:00+09:00"
+    }
+  ]
+}
