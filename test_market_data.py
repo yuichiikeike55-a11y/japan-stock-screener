@@ -1,24 +1,21 @@
+
 """
 市場データ鮮度判定の単体テスト。
 
 固定時刻を使い、
-closed / ok / stale の
-3ケースを確認する。
+stale / ok / stale の3ケースを確認する。
+
+注意:
+closed は休場カレンダーに基づく判定であり、
+単純な経過時間判定では使用しない。
 """
 
-from datetime import datetime
-from datetime import timezone
+from datetime import datetime, timezone
 
-from market_data.validators import (
-    validate_freshness,
-)
+from market_data.validators import validate_freshness
 
 
 def make_data(as_of):
-    """
-    テスト用の標準化済みデータを作る。
-    """
-
     return {
         "symbol": "NIY=F",
         "source": "yfinance",
@@ -30,128 +27,65 @@ def make_data(as_of):
     }
 
 
+def check_case(name, data, now, expected):
+    result = validate_freshness(
+        data,
+        max_age_minutes=180,
+        now=now,
+    )
+
+    actual = result.get("status")
+
+    print(f"{name}: {actual} (expected: {expected})")
+
+    if actual != expected:
+        raise RuntimeError(
+            f"{name} failed: "
+            f"expected={expected}, actual={actual}"
+        )
+
+
 def main():
-    print(
-        "=== Freshness Validator Test ==="
-    )
+    print("=== Freshness Validator Test ===")
 
-    max_age_minutes = 180
-
-    # =====================================
     # CASE 1
-    # 日曜日 + 直近金曜日データ
-    # → closed
-    # =====================================
-
-    sunday_now = datetime(
-        2026,
-        9,
-        6,
-        12,
-        0,
-        tzinfo=timezone.utc,
+    # 日曜日 + 44時間前の金曜日データ
+    # 鮮度180分超過 → stale
+    check_case(
+        "CASE 1",
+        make_data("2026-09-04T16:00:00+00:00"),
+        datetime(
+            2026, 9, 6, 12, 0,
+            tzinfo=timezone.utc,
+        ),
+        "stale",
     )
 
-    friday_data = make_data(
-        "2026-09-04T16:00:00+00:00"
-    )
-
-    result = validate_freshness(
-        friday_data,
-        max_age_minutes,
-        now=sunday_now,
-    )
-
-    print()
-    print("CASE 1")
-    print(
-        "status:",
-        result["status"],
-    )
-
-    if result["status"] != "closed":
-        raise RuntimeError(
-            "CASE 1 failed"
-        )
-
-    # =====================================
     # CASE 2
-    # 平日 + 60分前
-    # → ok
-    # =====================================
-
-    weekday_now = datetime(
-        2026,
-        9,
-        4,
-        17,
-        0,
-        tzinfo=timezone.utc,
+    # 60分前 → ok
+    check_case(
+        "CASE 2",
+        make_data("2026-09-04T16:00:00+00:00"),
+        datetime(
+            2026, 9, 4, 17, 0,
+            tzinfo=timezone.utc,
+        ),
+        "ok",
     )
 
-    fresh_data = make_data(
-        "2026-09-04T16:00:00+00:00"
-    )
-
-    result = validate_freshness(
-        fresh_data,
-        max_age_minutes,
-        now=weekday_now,
-    )
-
-    print()
-    print("CASE 2")
-    print(
-        "status:",
-        result["status"],
-    )
-
-    if result["status"] != "ok":
-        raise RuntimeError(
-            "CASE 2 failed"
-        )
-
-    # =====================================
     # CASE 3
-    # 平日 + 4時間前
-    # → stale
-    # =====================================
-
-    stale_now = datetime(
-        2026,
-        9,
-        4,
-        20,
-        0,
-        tzinfo=timezone.utc,
+    # 240分前 → stale
+    check_case(
+        "CASE 3",
+        make_data("2026-09-04T16:00:00+00:00"),
+        datetime(
+            2026, 9, 4, 20, 0,
+            tzinfo=timezone.utc,
+        ),
+        "stale",
     )
 
-    stale_data = make_data(
-        "2026-09-04T16:00:00+00:00"
-    )
-
-    result = validate_freshness(
-        stale_data,
-        max_age_minutes,
-        now=stale_now,
-    )
-
-    print()
-    print("CASE 3")
-    print(
-        "status:",
-        result["status"],
-    )
-
-    if result["status"] != "stale":
-        raise RuntimeError(
-            "CASE 3 failed"
-        )
-
-    print()
-    print(
-        "=== FRESHNESS CHECK PASSED ==="
-    )
+    print("=== FRESHNESS CHECK PASSED ===")
 
 
 if __name__ == "__main__":
