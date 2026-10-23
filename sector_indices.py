@@ -1,10 +1,23 @@
-from pathlib import Path
-from datetime import datetime, timezone, timedelta
-from io import StringIO
-import urllib.request
+
+"""
+18セクター指数取得・指標生成。
+
+TOPIX-17連動ETF 17銘柄 + 半導体ETF 2644.T。
+
+- BASE_DATE時点のデータだけで計算
+- 取得失敗時は再試行
+- 18セクターの基準日一致を確認
+- 品質警告を保存
+- 不完全な結果は正式latestへ公開しない
+- 失敗内容は別JSONに保存
+"""
+
 import json
 import math
 import os
+import time
+from datetime import datetime, timezone
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -13,197 +26,82 @@ import yfinance as yf
 
 OUTPUT_DIR = Path("output")
 HISTORY_DIR = OUTPUT_DIR / "sector_history"
+LATEST_FILE = OUTPUT_DIR / "sector_indices_latest.json"
+STATUS_FILE = OUTPUT_DIR / "sector_indices_status.json"
 
-OUTPUT_DIR.mkdir(
-    parents=True,
-    exist_ok=True,
-)
+RETRY_COUNT = 3
+RETRY_SECONDS = 10
 
-HISTORY_DIR.mkdir(
-    parents=True,
-    exist_ok=True,
-)
-
-
-# =========================================================
-# セクター分析用
-# TOPIX-17連動ETFを基本代理指数として使用
-# 半導体は2644を追加
-# =========================================================
+SECTOR_NAMES = [
+    "食品",
+    "エネルギー資源",
+    "建設・資材",
+    "素材・化学",
+    "医薬品",
+    "自動車・輸送機",
+    "鉄鋼・非鉄",
+    "機械",
+    "電機・精密",
+    "情報通信・サービスその他",
+    "電力・ガス",
+    "運輸・物流",
+    "商社・卸売",
+    "小売",
+    "銀行",
+    "金融（除く銀行）",
+    "不動産",
+]
 
 SECTORS = [
     {
-        "sector": "食品",
-        "symbol": "1617.T",
-        "name": "NEXT FUNDS 食品(TOPIX-17)ETF",
+        "sector": name,
+        "symbol": f"{1617 + index}.T",
+        "name": f"NEXT FUNDS {name}(TOPIX-17)ETF",
         "proxy_type": "ETF",
-    },
-    {
-        "sector": "エネルギー資源",
-        "symbol": "1618.T",
-        "name": "NEXT FUNDS エネルギー資源(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "建設・資材",
-        "symbol": "1619.T",
-        "name": "NEXT FUNDS 建設・資材(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "素材・化学",
-        "symbol": "1620.T",
-        "name": "NEXT FUNDS 素材・化学(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "医薬品",
-        "symbol": "1621.T",
-        "name": "NEXT FUNDS 医薬品(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "自動車・輸送機",
-        "symbol": "1622.T",
-        "name": "NEXT FUNDS 自動車・輸送機(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "鉄鋼・非鉄",
-        "symbol": "1623.T",
-        "name": "NEXT FUNDS 鉄鋼・非鉄(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "機械",
-        "symbol": "1624.T",
-        "name": "NEXT FUNDS 機械(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "電機・精密",
-        "symbol": "1625.T",
-        "name": "NEXT FUNDS 電機・精密(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "情報通信・サービスその他",
-        "symbol": "1626.T",
-        "name": "NEXT FUNDS 情報通信・サービスその他(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "電力・ガス",
-        "symbol": "1627.T",
-        "name": "NEXT FUNDS 電力・ガス(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "運輸・物流",
-        "symbol": "1628.T",
-        "name": "NEXT FUNDS 運輸・物流(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "商社・卸売",
-        "symbol": "1629.T",
-        "name": "NEXT FUNDS 商社・卸売(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "小売",
-        "symbol": "1630.T",
-        "name": "NEXT FUNDS 小売(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "銀行",
-        "symbol": "1631.T",
-        "name": "NEXT FUNDS 銀行(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "金融",
-        "symbol": "1632.T",
-        "name": "NEXT FUNDS 金融(除く銀行)(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
-    {
-        "sector": "不動産",
-        "symbol": "1633.T",
-        "name": "NEXT FUNDS 不動産(TOPIX-17)ETF",
-        "proxy_type": "ETF",
-    },
+    }
+    for index, name in enumerate(SECTOR_NAMES)
+]
+
+SECTORS.append(
     {
         "sector": "半導体",
         "symbol": "2644.T",
         "name": "Global X 半導体関連-日本株式 ETF",
         "proxy_type": "ETF",
-    },
-]
-
-def get_jpx_holidays():
-    url = "https://www.jpx.co.jp/corporate/about-jpx/calendar/index.html"
-
-    try:
-        with urllib.request.urlopen(url, timeout=10) as response:
-            html = response.read().decode("utf-8")
-
-        tables = pd.read_html(StringIO(html))
-        holidays = set()
-
-        for table in tables:
-            for col in table.columns:
-                for value in table[col].dropna():
-                    try:
-                        d = pd.to_datetime(value).date()
-                        holidays.add(d)
-                    except Exception:
-                        pass
-
-        return holidays
-
-    except Exception as e:
-        raise RuntimeError(
-            "Failed to load JPX holiday calendar: "
-            f"{repr(e)}"
-        )
+    }
+)
 
 
-def get_previous_trading_date(target_date):
-    """
-    target_date より前の直近JPX営業日を返す。
-    土日・JPX休場日は遡る。
-    """
-    holidays = get_jpx_holidays()
-
-    d = target_date - timedelta(days=1)
-
-    while (
-        d.weekday() >= 5
-        or d in holidays
-    ):
-        d -= timedelta(days=1)
-
-    return d
 def safe_float(value):
-    if value is None:
-        return None
-
     try:
-        value = float(value)
+        number = float(value)
+        return number if math.isfinite(number) else None
     except (TypeError, ValueError):
         return None
 
-    if not math.isfinite(value):
-        return None
 
-    return value
+def atomic_json(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".tmp")
+
+    try:
+        temporary.write_text(
+            json.dumps(
+                data,
+                ensure_ascii=False,
+                indent=2,
+                allow_nan=False,
+            ),
+            encoding="utf-8",
+        )
+        os.replace(temporary, path)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
 
 
 def calc_rsi(close, period=14):
     delta = close.diff()
-
     gain = delta.clip(lower=0)
     loss = -delta.clip(upper=0)
 
@@ -220,48 +118,116 @@ def calc_rsi(close, period=14):
     ).mean()
 
     rs = avg_gain / avg_loss
+    result = 100 - 100 / (1 + rs)
 
-    rsi = 100 - (
-        100 / (1 + rs)
+    result = result.mask(
+        (avg_loss == 0) & (avg_gain > 0),
+        100,
+    )
+    result = result.mask(
+        (avg_loss == 0) & (avg_gain == 0),
+        50,
     )
 
-    return rsi
+    return result
 
 
-def validate_ohlcv(df, symbol):
-    """
-    OHLCVの明らかな異常値を検出・除外する。
-    異常値をMA・RSI・高安値計算へ混入させない。
-    """
+def download_history(symbol):
+    last_error = None
+
+    for attempt in range(1, RETRY_COUNT + 1):
+        try:
+            df = yf.download(
+                symbol,
+                period="2y",
+                interval="1d",
+                auto_adjust=False,
+                progress=False,
+                threads=False,
+            )
+
+            if df is None or df.empty:
+                raise RuntimeError("empty response")
+
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+
+            required = [
+                "Open", "High", "Low", "Close", "Volume"
+            ]
+
+            missing = [
+                col for col in required
+                if col not in df.columns
+            ]
+
+            if missing:
+                raise RuntimeError(
+                    f"missing columns: {missing}"
+                )
+
+            df = df[required].copy()
+
+            index = pd.to_datetime(df.index)
+
+            if index.tz is not None:
+                index = index.tz_convert(
+                    "Asia/Tokyo"
+                ).tz_localize(None)
+
+            df.index = index.normalize()
+            df = df.sort_index()
+            df = df.loc[~df.index.duplicated(keep="last")]
+
+            if df.empty:
+                raise RuntimeError("no valid dates")
+
+            return df
+
+        except Exception as exc:
+            last_error = str(exc)
+            print(
+                f"{symbol}: attempt "
+                f"{attempt}/{RETRY_COUNT}: "
+                f"{last_error}",
+                flush=True,
+            )
+
+            if attempt < RETRY_COUNT:
+                time.sleep(RETRY_SECONDS)
+
+    raise RuntimeError(
+        f"{symbol}: download failed: {last_error}"
+    )
+
+
+def validate_ohlcv(df):
     x = df.copy()
     flags = []
 
-    price_cols = [
-        "Open",
-        "High",
-        "Low",
-        "Close",
-    ]
+    price_cols = ["Open", "High", "Low", "Close"]
 
-    # 1. 価格が0以下、infなど
     for col in price_cols:
-        bad = (
+        x[col] = pd.to_numeric(
+            x[col], errors="coerce"
+        )
+
+    x["Volume"] = pd.to_numeric(
+        x["Volume"], errors="coerce"
+    )
+
+    invalid_price = pd.Series(False, index=x.index)
+
+    for col in price_cols:
+        invalid_price |= (
             ~np.isfinite(x[col])
             | (x[col] <= 0)
         )
 
-        if bad.any():
-            flags.append(
-                f"{col.lower()}_non_positive_or_invalid"
-            )
+    if invalid_price.any():
+        flags.append("invalid_price")
 
-            x.loc[
-                bad,
-                price_cols
-            ] = np.nan
-
-    # 2. OHLCの論理矛盾
-    bad_ohlc = (
+    invalid_ohlc = (
         (x["High"] < x["Low"])
         | (x["High"] < x["Open"])
         | (x["High"] < x["Close"])
@@ -269,178 +235,50 @@ def validate_ohlcv(df, symbol):
         | (x["Low"] > x["Close"])
     )
 
-    if bad_ohlc.any():
-        flags.append(
-            "ohlc_inconsistency"
-        )
+    if invalid_ohlc.any():
+        flags.append("ohlc_inconsistency")
 
-        x.loc[
-            bad_ohlc,
-            price_cols
-        ] = np.nan
+    bad_price = invalid_price | invalid_ohlc
 
-    # 3. 前日比±40%以上を検出
-    close_ratio = (
-        x["Close"]
-        / x["Close"].shift(1)
-    )
+    x.loc[bad_price, price_cols] = np.nan
 
-    extreme_move = (
-        (close_ratio > 1.40)
-        | (close_ratio < 0.60)
-    )
-
-    if extreme_move.any():
-        flags.append(
-            "extreme_daily_price_move_detected"
-        )
-
-    # 4. 周辺価格から極端に離れた単発値
-    rolling_median = (
-        x["Close"]
-        .rolling(
-            21,
-            center=True,
-            min_periods=5,
-        )
-        .median()
-    )
-
-    for col in price_cols:
-        ratio = (
-            x[col]
-            / rolling_median
-        )
-
-        bad_outlier = (
-            (ratio < 0.20)
-            | (ratio > 5.00)
-        )
-
-        if bad_outlier.any():
-            flags.append(
-                f"{col.lower()}_extreme_outlier"
-            )
-
-            x.loc[
-                bad_outlier,
-                col
-            ] = np.nan
-
-    # 5. 出来高の異常
     bad_volume = (
         ~np.isfinite(x["Volume"])
         | (x["Volume"] < 0)
     )
 
     if bad_volume.any():
-        flags.append(
-            "invalid_volume"
+        flags.append("invalid_volume")
+        x.loc[bad_volume, "Volume"] = np.nan
+
+    ratio = x["Close"] / x["Close"].shift(1)
+
+    if ((ratio > 1.4) | (ratio < 0.6)).any():
+        flags.append("extreme_daily_price_move_detected")
+
+    median = x["Close"].rolling(
+        21, center=True, min_periods=5
+    ).median()
+
+    for col in price_cols:
+        distance = x[col] / median
+        outlier = (
+            (distance < 0.2)
+            | (distance > 5.0)
         )
 
-        x.loc[
-            bad_volume,
-            "Volume"
-        ] = np.nan
+        if outlier.any():
+            flags.append(
+                f"{col.lower()}_extreme_outlier"
+            )
+            x.loc[outlier, col] = np.nan
 
-    # Closeが無効になった行は除外
-    x = x.dropna(
-        subset=["Close"]
-    )
+    # 異常値を除いた後の有効日付だけを使用
+    x = x.dropna(subset=["Close"])
 
-    # 警告の重複を削除
-    flags = list(
-        dict.fromkeys(flags)
-    )
+    return x, list(dict.fromkeys(flags))
 
-    return x, flags
 
-def download_history(symbol):
-    requested_base_date_raw = os.environ.get(
-        "BASE_DATE", ""
-    ).strip()
-
-    download_args = {
-        "interval": "1d",
-        "auto_adjust": False,
-        "progress": False,
-        "threads": False,
-    }
-
-    if requested_base_date_raw:
-        base_date = pd.Timestamp(
-            requested_base_date_raw
-        ).normalize()
-
-        download_args["start"] = (
-            base_date - pd.Timedelta(days=800)
-        ).strftime("%Y-%m-%d")
-
-        download_args["end"] = (
-            base_date + pd.Timedelta(days=1)
-        ).strftime("%Y-%m-%d")
-    else:
-        download_args["period"] = "2y"
-
-    df = yf.download(
-        symbol,
-        **download_args,
-    )
-    if df.empty:
-        return pd.DataFrame()
-
-    # yfinance MultiIndex対策
-    if isinstance(
-        df.columns,
-        pd.MultiIndex,
-    ):
-        df.columns = (
-            df.columns
-            .get_level_values(0)
-        )
-
-    required = [
-        "Open",
-        "High",
-        "Low",
-        "Close",
-        "Volume",
-    ]
-
-    missing = [
-        col
-        for col in required
-        if col not in df.columns
-    ]
-
-    if missing:
-        raise ValueError(
-            f"{symbol}: missing columns "
-            f"{missing}"
-        )
-
-    df = df[required].copy()
-
-    df = df.dropna(
-        subset=["Close"]
-    )
-
-    df.index = pd.to_datetime(
-        df.index
-    )
-
-    # OHLCV異常値チェック
-    df, quality_flags = validate_ohlcv(
-        df,
-        symbol,
-    )
-
-    # build_latest_recordへ警告を渡す
-    df.attrs[
-        "data_quality_flags"
-    ] = quality_flags
-
-    return df
 def calculate_metrics(df):
     x = df.copy()
 
@@ -449,672 +287,325 @@ def calculate_metrics(df):
     low = x["Low"]
     volume = x["Volume"]
 
-    x["ma5"] = close.rolling(
-        5
-    ).mean()
+    x["ma5"] = close.rolling(5).mean()
+    x["ma25"] = close.rolling(25).mean()
+    x["ma75"] = close.rolling(75).mean()
+    x["rsi14"] = calc_rsi(close, 14)
 
-    x["ma25"] = close.rolling(
-        25
-    ).mean()
+    x["high20"] = high.rolling(20).max()
+    x["low20"] = low.rolling(20).min()
+    x["high52"] = high.rolling(252).max()
+    x["low52"] = low.rolling(252).min()
 
-    x["ma75"] = close.rolling(
-        75
-    ).mean()
-
-    x["rsi14"] = calc_rsi(
-        close,
-        14,
-    )
-
-    x["high20"] = high.rolling(
-        20
-    ).max()
-
-    x["low20"] = low.rolling(
-        20
-    ).min()
-
-    x["high52"] = high.rolling(
-        252
-    ).max()
-
-    x["low52"] = low.rolling(
-        252
-    ).min()
-
-    x["avg_volume_5d"] = (
-        volume.rolling(5).mean()
-    )
-
-    x["avg_volume_20d"] = (
-        volume.rolling(20).mean()
-    )
+    x["avg_volume_5d"] = volume.rolling(5).mean()
+    x["avg_volume_20d"] = volume.rolling(20).mean()
 
     return x
 
 
-def build_latest_record(
-    sector_info,
-    df,
-):
+def gap_pct(value, base):
+    a = safe_float(value)
+    b = safe_float(base)
+
+    if a is None or b is None or b == 0:
+        return None
+
+    return (a / b - 1) * 100
+
+
+def build_latest_record(info, df, flags):
+    if len(df) < 75:
+        raise RuntimeError(
+            f"not enough history: {len(df)} rows"
+        )
+
     x = calculate_metrics(df)
-    quality_flags = list(
-        df.attrs.get(
-            "data_quality_flags",
-            []
-        )
-    )
-
-    if len(x) < 75:
-        raise ValueError(
-            f"{sector_info['symbol']}: "
-            "not enough history"
-        )
-
     current = x.iloc[-1]
     previous = x.iloc[-2]
 
-    close = safe_float(
-        current["Close"]
-    )
+    close = safe_float(current["Close"])
+    previous_close = safe_float(previous["Close"])
 
-    previous_close = safe_float(
-        previous["Close"]
-    )
+    if close is None or previous_close is None:
+        raise RuntimeError("invalid latest close")
 
-    ma5 = safe_float(
-        current["ma5"]
-    )
+    ma5 = safe_float(current["ma5"])
+    ma25 = safe_float(current["ma25"])
+    ma75 = safe_float(current["ma75"])
+    ma25_previous = safe_float(previous["ma25"])
 
-    ma25 = safe_float(
-        current["ma25"]
-    )
-
-    ma75 = safe_float(
-        current["ma75"]
-    )
-
-    ma25_previous = safe_float(
-        previous["ma25"]
-    )
-
-    rsi14 = safe_float(
-        current["rsi14"]
-    )
-
-    high20 = safe_float(
-        current["high20"]
-    )
-
-    low20 = safe_float(
-        current["low20"]
-    )
-
-    high52 = safe_float(
-        current["high52"]
-    )
-
-    low52 = safe_float(
-        current["low52"]
-    )
-    # =========================================
-    # 52週高値・安値の異常値チェック
-    # =========================================
-
-    if (
-        close is not None
-        and high52 is not None
-    ):
-        if high52 < close:
-            quality_flags.append(
-                "invalid_high52_below_close"
-            )
-            high52 = None
-
-    if (
-        close is not None
-        and low52 is not None
-    ):
-        if low52 > close:
-            quality_flags.append(
-                "invalid_low52_above_close"
-            )
-            low52 = None
-
-        elif low52 < close * 0.10:
-            quality_flags.append(
-                "invalid_low52_extreme_outlier"
-            )
-            low52 = None
-
-    # 警告の重複を削除
-    quality_flags = list(
-        dict.fromkeys(
-            quality_flags
-        )
-    )
-
-    volume = safe_float(
-        current["Volume"]
-    )
-
-    avg_volume_5d = safe_float(
-        current["avg_volume_5d"]
-    )
-
-    avg_volume_20d = safe_float(
-        current["avg_volume_20d"]
-    )
-
-    ma25_slope = None
-
-    if (
-        ma25 is not None
+    ma25_slope = (
+        ma25 - ma25_previous
+        if ma25 is not None
         and ma25_previous is not None
-    ):
-        ma25_slope = (
-            ma25
-            - ma25_previous
-        )
+        else None
+    )
 
-    ma25_direction = None
+    direction = None
 
     if ma25_slope is not None:
-        if ma25_slope > 0:
-            ma25_direction = "up"
-        elif ma25_slope < 0:
-            ma25_direction = "down"
-        else:
-            ma25_direction = "flat"
-
-    def gap_pct(
-        value,
-        base,
-    ):
-        if (
-            value is None
-            or base is None
-            or base == 0
-        ):
-            return None
-
-        return (
-            value / base - 1
-        ) * 100
-
-    return_1d = gap_pct(
-        close,
-        previous_close,
-    )
-
-    return_5d = None
-
-    if len(x) >= 6:
-        return_5d = gap_pct(
-            close,
-            safe_float(
-                x.iloc[-6]["Close"]
-            ),
+        direction = (
+            "up" if ma25_slope > 0
+            else "down" if ma25_slope < 0
+            else "flat"
         )
 
-    return_20d = None
+    high52 = safe_float(current["high52"])
+    low52 = safe_float(current["low52"])
 
-    if len(x) >= 21:
-        return_20d = gap_pct(
-            close,
-            safe_float(
-                x.iloc[-21]["Close"]
-            ),
-        )
+    if high52 is not None and high52 < close:
+        flags.append("invalid_high52_below_close")
+        high52 = None
 
-    volume_ratio_20d = None
+    if low52 is not None and low52 > close:
+        flags.append("invalid_low52_above_close")
+        low52 = None
 
-    if (
-        volume is not None
-        and avg_volume_20d
-        not in (None, 0)
-    ):
-        volume_ratio_20d = (
-            volume
-            / avg_volume_20d
-        )
+    if low52 is not None and low52 < close * 0.1:
+        flags.append("invalid_low52_extreme_outlier")
+        low52 = None
 
-    base_date = (
-        x.index[-1]
-        .strftime("%Y-%m-%d")
-    )
+    volume = safe_float(current["Volume"])
+    avg20 = safe_float(current["avg_volume_20d"])
 
     return {
-        "sector": sector_info[
-            "sector"
-        ],
-        "symbol": sector_info[
-            "symbol"
-        ],
-        "name": sector_info[
-            "name"
-        ],
-        "proxy_type": sector_info[
-            "proxy_type"
-        ],
+        "sector": info["sector"],
+        "symbol": info["symbol"],
+        "name": info["name"],
+        "proxy_type": info["proxy_type"],
         "source": "yfinance",
-        "base_date": base_date,
-        "data_quality_status":
-            "warning"
-            if quality_flags
-            else "ok",
-
-        "data_quality_flags":
-            quality_flags,    
-
-        "open": safe_float(
-            current["Open"]
+        "base_date": df.index[-1].strftime("%Y-%m-%d"),
+        "data_quality_status": (
+            "warning" if flags else "ok"
         ),
-        "high": safe_float(
-            current["High"]
-        ),
-        "low": safe_float(
-            current["Low"]
-        ),
+        "data_quality_flags": list(dict.fromkeys(flags)),
+        "open": safe_float(current["Open"]),
+        "high": safe_float(current["High"]),
+        "low": safe_float(current["Low"]),
         "close": close,
         "volume": volume,
-
         "ma5": ma5,
         "ma25": ma25,
         "ma75": ma75,
-
-        "ma25_previous":
-            ma25_previous,
-        "ma25_slope":
-            safe_float(
-                ma25_slope
-            ),
-        "ma25_direction":
-            ma25_direction,
-
-        "ma5_gap_pct":
-            safe_float(
-                gap_pct(
-                    close,
-                    ma5,
-                )
-            ),
-
-        "ma25_gap_pct":
-            safe_float(
-                gap_pct(
-                    close,
-                    ma25,
-                )
-            ),
-
-        "ma75_gap_pct":
-            safe_float(
-                gap_pct(
-                    close,
-                    ma75,
-                )
-            ),
-
-        "rsi14": rsi14,
-
-        "high20": high20,
-        "low20": low20,
+        "ma25_previous": ma25_previous,
+        "ma25_slope": safe_float(ma25_slope),
+        "ma25_direction": direction,
+        "ma5_gap_pct": gap_pct(close, ma5),
+        "ma25_gap_pct": gap_pct(close, ma25),
+        "ma75_gap_pct": gap_pct(close, ma75),
+        "rsi14": safe_float(current["rsi14"]),
+        "high20": safe_float(current["high20"]),
+        "low20": safe_float(current["low20"]),
         "high52": high52,
         "low52": low52,
-
-        "high20_gap_pct":
-            safe_float(
-                gap_pct(
-                    close,
-                    high20,
-                )
-            ),
-
-        "high52_gap_pct":
-            safe_float(
-                gap_pct(
-                    close,
-                    high52,
-                )
-            ),
-
-        "return_1d_pct":
-            safe_float(
-                return_1d
-            ),
-
-        "return_5d_pct":
-            safe_float(
-                return_5d
-            ),
-
-        "return_20d_pct":
-            safe_float(
-                return_20d
-            ),
-
-        "avg_volume_5d":
-            avg_volume_5d,
-
-        "avg_volume_20d":
-            avg_volume_20d,
-
-        "volume_ratio_20d":
-            safe_float(
-                volume_ratio_20d
-            ),
+        "high20_gap_pct": gap_pct(
+            close, current["high20"]
+        ),
+        "high52_gap_pct": gap_pct(close, high52),
+        "return_1d_pct": gap_pct(
+            close, previous_close
+        ),
+        "return_5d_pct": (
+            gap_pct(close, x.iloc[-6]["Close"])
+            if len(x) >= 6 else None
+        ),
+        "return_20d_pct": (
+            gap_pct(close, x.iloc[-21]["Close"])
+            if len(x) >= 21 else None
+        ),
+        "avg_volume_5d": safe_float(
+            current["avg_volume_5d"]
+        ),
+        "avg_volume_20d": avg20,
+        "volume_ratio_20d": (
+            volume / avg20
+            if volume is not None
+            and avg20 is not None
+            and avg20 > 0
+            else None
+        ),
     }
 
 
 def build_history_records(df):
-    records = []
+    rows = []
 
-    # 最新300営業日を保存
-    history = df.tail(
-        300
-    )
+    for index, row in df.tail(300).iterrows():
+        rows.append({
+            "date": index.strftime("%Y-%m-%d"),
+            "open": safe_float(row["Open"]),
+            "high": safe_float(row["High"]),
+            "low": safe_float(row["Low"]),
+            "close": safe_float(row["Close"]),
+            "volume": safe_float(row["Volume"]),
+        })
 
-    for index, row in (
-        history.iterrows()
-    ):
-        records.append(
-            {
-                "date":
-                    index.strftime(
-                        "%Y-%m-%d"
-                    ),
-                "open":
-                    safe_float(
-                        row["Open"]
-                    ),
-                "high":
-                    safe_float(
-                        row["High"]
-                    ),
-                "low":
-                    safe_float(
-                        row["Low"]
-                    ),
-                "close":
-                    safe_float(
-                        row["Close"]
-                    ),
-                "volume":
-                    safe_float(
-                        row["Volume"]
-                    ),
-            }
-        )
-
-    return records
-
+    return rows
 
 
 def main():
-    requested_base_date_raw = os.environ.get(
-        "BASE_DATE",
-        "",
-    ).strip()
+    raw_date = os.getenv("BASE_DATE", "").strip()
 
-    requested_base_date = None
-
-    if requested_base_date_raw:
-        requested_base_date = pd.Timestamp(
-            requested_base_date_raw
-        ).normalize()
-
-        print(
-            "Requested base date:",
-            requested_base_date.date()
-        )
+    requested_date = (
+        pd.Timestamp(raw_date).normalize()
+        if raw_date else None
+    )
 
     latest_results = []
     failures = []
+    history_payloads = []
 
-    for item in SECTORS:
-        symbol = item["symbol"]
+    for info in SECTORS:
+        symbol = info["symbol"]
 
         try:
             print(
                 "Downloading:",
                 symbol,
-                item["sector"],
+                info["sector"],
+                flush=True,
             )
 
-            df = download_history(
-                symbol
-            )
+            df = download_history(symbol)
+
+            # 要求日より後のデータは計算に混ぜない
+            if requested_date is not None:
+                df = df.loc[
+                    df.index <= requested_date
+                ].copy()
+
+                if df.empty:
+                    raise RuntimeError(
+                        "no data on or before BASE_DATE"
+                    )
+
+                if df.index[-1] != requested_date:
+                    raise RuntimeError(
+                        "BASE_DATE bar missing; "
+                        f"latest={df.index[-1].date()}"
+                    )
+
+            df, flags = validate_ohlcv(df)
 
             if df.empty:
                 raise RuntimeError(
-                    f"{symbol}: no data"
-                )
-            # BASE_DATEが指定されている場合、
-            # 要求日がデータ内に存在することを確認し、
-            # その日より後のデータを完全に除外する
-            if requested_base_date is not None:
-                normalized_dates = (
-                    pd.to_datetime(df.index)
-                    .tz_localize(None)
-                    .normalize()
+                    "no valid OHLCV data"
                 )
 
-                if requested_base_date not in normalized_dates:
-                    actual_base_date = (
-                        pd.Timestamp(df.index[-1])
-                        .tz_localize(None)
-                        .normalize()
-                    )
-
-                    raise RuntimeError(
-                        f"{symbol}: requested base date "
-                        f"{requested_base_date.date()} "
-                        f"is not available. "
-                        f"Latest available date is "
-                        f"{actual_base_date.date()}."
-                    )
-
-                df = df.loc[
-                    normalized_dates <= requested_base_date
-                ].copy()
-            latest = (
-                build_latest_record(
-                    item,
-                    df,
+            if (
+                requested_date is not None
+                and df.index[-1] != requested_date
+            ):
+                raise RuntimeError(
+                    "BASE_DATE bar invalid after quality checks"
                 )
+
+            record = build_latest_record(
+                info, df, flags
             )
 
-            latest_results.append(
-                latest
-            )
+            latest_results.append(record)
 
-            history_json = {
-                "sector":
-                    item["sector"],
-                "symbol":
-                    symbol,
-                "name":
-                    item["name"],
-                "proxy_type":
-                    item["proxy_type"],
-                "source":
-                    "yfinance",
-                "base_date":
-                    latest[
-                        "base_date"
-                    ],
-                "generated_at":
-                    datetime.now(
+            history_payloads.append((
+                HISTORY_DIR / (
+                    symbol.replace(".", "_") + ".json"
+                ),
+                {
+                    "sector": info["sector"],
+                    "symbol": symbol,
+                    "name": info["name"],
+                    "proxy_type": info["proxy_type"],
+                    "source": "yfinance",
+                    "base_date": record["base_date"],
+                    "generated_at": datetime.now(
                         timezone.utc
                     ).isoformat(),
-                "history":
-                    build_history_records(
-                        df
-                    ),
-            }
+                    "history": build_history_records(df),
+                },
+            ))
 
-            filename = (
-                symbol
-                .replace(
-                    ".",
-                    "_"
-                )
-                + ".json"
-            )
-
-            with open(
-                HISTORY_DIR
-                / filename,
-                "w",
-                encoding="utf-8",
-            ) as f:
-                json.dump(
-                    history_json,
-                    f,
-                    ensure_ascii=False,
-                    indent=2,
-                    allow_nan=False,
-                )
-
-        except Exception as e:
+        except Exception as exc:
             print(
-                "FAILED:",
-                symbol,
-                repr(e),
+                "FAILED:", symbol, str(exc),
+                flush=True,
             )
 
-            failures.append(
-                {
-                    "sector":
-                        item[
-                            "sector"
-                        ],
-                    "symbol":
-                        symbol,
-                    "error":
-                        str(e),
-                }
-            )
-    # =========================================
-    # 最終整合性チェック
-    # 18セクターすべてが揃い、
-    # 基準日も一致している場合のみ
-    # latest JSONを公開する
-    # =========================================
+            failures.append({
+                "sector": info["sector"],
+                "symbol": symbol,
+                "error": str(exc),
+            })
 
-    # 取得件数・失敗件数チェック
-    if (
-        failures
-        or len(latest_results) != len(SECTORS)
-    ):
-        raise RuntimeError(
-            "Sector data is not complete. "
-            f"processed={len(latest_results)}/{len(SECTORS)}, "
-            f"failures={len(failures)}. "
-            "Incomplete sector data will NOT be published."
-        )
-
-    # 18セクターのbase_dateが
-    # すべて同じ日かチェック
-    result_base_dates = {
-        x["base_date"]
-        for x in latest_results
+    dates = {
+        item["base_date"]
+        for item in latest_results
     }
 
-    if len(result_base_dates) != 1:
-        raise RuntimeError(
-            "Sector base dates are inconsistent. "
-            f"base_dates={sorted(result_base_dates)}. "
-            "Mixed-date sector data will NOT be published."
+    expected = (
+        requested_date.strftime("%Y-%m-%d")
+        if requested_date is not None else None
+    )
+
+    complete = (
+        len(latest_results) == 18
+        and len(failures) == 0
+        and len(dates) == 1
+        and (
+            expected is None
+            or dates == {expected}
         )
+    )
 
-    # BASE_DATEが指定されている場合は、
-    # 18セクターすべてが要求日と一致することを確認
-    if requested_base_date is not None:
-        expected_date = requested_base_date.strftime(
-            "%Y-%m-%d"
-        )
-
-        wrong_dates = [
-            x
-            for x in latest_results
-            if x["base_date"] != expected_date
-        ]
-
-        if wrong_dates:
-            raise RuntimeError(
-                f"Sector data for {expected_date} is not ready. "
-                f"wrong_dates={len(wrong_dates)}. "
-                "Previous trading day will NOT be published."
-            )
-    base_dates = [
-        x["base_date"]
-        for x in latest_results
-    ]
-
-    latest_json = {
-        "generated_at":
-            datetime.now(
-                timezone.utc
-            ).isoformat(),
-        "sector_count":
-            len(SECTORS),
-        "processed_count":
-            len(
-                latest_results
-            ),
-        "failure_count":
-            len(failures),
-        "latest_base_date":
-            max(base_dates)
-            if base_dates
-            else None,
-        "results":
-            latest_results,
-        "failures":
-            failures,
+    status = {
+        "generated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+        "requested_base_date": expected,
+        "evaluation_status": (
+            "ok" if complete else "unavailable"
+        ),
+        "sector_count": 18,
+        "processed_count": len(latest_results),
+        "failure_count": len(failures),
+        "observed_base_dates": sorted(dates),
+        "failures": failures,
     }
 
-    with open(
-        OUTPUT_DIR
-        / "sector_indices_latest.json",
-        "w",
-        encoding="utf-8",
-    ) as f:
-        json.dump(
-            latest_json,
-            f,
-            ensure_ascii=False,
-            indent=2,
-            allow_nan=False,
+    atomic_json(STATUS_FILE, status)
+
+    if not complete:
+        # 以前の正常データを今回の結果と誤認させない。
+        # screener側でも必ずBASE_DATEを照合する。
+        raise RuntimeError(
+            "18-sector data incomplete or date mismatch. "
+            f"processed={len(latest_results)}/18, "
+            f"failures={len(failures)}, "
+            f"dates={sorted(dates)}. "
+            "Official latest file was not overwritten."
         )
 
-    print()
+    payload = {
+        "generated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+        "sector_count": 18,
+        "processed_count": 18,
+        "failure_count": 0,
+        "latest_base_date": next(iter(dates)),
+        "results": latest_results,
+        "failures": [],
+    }
+
+    # 完全な18セクターが揃ってから公開する
+    for path, history in history_payloads:
+        atomic_json(path, history)
+
+    atomic_json(LATEST_FILE, payload)
+
     print("=== COMPLETE ===")
-    print(
-        "Processed:",
-        len(latest_results),
-        "/",
-        len(SECTORS),
-    )
-
-    print(
-        "Failures:",
-        len(failures),
-    )
-
-    for row in latest_results:
-        print(
-            row["symbol"],
-            row["sector"],
-            row["base_date"],
-            row["close"],
-            "25MA:",
-            row["ma25"],
-            "RSI:",
-            row["rsi14"],
-        )
+    print("Base date:", payload["latest_base_date"])
+    print("Processed: 18/18")
+    print("Failures: 0")
 
 
 if __name__ == "__main__":
