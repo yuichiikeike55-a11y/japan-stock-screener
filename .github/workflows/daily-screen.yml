@@ -146,7 +146,8 @@ jobs:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: python market_data_runner.py
 
-      - name: Validate CME market data
+
+      - name: Validate Osaka and CME market data
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: |
@@ -157,60 +158,66 @@ jobs:
           from pathlib import Path
 
           path = Path("output/market_data.json")
-
           if not path.is_file():
-              raise SystemExit(
-                  "STOP: market_data.json missing"
-              )
+              raise SystemExit("STOP: market_data.json missing")
 
-          data = json.loads(
-              path.read_text(encoding="utf-8")
-          )
-
-          rows = data.get("results", [])
-
-          cme = next(
-              (
-                  row for row in rows
-                  if row.get("key")
-                  == "nikkei225_futures_cme"
-              ),
-              None,
-          )
-
-          if cme is None:
-              raise SystemExit(
-                  "STOP: CME futures missing"
-              )
-
-          if cme.get("status") != "ok":
-              raise SystemExit(
-                  "STOP: CME status is not ok"
-              )
-
+          data = json.loads(path.read_text(encoding="utf-8"))
           expected = os.environ["BASE_DATE"]
 
-          if cme.get(
-              "evaluation_base_date"
-          ) != expected:
-              raise SystemExit(
-                  "STOP: CME base date mismatch"
-              )
+          if data.get("base_date") != expected:
+              raise SystemExit("STOP: market JSON base date mismatch")
 
-          change = cme.get("change_pct")
+          rows = data.get("results")
+          if not isinstance(rows, list):
+              raise SystemExit("STOP: market results invalid")
 
-          if (
-              isinstance(change, bool)
-              or not isinstance(change, (int, float))
-              or not math.isfinite(change)
+          for name, key in (
+              ("Osaka", "nikkei225_futures_osaka"),
+              ("CME", "nikkei225_futures_cme"),
           ):
+              matches = [
+                  row for row in rows
+                  if isinstance(row, dict)
+                  and row.get("key") == key
+              ]
+
+              if len(matches) != 1:
+                  raise SystemExit(
+                      f"STOP: {name} futures missing or duplicated"
+                  )
+
+              row = matches[0]
+
+              if row.get("status") != "ok" or row.get("usable") is not True:
+                  raise SystemExit(
+                      f"STOP: {name} futures unavailable: "
+                      f"{row.get('reason', row.get('status'))}"
+                  )
+
+              if row.get("evaluation_base_date") != expected:
+                  raise SystemExit(
+                      f"STOP: {name} base date mismatch"
+                  )
+
+              change = row.get("change_pct")
+              if (
+                  isinstance(change, bool)
+                  or not isinstance(change, (int, float))
+                  or not math.isfinite(change)
+              ):
+                  raise SystemExit(
+                      f"STOP: {name} change_pct invalid"
+                  )
+
+              print(f"{name} futures validation OK")
+
+          if data.get("evaluation_status") != "ok":
               raise SystemExit(
-                  "STOP: CME change_pct invalid"
+                  "STOP: overall market evaluation is not ok"
               )
 
-          print("CME validation OK")
+          print("Osaka and CME validation OK")
           PY
-
       - name: Update 18 sector indices
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
