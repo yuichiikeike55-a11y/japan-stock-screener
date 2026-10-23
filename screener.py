@@ -3654,8 +3654,16 @@ def score_market_condition_15(
             "stop_reason": "stock_base_date_missing",
         }
 
+    # 基準日が1件でも欠損していたら停止
+    if metrics["base_date"].isna().any():
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "stock_base_date_missing",
+        }
+
     expected_dates = set(
-        metrics["base_date"].dropna().astype(str)
+        metrics["base_date"].astype(str)
     )
 
     if len(expected_dates) != 1:
@@ -5021,6 +5029,24 @@ def main():
             "No valid stock metrics. "
             "Screening stopped before publishing results."
         )
+    # 地合い評価前：指標計算の診断
+    from collections import Counter
+
+    print("Calculated metrics:", len(metrics))
+    print("Metric failures:", len(metric_failures))
+    print(
+        "Metric failure reasons:",
+        dict(Counter(
+            item.get("reason", "unknown")
+            for item in metric_failures
+        )),
+    )
+
+    if metrics.empty or "code" not in metrics.columns:
+        raise RuntimeError(
+            "No valid stock metrics. "
+            "Screening stopped before publishing results."
+        )        
     # 5. Screen
     result = apply_screen(metrics)
     reacceleration_result = apply_reacceleration_screen(metrics)
