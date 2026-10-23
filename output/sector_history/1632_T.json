@@ -1,20 +1,12 @@
 {
-  "sector": "金融",
+  "sector": "金融（除く銀行）",
   "symbol": "1632.T",
-  "name": "NEXT FUNDS 金融(除く銀行)(TOPIX-17)ETF",
+  "name": "NEXT FUNDS 金融（除く銀行）(TOPIX-17)ETF",
   "proxy_type": "ETF",
   "source": "yfinance",
-  "base_date": "2026-10-22",
-  "generated_at": "2026-10-22T14:44:27.761461+00:00",
+  "base_date": "2026-10-23",
+  "generated_at": "2026-10-23T13:42:18.740838+00:00",
   "history": [
-    {
-      "date": "2025-07-28",
-      "open": 30090.0,
-      "high": 30090.0,
-      "low": 29725.0,
-      "close": 29725.0,
-      "volume": 646.0
-    },
     {
       "date": "2025-07-29",
       "open": 29650.0,
@@ -2406,6 +2398,14 @@
       "low": 43260.0,
       "close": 43520.0,
       "volume": 1043.0
+    },
+    {
+      "date": "2026-10-23",
+      "open": 43700.0,
+      "high": 43700.0,
+      "low": 42870.0,
+      "close": 43300.0,
+      "volume": 1079.0
     }
   ]
 }
