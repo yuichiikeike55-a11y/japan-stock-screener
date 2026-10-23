@@ -4425,6 +4425,7 @@ def score_final_evaluation_100(stock):
     }
     strategy_hits,
 ):
+    if not strategy_hits:
     """
     4戦略ヒット銘柄へ
     最終100点評価を付与する。
