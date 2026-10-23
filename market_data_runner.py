@@ -55,17 +55,21 @@ def get_base_date():
     return candidate
 
 
+
 def get_cutoff(base_date):
     now = datetime.now(JST)
 
-    base_cutoff = datetime.combine(
-        base_date,
-        dt_time(20, 30),
+    # 金曜日なら月曜日、それ以外は翌日
+    days_ahead = 3 if base_date.weekday() == 4 else 1
+    next_day = base_date + timedelta(days=days_ahead)
+
+    cutoff = datetime.combine(
+        next_day,
+        dt_time(7, 0),
         tzinfo=JST,
     )
 
-    return min(now, base_cutoff)
-
+    return min(now, cutoff)
 
 def finite_number(value):
     return (
