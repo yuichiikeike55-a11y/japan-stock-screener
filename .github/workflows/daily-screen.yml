@@ -9,20 +9,9 @@ on:
         required: false
         type: string
 
-  schedule:
-    - cron: "30 7 * * 1-5"
-    - cron: "0 8 * * 1-5"
-    - cron: "30 8 * * 1-5"
-    - cron: "0 9 * * 1-5"
-    - cron: "30 9 * * 1-5"
-    - cron: "0 10 * * 1-5"
-    - cron: "30 10 * * 1-5"
-    - cron: "40 10 * * 1-5"
-    - cron: "50 10 * * 1-5"
-    - cron: "55 10 * * 1-5"
-    - cron: "10 11 * * 1-5"
-    - cron: "30 11 * * 1-5"
 
+  schedule:
+    - cron: "0 22 * * 0-4"
 permissions:
   contents: write
 
@@ -107,7 +96,7 @@ jobs:
               start = pd.Timestamp(
                   today - timedelta(days=30)
               )
-              end = pd.Timestamp(today)
+              end = pd.Timestamp(today if datetime.now(ZoneInfo("Asia/Tokyo")).hour >= 18 else today - timedelta(days=1))
 
               sessions = calendar.sessions_in_range(
                   start, end
