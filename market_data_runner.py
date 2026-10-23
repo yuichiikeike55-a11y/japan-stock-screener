@@ -1,315 +1,289 @@
 
 """
-CME先物データ取得：深夜・前営業日対応版
+市場データ取得ランナー。
 
-BASE_DATE は日本株の評価基準日。
-CMEは基準日の20:30 JSTまでの観測値を使用する。
-
-・当日20:30前は実行時刻を上限とする
-・深夜や休日の前営業日指定を許可
-・未来の観測値は使用しない
-・鮮度不足や欠損時は公開せず停止
-・7日を超える過去日の再取得は停止
+- CME先物: 確定済み1時間足と日足を取得
+- 取得失敗時は再試行
+- 大阪先物: 検証済みJSONがある場合のみ利用
+- 取得失敗を明示したJSONを出力
+- 基準日の異なるデータは正式評価に使用しない
 """
 
 import json
 import math
 import os
-
-from datetime import datetime, time, timedelta
+import time
+from datetime import date, datetime, time as dt_time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from market_data.providers import (
     fetch_yfinance,
     fetch_yfinance_daily,
+    fetch_verified_osaka_futures,
 )
-from market_data.normalizers import normalize_yfinance
+from market_data.normalizers import (
+    normalize_yfinance,
+    normalize_verified_osaka,
+)
 from market_data.validators import validate_freshness
 
 
 JST = ZoneInfo("Asia/Tokyo")
 
-OUTPUT_DIR = Path("output")
-OUTPUT_FILE = OUTPUT_DIR / "market_data.json"
-HISTORY_DIR = OUTPUT_DIR / "market_data_history"
+OUTPUT = Path("output/market_data.json")
+HISTORY_DIR = Path("output/market_data_history")
 
 CME_SYMBOL = "NKD=F"
-CME_KEY = "nikkei225_futures_cme"
-
 MAX_AGE_MINUTES = 180
-MAX_HISTORY_DAYS = 7
+RETRY_COUNT = 3
+RETRY_SECONDS = 15
 
 
-def parse_observation_time(value):
-    if not value:
-        raise RuntimeError(
-            "STOP: CME observation time missing"
-        )
+def get_base_date():
+    raw = os.getenv("BASE_DATE", "").strip()
 
-    dt = datetime.fromisoformat(str(value))
+    if raw:
+        return date.fromisoformat(raw)
 
-    if dt.tzinfo is None:
-        raise RuntimeError(
-            "STOP: CME observation timezone missing"
-        )
+    now = datetime.now(JST)
+    candidate = now.date()
 
-    return dt.astimezone(JST)
+    while candidate.weekday() >= 5:
+        candidate -= timedelta(days=1)
 
-
-def get_base_date(now_jst):
-    text = os.getenv("BASE_DATE", "").strip()
-
-    if not text:
-        return now_jst.date()
-
-    return datetime.strptime(
-        text, "%Y-%m-%d"
-    ).date()
+    return candidate
 
 
-def validate_base_date(base_date, now_jst):
-    today = now_jst.date()
+def get_cutoff(base_date):
+    now = datetime.now(JST)
 
-    if base_date > today:
-        raise RuntimeError(
-            "STOP: future BASE_DATE is prohibited"
-        )
-
-    if base_date < today - timedelta(
-        days=MAX_HISTORY_DAYS
-    ):
-        raise RuntimeError(
-            "STOP: BASE_DATE is too old "
-            "for automatic historical retrieval"
-        )
-
-    # 土日を日本株の評価日として使わない
-    if base_date.weekday() >= 5:
-        raise RuntimeError(
-            "STOP: BASE_DATE is a weekend. "
-            "Use the latest Japanese trading date."
-        )
-
-
-def get_effective_cutoff(base_date, now_jst):
-    cutoff = datetime.combine(
+    base_cutoff = datetime.combine(
         base_date,
-        time(20, 30),
+        dt_time(20, 30),
         tzinfo=JST,
     )
 
-    return min(cutoff, now_jst)
+    return min(now, base_cutoff)
 
 
-def validate_change_pct(value):
-    if value is None or isinstance(value, bool):
-        raise RuntimeError(
-            "STOP: CME change_pct missing"
+def finite_number(value):
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(value)
+    )
+
+
+def unavailable_result(key, name, reason):
+    return {
+        "key": key,
+        "name": name,
+        "status": "unavailable",
+        "usable": False,
+        "reason": str(reason),
+        "change_pct": None,
+    }
+
+
+def fetch_cme(base_date, cutoff):
+    last_error = None
+
+    for attempt in range(1, RETRY_COUNT + 1):
+        try:
+            hourly = fetch_yfinance(CME_SYMBOL)
+            daily = fetch_yfinance_daily(CME_SYMBOL)
+
+            normalized = normalize_yfinance(
+                CME_SYMBOL,
+                hourly,
+                daily,
+                cutoff=cutoff,
+            )
+
+            validated = validate_freshness(
+                normalized,
+                MAX_AGE_MINUTES,
+                now=cutoff,
+            )
+
+            change = validated.get("change_pct")
+
+            if not finite_number(change):
+                raise RuntimeError(
+                    "CME change_pct is invalid"
+                )
+
+            status = validated.get("status")
+            usable = status == "ok"
+
+            return {
+                "key": "nikkei225_futures_cme",
+                "name": "日経225先物（CME）",
+                "category": "futures",
+                **validated,
+                "usable": usable,
+                "evaluation_base_date": base_date.isoformat(),
+                "evaluation_cutoff_jst": cutoff.isoformat(),
+                "as_of_jst": validated.get("as_of"),
+                "attempts": attempt,
+            }
+
+        except Exception as exc:
+            last_error = str(exc)
+            print(
+                f"CME attempt {attempt}/{RETRY_COUNT} "
+                f"failed: {last_error}",
+                flush=True,
+            )
+
+            if attempt < RETRY_COUNT:
+                time.sleep(RETRY_SECONDS)
+
+    result = unavailable_result(
+        "nikkei225_futures_cme",
+        "日経225先物（CME）",
+        last_error or "unknown_error",
+    )
+    result["category"] = "futures"
+    result["evaluation_base_date"] = base_date.isoformat()
+    result["evaluation_cutoff_jst"] = cutoff.isoformat()
+    result["attempts"] = RETRY_COUNT
+    return result
+
+
+def fetch_osaka(base_date, cutoff):
+    try:
+        raw = fetch_verified_osaka_futures(base_date)
+        normalized = normalize_verified_osaka(raw)
+
+        quote_time = datetime.fromisoformat(
+            normalized["as_of"]
+        ).astimezone(JST)
+
+        if quote_time > cutoff:
+            raise RuntimeError(
+                "Osaka quote is after evaluation cutoff"
+            )
+
+        if normalized.get("trading_date") != base_date.isoformat():
+            raise RuntimeError(
+                "Osaka trading date mismatch"
+            )
+
+        change = normalized.get("change_pct")
+
+        if not finite_number(change):
+            raise RuntimeError(
+                "Osaka change_pct is invalid"
+            )
+
+        return {
+            "key": "nikkei225_futures_osaka",
+            "name": "日経225先物（大阪）",
+            "category": "futures",
+            **normalized,
+            "status": "ok",
+            "usable": True,
+            "evaluation_base_date": base_date.isoformat(),
+            "evaluation_cutoff_jst": cutoff.isoformat(),
+        }
+
+    except Exception as exc:
+        result = unavailable_result(
+            "nikkei225_futures_osaka",
+            "日経225先物（大阪）",
+            exc,
         )
+        result["category"] = "futures"
+        result["evaluation_base_date"] = base_date.isoformat()
+        result["evaluation_cutoff_jst"] = cutoff.isoformat()
+        return result
+
+
+def write_json_atomic(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    temporary = path.with_name(path.name + ".tmp")
 
     try:
-        number = float(value)
-    except (TypeError, ValueError):
-        raise RuntimeError(
-            "STOP: CME change_pct invalid"
+        temporary.write_text(
+            json.dumps(
+                data,
+                ensure_ascii=False,
+                indent=2,
+                allow_nan=False,
+            ),
+            encoding="utf-8",
         )
-
-    if not math.isfinite(number):
-        raise RuntimeError(
-            "STOP: CME change_pct not finite"
-        )
-
-    return number
+        os.replace(temporary, path)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
 
 
 def main():
-    now_jst = datetime.now(JST)
-    base_date = get_base_date(now_jst)
+    base_date = get_base_date()
+    now = datetime.now(JST)
 
-    validate_base_date(
-        base_date,
-        now_jst,
-    )
-
-    effective_cutoff = get_effective_cutoff(
-        base_date,
-        now_jst,
-    )
-
-    print("Action date:", now_jst.isoformat())
-    print("Requested base date:", base_date)
-    print(
-        "CME evaluation cutoff:",
-        effective_cutoff.isoformat(),
-    )
-
-    # CME先物取得
-    print(
-        "Fetching CME futures:",
-        CME_SYMBOL,
-    )
-
-    hourly = fetch_yfinance(CME_SYMBOL)
-    daily = fetch_yfinance_daily(CME_SYMBOL)
-
-    normalized = normalize_yfinance(
-        CME_SYMBOL,
-        hourly,
-        daily,
-        cutoff=effective_cutoff,
-    )
-
-    validated = validate_freshness(
-        normalized,
-        MAX_AGE_MINUTES,
-        now=effective_cutoff,
-    )
-
-    print(
-        "CME freshness:",
-        validated.get("status"),
-        validated.get("as_of"),
-        validated.get("age_minutes"),
-        validated.get("reason"),
-    )
-
-    if validated.get("status") != "ok":
+    if base_date > now.date():
         raise RuntimeError(
-            "STOP: CME unavailable or stale "
-            f"at evaluation cutoff: "
-            f"{validated.get('reason')}"
+            "BASE_DATE cannot be in the future"
         )
 
-    as_of_jst = parse_observation_time(
-        validated.get("as_of")
-    )
-
-    if as_of_jst > effective_cutoff:
+    if base_date.weekday() >= 5:
         raise RuntimeError(
-            "STOP: CME observation is "
-            "after evaluation cutoff"
+            "BASE_DATE must be a weekday"
         )
 
-    if as_of_jst > now_jst:
+    if (now.date() - base_date).days > 7:
         raise RuntimeError(
-            "STOP: future CME observation"
+            "BASE_DATE is older than 7 days"
         )
 
-    change_pct = validate_change_pct(
-        validated.get("change_pct")
+    cutoff = get_cutoff(base_date)
+
+    print("BASE_DATE:", base_date.isoformat())
+    print("CUTOFF:", cutoff.isoformat())
+
+    cme = fetch_cme(base_date, cutoff)
+    osaka = fetch_osaka(base_date, cutoff)
+
+    results = [cme, osaka]
+
+    status = (
+        "ok"
+        if all(item["status"] == "ok" for item in results)
+        else "partial"
+        if any(item["status"] == "ok" for item in results)
+        else "unavailable"
     )
 
-    # 出力
-    result = {
-        "key": CME_KEY,
-        "name": "日経225先物（CME）",
-        "category": "futures",
-        **validated,
-        "change_pct": change_pct,
-        "as_of_jst": as_of_jst.isoformat(),
-        "evaluation_base_date": (
-            base_date.isoformat()
-        ),
-        "evaluation_cutoff_jst": (
-            effective_cutoff.isoformat()
-        ),
+    payload = {
+        "base_date": base_date.isoformat(),
+        "generated_at_jst": datetime.now(JST).isoformat(),
+        "evaluation_status": status,
+        "results": results,
     }
 
-    output_data = {
-        "results": [result]
-    }
-
-    snapshot_file = (
+    history_path = (
         HISTORY_DIR
         / f"market_data_{base_date.isoformat()}.json"
     )
 
-    # 既存の新しいデータを保護
-    if snapshot_file.exists():
-        existing = json.loads(
-            snapshot_file.read_text(
-                encoding="utf-8"
-            )
+    # 履歴は基準日ごとに保存。
+    # 最新ファイルと履歴ファイルを同じ内容にする。
+    write_json_atomic(history_path, payload)
+    write_json_atomic(OUTPUT, payload)
+
+    print("MARKET DATA STATUS:", status)
+
+    for result in results:
+        print(
+            result["key"],
+            result["status"],
+            result.get("reason", ""),
         )
-
-        previous = next(
-            (
-                item
-                for item in existing.get(
-                    "results", []
-                )
-                if item.get("key") == CME_KEY
-            ),
-            None,
-        )
-
-        if previous is not None:
-            previous_time = parse_observation_time(
-                previous.get("as_of")
-            )
-
-            if as_of_jst < previous_time:
-                raise RuntimeError(
-                    "STOP: existing snapshot "
-                    "has newer CME observation"
-                )
-
-    # すべての検証が通った後に保存
-    OUTPUT_DIR.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    HISTORY_DIR.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    encoded = json.dumps(
-        output_data,
-        ensure_ascii=False,
-        indent=2,
-        allow_nan=False,
-    )
-
-    snapshot_tmp = snapshot_file.with_suffix(
-        ".json.tmp"
-    )
-
-    output_tmp = OUTPUT_FILE.with_suffix(
-        ".json.tmp"
-    )
-
-    snapshot_tmp.write_text(
-        encoded,
-        encoding="utf-8",
-    )
-
-    output_tmp.write_text(
-        encoded,
-        encoding="utf-8",
-    )
-
-    os.replace(
-        snapshot_tmp,
-        snapshot_file,
-    )
-
-    os.replace(
-        output_tmp,
-        OUTPUT_FILE,
-    )
-
-    print(
-        "Saved CME snapshot:",
-        snapshot_file,
-    )
-
-    print(
-        "Saved market data:",
-        OUTPUT_FILE,
-    )
 
 
 if __name__ == "__main__":
