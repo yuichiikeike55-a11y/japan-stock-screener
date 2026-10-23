@@ -608,5 +608,40 @@ def main():
     print("Failures: 0")
 
 
+
 if __name__ == "__main__":
-    main()
+    import time
+
+    max_attempts = 3
+    retry_seconds = 300
+
+    for attempt in range(1, max_attempts + 1):
+        print(
+            f"\n=== SECTOR ATTEMPT "
+            f"{attempt}/{max_attempts} ===",
+            flush=True,
+        )
+
+        try:
+            main()
+            print(
+                "SECTOR DATA READY: "
+                "18 sectors validated",
+                flush=True,
+            )
+            break
+
+        except RuntimeError as exc:
+            print(
+                f"SECTOR ATTEMPT FAILED: {exc}",
+                flush=True,
+            )
+
+            if attempt == max_attempts:
+                raise
+
+            print(
+                f"Retrying in {retry_seconds} seconds...",
+                flush=True,
+            )
+            time.sleep(retry_seconds)
