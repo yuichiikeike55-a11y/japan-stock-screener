@@ -4125,555 +4125,246 @@ def attach_volume_supply_scores(
 # 最終評価 100点
 # ============================================================
 
+
+
 def score_final_evaluation_100(stock):
     """
-    最終評価：100点満点
+    最終100点評価。
 
-    正式配点
-    ・戦略適合度       35点
-    ・セクター分析     25点
-    ・個別テクニカル   15点
-    ・地合い           15点
-    ・出来高・需給     10点
+    戦略35、セクター25、テクニカル15、
+    地合い15、出来高需給10。
 
-    複数戦略一致ボーナス
-    ・1戦略 : +0
-    ・2戦略 : +1
-    ・3戦略 : +2
-    ・4戦略 : +3
-
-    最終点は100点上限。
-
-    安全弁
-    ・必須評価が stopped / 欠損
-        → 最終評価停止
-
-    ・data_quality warning
-        → 最高B
-
-    ・明確な戦略否定条件
-        → 原則最高C
+    地合い・セクター欠損時のみ暫定評価。
+    暫定評価は最高B。
     """
 
-    # --------------------------------------------------------
-    # 0. 基本確認
-    # --------------------------------------------------------
+    import math
+    from datetime import date, datetime
 
-    if not stock:
+    def stopped(reason, **extra):
         return {
             "final_score": None,
             "final_rank": None,
             "evaluation_status": "stopped",
-            "stop_reason": "stock_data_missing",
+            "stop_reason": reason,
+            **extra,
         }
-    # --------------------------------------------------------
-    # 0-1. 基準日整合性チェック
-    # --------------------------------------------------------
 
-    stock_base_date = stock.get(
-        "base_date"
-    )
-
-    stock_metrics = stock.get(
-        "metrics",
-        {}
-    )
-
-    metrics_base_date = (
-        stock_metrics.get(
-            "base_date"
-        )
-    )
-
-    # 日付を比較しやすい文字列へ統一
-    def normalize_base_date(value):
-
-        if value is None:
-            return None
-
-        if isinstance(
-            value,
-            pd.Timestamp,
-        ):
-            return value.strftime(
-                "%Y-%m-%d"
-            )
-
-        if isinstance(
-            value,
-            datetime,
-        ):
-            return value.strftime(
-                "%Y-%m-%d"
-            )
-
-        if hasattr(
-            value,
-            "strftime",
-        ):
+    def normalized_date(value):
+        if isinstance(value, datetime):
+            return value.date().isoformat()
+        if isinstance(value, date):
+            return value.isoformat()
+        if isinstance(value, str):
             try:
-                return value.strftime(
-                    "%Y-%m-%d"
-                )
-            except Exception:
-                pass
+                return date.fromisoformat(
+                    value[:10]
+                ).isoformat()
+            except ValueError:
+                return None
+        return None
 
-        text = str(value)
-
-        if len(text) >= 10:
-            return text[:10]
-
-        return text
-
-    stock_base_date = (
-        normalize_base_date(
-            stock_base_date
+    def valid_number(value, limit):
+        return (
+            isinstance(value, (int, float))
+            and not isinstance(value, bool)
+            and math.isfinite(value)
+            and 0 <= value <= limit
         )
-    )
-
-    metrics_base_date = (
-        normalize_base_date(
-            metrics_base_date
-        )
-    )
-
-    # stock側の基準日は必須
-    if stock_base_date is None:
-        return {
-            "final_score": None,
-            "final_rank": None,
-            "evaluation_status": "stopped",
-            "stop_reason":
-                "base_date_missing",
-        }
-
-    # metrics側にも基準日がある場合は
-    # stock側と一致している必要がある
-    if (
-        metrics_base_date is not None
-        and
-        metrics_base_date
-        != stock_base_date
-    ):
-        return {
-            "final_score": None,
-            "final_rank": None,
-            "evaluation_status": "stopped",
-            "stop_reason":
-                "base_date_mismatch",
-            "base_dates": {
-                "stock":
-                    stock_base_date,
-                "metrics":
-                    metrics_base_date,
-            },
-        }
-
-    # セクター評価の基準日も確認
-    sector_eval_for_date = (
-        stock.get(
-            "sector_evaluation",
-            {}
-        )
-    )
-
-    sector_base_date = (
-        sector_eval_for_date.get(
-            "base_date"
-        )
-    )
-
-    sector_base_date = (
-        normalize_base_date(
-            sector_base_date
-        )
-    )
-
-    if (
-        sector_base_date is not None
-        and
-        sector_base_date
-        != stock_base_date
-    ):
-        return {
-            "final_score": None,
-            "final_rank": None,
-            "evaluation_status": "stopped",
-            "stop_reason":
-                "sector_base_date_mismatch",
-            "base_dates": {
-                "stock":
-                    stock_base_date,
-                "sector":
-                    sector_base_date,
-            },
-        }
-    # --------------------------------------------------------
-    # 1. 各評価を取得
-    # --------------------------------------------------------
-
-    strategy_eval = stock.get(
-        "strategy_fit_evaluation",
-        {}
-    )
-
-    sector_eval = stock.get(
-        "sector_evaluation",
-        {}
-    )
-
-    technical_eval = stock.get(
-        "technical_evaluation",
-        {}
-    )
-
-    market_eval = stock.get(
-        "market_evaluation",
-        {}
-    )
-
-    volume_eval = stock.get(
-        "volume_supply_evaluation",
-        {}
-    )
-
-    evaluations = {
-        "strategy":
-            strategy_eval,
-
-        "sector":
-            sector_eval,
-
-        "technical":
-            technical_eval,
-
-        "market":
-            market_eval,
-
-        "volume_supply":
-            volume_eval,
-    }
-
-    # --------------------------------------------------------
-    # 2. 必須評価 status 確認
-    # --------------------------------------------------------
-
-    stopped_components = []
-
-    for key, evaluation in evaluations.items():
-
-        if not evaluation:
-            stopped_components.append(
-                key
-            )
-            continue
-
-        if (
-            evaluation.get(
-                "evaluation_status"
-            )
-            != "ok"
-        ):
-            stopped_components.append(
-                key
-            )
-
-    if stopped_components:
-        return {
-            "final_score": None,
-            "final_rank": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "required_evaluation_stopped",
-            "stopped_components":
-                stopped_components,
-        }
-
-    # --------------------------------------------------------
-    # 3. 各点数取得
-    # --------------------------------------------------------
-
-    strategy_score = _num(
-        strategy_eval,
-        "strategy_fit_score",
-    )
-
-    sector_score = _num(
-        sector_eval,
-        "sector_score",
-    )
-
-    technical_score = _num(
-        technical_eval,
-        "technical_score",
-    )
-
-    market_score = _num(
-        market_eval,
-        "market_score",
-    )
-
-    volume_score = _num(
-        volume_eval,
-        "volume_supply_score",
-    )
-
-    scores = {
-        "strategy":
-            strategy_score,
-
-        "sector":
-            sector_score,
-
-        "technical":
-            technical_score,
-
-        "market":
-            market_score,
-
-        "volume_supply":
-            volume_score,
-    }
-
-    missing_scores = [
-        key
-        for key, value
-        in scores.items()
-        if value is None
-    ]
-
-    if missing_scores:
-        return {
-            "final_score": None,
-            "final_rank": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "required_score_missing",
-            "missing_scores":
-                missing_scores,
-        }
-
-    # --------------------------------------------------------
-    # 4. 配点範囲チェック
-    # --------------------------------------------------------
-
-    score_limits = {
-        "strategy": 35,
-        "sector": 25,
-        "technical": 15,
-        "market": 15,
-        "volume_supply": 10,
-    }
-
-    invalid_scores = []
-
-    for key, value in scores.items():
-
-        if (
-            value < 0
-            or value > score_limits[key]
-        ):
-            invalid_scores.append(
-                key
-            )
-
-    if invalid_scores:
-        return {
-            "final_score": None,
-            "final_rank": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "score_out_of_range",
-            "invalid_scores":
-                invalid_scores,
-        }
-
-    # --------------------------------------------------------
-    # 5. 基本100点
-    # --------------------------------------------------------
-
-    base_score = (
-        strategy_score
-        + sector_score
-        + technical_score
-        + market_score
-        + volume_score
-    )
-
-    # --------------------------------------------------------
-    # 6. 複数戦略一致ボーナス
-    # --------------------------------------------------------
-
-    hit_count = stock.get(
-        "hit_count",
-        1,
-    )
-
-    try:
-        hit_count = int(
-            hit_count
-        )
-    except Exception:
-        hit_count = 1
-
-    if hit_count >= 4:
-        multi_strategy_bonus = 3
-
-    elif hit_count == 3:
-        multi_strategy_bonus = 2
-
-    elif hit_count == 2:
-        multi_strategy_bonus = 1
-
-    else:
-        multi_strategy_bonus = 0
-
-    raw_final_score = (
-        base_score
-        + multi_strategy_bonus
-    )
-
-    final_score = min(
-        100.0,
-        raw_final_score,
-    )
-
-    final_score = round(
-        float(final_score),
-        1,
-    )
-
-    # --------------------------------------------------------
-    # 7. 通常ランク
-    # --------------------------------------------------------
 
     def rank_from_score(score):
-
         if score >= 90:
             return "S"
-
         if score >= 80:
             return "A"
-
         if score >= 70:
             return "B"
-
         if score >= 60:
             return "C"
-
         if score >= 50:
             return "D"
-
         return "E"
 
-    uncapped_rank = rank_from_score(
-        final_score
+    def cap_rank(rank, maximum):
+        order = ["S", "A", "B", "C", "D", "E"]
+        return order[max(
+            order.index(rank),
+            order.index(maximum),
+        )]
+
+    if not isinstance(stock, dict) or not stock:
+        return stopped("stock_data_missing")
+
+    metrics = stock.get("metrics")
+
+    if not isinstance(metrics, dict) or not metrics:
+        return stopped("stock_metrics_missing")
+
+    base_date = normalized_date(
+        stock.get("base_date")
     )
 
+    if base_date is None:
+        return stopped("base_date_missing_or_invalid")
+
+    metrics_raw_date = metrics.get("base_date")
+
+    if metrics_raw_date is not None:
+        metrics_date = normalized_date(metrics_raw_date)
+
+        if metrics_date != base_date:
+            return stopped(
+                "stock_metrics_base_date_mismatch"
+            )
+
+    hit_count = stock.get("hit_count")
+
+    if (
+        isinstance(hit_count, bool)
+        or not isinstance(hit_count, int)
+        or not 1 <= hit_count <= 4
+    ):
+        return stopped("invalid_hit_count")
+
+    definitions = {
+        "strategy_fit": (
+            "strategy_fit_evaluation",
+            "strategy_fit_score",
+            35,
+        ),
+        "sector": (
+            "sector_evaluation",
+            "sector_score",
+            25,
+        ),
+        "technical": (
+            "technical_evaluation",
+            "technical_score",
+            15,
+        ),
+        "market": (
+            "market_evaluation",
+            "market_score",
+            15,
+        ),
+        "volume_supply": (
+            "volume_supply_evaluation",
+            "volume_supply_score",
+            10,
+        ),
+    }
+
+    scores = {}
+    missing_components = []
+    missing_reasons = {}
+
+    for component, (
+        section_key,
+        score_key,
+        limit,
+    ) in definitions.items():
+
+        evaluation = stock.get(section_key)
+
+        if not isinstance(evaluation, dict):
+            return stopped(
+                "evaluation_structure_missing",
+                component=component,
+            )
+
+        status = evaluation.get("evaluation_status")
+
+        if component == "sector" and status == "ok":
+            sector_date = normalized_date(
+                evaluation.get("base_date")
+                or evaluation.get("sector_base_date")
+            )
+
+            if sector_date != base_date:
+                status = "stopped"
+                reason = "sector_base_date_mismatch"
+            elif evaluation.get("sector_count") != 18:
+                status = "stopped"
+                reason = "sector_count_mismatch"
+            else:
+                reason = None
+        else:
+            reason = evaluation.get("stop_reason")
+
+        if status != "ok":
+            if component in ("sector", "market"):
+                scores[component] = 0.0
+                missing_components.append(component)
+                missing_reasons[component] = (
+                    reason or "evaluation_unavailable"
+                )
+                continue
+
+            return stopped(
+                "required_evaluation_stopped",
+                component=component,
+                reason=reason,
+            )
+
+        value = evaluation.get(score_key)
+
+        if not valid_number(value, limit):
+            if component in ("sector", "market"):
+                scores[component] = 0.0
+                missing_components.append(component)
+                missing_reasons[component] = (
+                    "invalid_or_missing_score"
+                )
+                continue
+
+            return stopped(
+                "required_score_invalid",
+                component=component,
+            )
+
+        scores[component] = float(value)
+
+    bonus = min(3, hit_count - 1)
+    base_score = sum(scores.values())
+    final_score = round(
+        min(100.0, base_score + bonus),
+        1,
+    )
+
+    uncapped_rank = rank_from_score(final_score)
     final_rank = uncapped_rank
 
-    # --------------------------------------------------------
-    # 8. data_quality 安全弁
-    #    warningなら最高B
-    # --------------------------------------------------------
+    sector_eval = stock.get("sector_evaluation", {})
 
-    safety_flags = []
-
-    data_quality_warning = False
-
-    # stock直下
-    stock_quality = str(
-        stock.get(
-            "data_quality_status",
-            ""
+    quality_warning = any(
+        str(value).lower() == "warning"
+        for value in (
+            stock.get("data_quality_status"),
+            metrics.get("data_quality_status"),
+            sector_eval.get("data_quality_status"),
         )
-    ).lower()
-
-    if stock_quality == "warning":
-        data_quality_warning = True
-
-    # sector評価
-    sector_quality = str(
-        sector_eval.get(
-            "data_quality_status",
-            ""
-        )
-    ).lower()
-
-    if sector_quality == "warning":
-        data_quality_warning = True
-
-    # metrics内も確認
-    stock_metrics = stock.get(
-        "metrics",
-        {}
     )
-
-    metrics_quality = str(
-        stock_metrics.get(
-            "data_quality_status",
-            ""
-        )
-    ).lower()
-
-    if metrics_quality == "warning":
-        data_quality_warning = True
-
-    if data_quality_warning:
-
-        safety_flags.append(
-            "data_quality_warning_rank_cap_B"
-        )
-
-        if final_rank in (
-            "S",
-            "A",
-        ):
-            final_rank = "B"
-
-    # --------------------------------------------------------
-    # 9. 明確な戦略否定条件
-    #    原則最高C
-    # --------------------------------------------------------
 
     strategy_negated = False
 
-    strategy_hits = stock.get(
-        "strategy_hits",
-        []
-    )
+    for hit in stock.get("strategy_hits", []):
+        if not isinstance(hit, dict):
+            continue
 
-    for hit in strategy_hits:
+        flags = hit.get("condition_flags", [])
 
-        condition_flags = hit.get(
-            "condition_flags",
-            []
-        )
-
-        if isinstance(
-            condition_flags,
-            dict,
-        ):
-            flag_values = list(
-                condition_flags.values()
-            )
-
-        elif isinstance(
-            condition_flags,
-            list,
-        ):
-            flag_values = condition_flags
-
+        if isinstance(flags, dict):
+            flag_values = list(flags.values())
+        elif isinstance(flags, list):
+            flag_values = flags
         else:
-            flag_values = [
-                condition_flags
-            ]
+            flag_values = [flags]
 
         for flag in flag_values:
-
-            flag_text = str(
-                flag
-            ).lower()
+            text = str(flag).lower()
 
             if any(
-                keyword in flag_text
+                keyword in text
                 for keyword in (
                     "negated",
                     "strategy_negated",
@@ -4688,92 +4379,50 @@ def score_final_evaluation_100(stock):
         if strategy_negated:
             break
 
-    if strategy_negated:
+    safety_flags = []
 
+    if quality_warning:
+        final_rank = cap_rank(final_rank, "B")
+        safety_flags.append(
+            "data_quality_warning_rank_cap_B"
+        )
+
+    if strategy_negated:
+        final_rank = cap_rank(final_rank, "C")
         safety_flags.append(
             "strategy_negated_rank_cap_C"
         )
 
-        if final_rank in (
-            "S",
-            "A",
-            "B",
-        ):
-            final_rank = "C"
+    provisional = bool(missing_components)
 
-    # --------------------------------------------------------
-    # 10. 最終結果
-    # --------------------------------------------------------
+    if provisional:
+        final_rank = cap_rank(final_rank, "B")
+        safety_flags.append(
+            "provisional_rank_cap_B"
+        )
 
     return {
-        "final_score":
-            final_score,
-
-        "final_rank":
-            final_rank,
-
-        "uncapped_rank":
-            uncapped_rank,
-
-        "base_score":
-            round(
-                float(base_score),
-                1,
-            ),
-
-        "multi_strategy_bonus":
-            multi_strategy_bonus,
-
+        "final_score": final_score,
+        "final_rank": final_rank,
+        "uncapped_rank": uncapped_rank,
+        "base_score": round(base_score, 1),
+        "multi_strategy_bonus": bonus,
         "score_breakdown": {
-            "strategy_fit":
-                round(
-                    float(strategy_score),
-                    1,
-                ),
-
-            "sector":
-                round(
-                    float(sector_score),
-                    1,
-                ),
-
-            "technical":
-                round(
-                    float(technical_score),
-                    1,
-                ),
-
-            "market":
-                round(
-                    float(market_score),
-                    1,
-                ),
-
-            "volume_supply":
-                round(
-                    float(volume_score),
-                    1,
-                ),
+            key: round(value, 1)
+            for key, value in scores.items()
         },
-
         "safety": {
-            "data_quality_warning":
-                data_quality_warning,
-
-            "strategy_negated":
-                strategy_negated,
-
-            "flags":
-                safety_flags,
+            "data_quality_warning": quality_warning,
+            "strategy_negated": strategy_negated,
+            "flags": safety_flags,
         },
-
-        "evaluation_status":
-            "ok",
-
-        "stop_reason":
-            None,
-    }    
-def attach_final_evaluations(
+        "evaluation_status": (
+            "provisional" if provisional else "ok"
+        ),
+        "missing_components": missing_components,
+        "missing_reasons": missing_reasons,
+        "stop_reason": None,
+    }
     strategy_hits,
 ):
     """
@@ -5916,6 +5565,79 @@ def main():
         failure_rows
     )
 
+    # 地合い評価に渡す全銘柄指標の診断
+    print("=== METRICS DIAGNOSTICS ===")
+    print("BASE_DATE:", base_date)
+    print("METRICS_ROWS:", len(metrics))
+    print("METRICS_COLUMNS:", list(metrics.columns))
+
+    required_market_columns = [
+        "close",
+        "previous_close",
+        "ma25",
+        "ma25_direction",
+        "base_date",
+    ]
+
+    print(
+        "MISSING_MARKET_COLUMNS:",
+        [
+            col for col in required_market_columns
+            if col not in metrics.columns
+        ],
+    )
+
+    if not metrics.empty and "base_date" in metrics.columns:
+        print(
+            "METRICS_BASE_DATES:",
+            metrics["base_date"]
+            .dropna()
+            .astype(str)
+            .unique()
+            .tolist(),
+        )
+
+    # ========================================================
+    # 全銘柄指標の診断・安全停止
+    # ========================================================
+    print("\n=== METRICS DIAGNOSTICS ===")
+    print("BASE_DATE:", base_date)
+    print("METRICS_ROWS:", len(metrics))
+    print("METRICS_COLUMNS:", list(metrics.columns))
+    print("DOWNLOAD_FAILURES:", len(download_failures))
+    print("METRIC_FAILURES:", len(metric_failures))
+
+    market_required = [
+        "close",
+        "previous_close",
+        "ma25",
+        "ma25_direction",
+    ]
+
+    missing_market_columns = [
+        column
+        for column in market_required
+        if column not in metrics.columns
+    ]
+
+    print(
+        "MISSING_MARKET_COLUMNS:",
+        missing_market_columns,
+    )
+
+    if metrics.empty or "code" not in metrics.columns:
+        raise RuntimeError(
+            "SCREENING_STOPPED: "
+            "全銘柄指標が空、またはcode列がありません。"
+            "空の結果は公開しません。"
+        )
+
+    if missing_market_columns:
+        raise RuntimeError(
+            "SCREENING_STOPPED: "
+            "地合い評価の必須列が不足しています。"
+            f" missing={missing_market_columns}"
+        )        
     processed_count = len(metrics)
 
     failure_count = (
@@ -6364,6 +6086,12 @@ def main():
             )
         )
         
+
+    # ========================================================
+    # 再加速戦略のデバッグ表示
+    # 空データ・code列欠損でも異常終了させない
+    # ========================================================
+
     debug_codes = [
         "7186",
         "9143",
@@ -6371,30 +6099,49 @@ def main():
         "8593",
     ]
 
-    debug_result = metrics[
-        metrics["code"].isin(debug_codes)
-    ].copy()
-
     print()
     print("=== Reacceleration Debug ===")
 
-    print(
-        debug_result[
-            [
-                "code",
-                "name",
-                "close",
-                "high52_gap_pct",
-                "avg_turnover_5d",
-                "volume",
-                "previous_volume",
-                "volume_ratio_prev",
-                "ma25_gap_pct",
-                "rsi14",
-            ]
-        ].to_string(
-            index=False
+    if (
+        metrics is None
+        or metrics.empty
+        or "code" not in metrics.columns
+    ):
+        print(
+            "DEBUG SKIPPED: "
+            "metrics is empty or code column is missing"
         )
-    )
+    else:
+        debug_result = metrics.loc[
+            metrics["code"].astype(str).isin(debug_codes)
+        ].copy()
+
+        debug_columns = [
+            "code",
+            "name",
+            "close",
+            "high52_gap_pct",
+            "avg_turnover_5d",
+            "volume",
+            "previous_volume",
+            "volume_ratio_prev",
+            "ma25_gap_pct",
+            "rsi14",
+        ]
+
+        available_columns = [
+            column
+            for column in debug_columns
+            if column in debug_result.columns
+        ]
+
+        if debug_result.empty:
+            print("No debug target stocks found")
+        else:
+            print(
+                debug_result[
+                    available_columns
+                ].to_string(index=False)
+            )
 if __name__ == "__main__":
     main()
