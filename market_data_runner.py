@@ -165,9 +165,21 @@ def fetch_osaka(base_date, cutoff):
             normalized["as_of"]
         ).astimezone(JST)
 
+
         if quote_time > cutoff:
             raise RuntimeError(
                 "Osaka quote is after evaluation cutoff"
+            )
+
+        # 評価期限から3時間以内の価格のみ採用
+        age_minutes = (
+            cutoff - quote_time
+        ).total_seconds() / 60
+
+        if age_minutes > MAX_AGE_MINUTES:
+            raise RuntimeError(
+                "Osaka quote is stale: "
+                f"{age_minutes:.0f} minutes old"
             )
 
         if normalized.get("trading_date") != base_date.isoformat():
