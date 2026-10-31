@@ -1,9 +1,9 @@
 {
   "status": "ok",
-  "base_date": "2026-10-22",
-  "generated_at": "2026-10-22T14:47:07.007988+00:00",
-  "universe_count": 1524,
-  "processed_count": 1524,
+  "base_date": "2026-10-30",
+  "generated_at": "2026-10-31T05:47:23.588699+00:00",
+  "universe_count": 1523,
+  "processed_count": 1523,
   "failure_count": 0,
   "coverage_pct": 100.0
 }
