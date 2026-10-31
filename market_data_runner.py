@@ -170,10 +170,22 @@ def fetch_cme(base_date, cutoff):
                 f"session_end_match={session_end_match}",
                 flush=True,
             )
+
+            # 確認済みCMEセッション終了時刻を基準に評価
+            # 取引終了前のデータは採用しない
+            if cutoff < expected_end:
+                raise RuntimeError(
+                    "CME session has not ended: "
+                    f"cutoff={cutoff.isoformat()}, "
+                    f"session_end={expected_end.isoformat()}"
+                )
+
+            # expected_end は確認済みカレンダーから取得
+            # actual_end との一致は直前で検証済み
             validated = validate_freshness(
                 normalized,
                 MAX_AGE_MINUTES,
-                now=cutoff,
+                now=expected_end,
             )
 
             change = validated.get("change_pct")
