@@ -70,7 +70,26 @@ def get_cutoff(base_date):
     )
 
     return min(now, cutoff)
+def get_cme_regular_session_end(base_date):
+    """
+    CME日経225先物の通常取引終了時刻を計算する。
 
+    米国東部時間17:00を日本時間に変換する。
+    夏時間・冬時間の切り替えはZoneInfoで処理する。
+
+    注意:
+    休場日・短縮取引日は、この関数だけでは検証できない。
+    この時刻だけを根拠にCMEデータを有効化しない。
+    """
+    eastern = ZoneInfo("America/New_York")
+
+    session_end_eastern = datetime.combine(
+        base_date,
+        dt_time(17, 0),
+        tzinfo=eastern,
+    )
+
+    return session_end_eastern.astimezone(JST)
 def finite_number(value):
     return (
         isinstance(value, (int, float))
@@ -104,7 +123,29 @@ def fetch_cme(base_date, cutoff):
                 daily,
                 cutoff=cutoff,
             )
+            # --------------------------------------------
+            # CME通常取引終了時刻との照合（診断のみ）
+            # --------------------------------------------
+            expected_end = get_cme_regular_session_end(
+                base_date
+            )
 
+            actual_end = datetime.fromisoformat(
+                normalized["as_of"]
+            ).astimezone(JST)
+
+            session_end_match = (
+                actual_end == expected_end
+            )
+
+            print(
+                "[CME SESSION CHECK]",
+                f"base_date={base_date.isoformat()}",
+                f"expected_end_jst={expected_end.isoformat()}",
+                f"actual_end_jst={actual_end.isoformat()}",
+                f"session_end_match={session_end_match}",
+                flush=True,
+            )
             validated = validate_freshness(
                 normalized,
                 MAX_AGE_MINUTES,
