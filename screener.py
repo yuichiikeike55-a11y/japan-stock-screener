@@ -4384,9 +4384,10 @@ def score_final_evaluation_100(stock):
         "missing_reasons": missing_reasons,
         "stop_reason": None,
     }
+
+def apply_final_evaluation_to_hits(
     strategy_hits,
 ):
-    if not strategy_hits:
     """
     4戦略ヒット銘柄へ
     最終100点評価を付与する。
