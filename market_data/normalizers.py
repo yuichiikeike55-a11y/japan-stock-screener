@@ -118,7 +118,15 @@ def normalize_yfinance(
     previous_close = float(
         previous_rows.iloc[-1]["Close"]
     )
-
+    print(
+        "[CME PREVIOUS CLOSE CHECK]",
+        f"symbol={symbol}",
+        f"selected_previous_date={previous_rows.index[-1]}",
+        f"selected_previous_close={previous_close}",
+        f"latest_daily_date={daily.index[-1]}",
+        f"latest_daily_close={daily.iloc[-1]['Close']}",
+        flush=True,
+    )
     if previous_close <= 0:
         raise RuntimeError(
             f"{symbol}: invalid previous Close"
