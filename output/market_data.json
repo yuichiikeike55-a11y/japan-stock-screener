@@ -1,4 +1,7 @@
 {
+  "base_date": "2026-10-30",
+  "generated_at_jst": "2026-10-31T13:44:51.928499+09:00",
+  "evaluation_status": "unavailable",
   "results": [
     {
       "key": "nikkei225_futures_cme",
@@ -6,19 +9,22 @@
       "category": "futures",
       "symbol": "NKD=F",
       "source": "yfinance",
-      "value": 63160.0,
-      "previous_close": 65055.0,
-      "change": -1895.0,
-      "change_pct": -2.912919837060948,
-      "as_of": "2026-10-22T20:00:00+09:00",
-      "bar_start_jst": "2026-10-22T19:00:00+09:00",
-      "bar_completed_jst": "2026-10-22T20:00:00+09:00",
-      "age_minutes": 30.0,
-      "status": "ok",
-      "reason": "within_age_limit",
-      "as_of_jst": "2026-10-22T20:00:00+09:00",
-      "evaluation_base_date": "2026-10-22",
-      "evaluation_cutoff_jst": "2026-10-22T20:30:00+09:00"
+      "value": 62480.0,
+      "previous_close": 62635.0,
+      "change": -155.0,
+      "change_pct": -0.2474654745749182,
+      "as_of": "2026-10-31T06:00:00+09:00",
+      "bar_start_jst": "2026-10-31T05:00:00+09:00",
+      "bar_completed_jst": "2026-10-31T06:00:00+09:00",
+      "age_minutes": 464.9,
+      "as_of_jst": "2026-10-31T06:00:00+09:00",
+      "evaluation_time_jst": "2026-10-31T13:44:51.720945+09:00",
+      "status": "stale",
+      "reason": "age_exceeds_max_age",
+      "usable": false,
+      "evaluation_base_date": "2026-10-30",
+      "evaluation_cutoff_jst": "2026-10-31T13:44:51.720945+09:00",
+      "attempts": 1
     }
   ]
 }
