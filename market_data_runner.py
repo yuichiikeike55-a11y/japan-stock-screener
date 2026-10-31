@@ -262,16 +262,25 @@ def main():
     print("BASE_DATE:", base_date.isoformat())
     print("CUTOFF:", cutoff.isoformat())
 
+
+    # --------------------------------------------------------
+    # CME日経225先物のみ取得
+    # 大阪先物は正式評価から廃止
+    # --------------------------------------------------------
+
     cme = fetch_cme(base_date, cutoff)
-    osaka = fetch_osaka(base_date, cutoff)
 
-    results = [cme, osaka]
+    results = [cme]
 
+    # CMEが正常な場合のみ市場データを有効にする
     status = (
         "ok"
-        if all(item["status"] == "ok" for item in results)
-        else "partial"
-        if any(item["status"] == "ok" for item in results)
+        if (
+            cme.get("status") == "ok"
+            and cme.get("usable") is True
+            and cme.get("evaluation_base_date")
+                == base_date.isoformat()
+        )
         else "unavailable"
     )
 
