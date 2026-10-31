@@ -73,9 +73,10 @@ def normalize_yfinance(
     # 日足は取引所タイムゾーンの日付ラベルを維持。
     daily = daily.sort_index()
 
-    latest_market_date = latest_start.astimezone(
-        daily.index.tz
-    ).date() if daily.index.tz is not None else latest_start.date()
+    # CMEの日足はタイムゾーン情報を持たないため、
+    # JSTの日付を取引日として流用しない。
+    # 日足の最新ラベルを診断上の基準日とする。
+    latest_market_date = daily.index[-1].date()
 
     # --------------------------------------------------------
     # CME日時診断ログ
