@@ -1,0 +1,133 @@
+
+name: Check CME Calendar
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install calendar
+        run: |
+          python -m pip install --upgrade pip
+          pip install exchange-calendars pandas
+
+      - name: Inspect CME calendar
+        run: |
+          python - <<'PY'
+          import exchange_calendars as xcals
+          import pandas as pd
+          from datetime import date, datetime, time
+          from zoneinfo import ZoneInfo
+
+          JST = ZoneInfo("Asia/Tokyo")
+          ET = ZoneInfo("America/New_York")
+
+          print("=== VERSION ===")
+          print("exchange_calendars:", xcals.__version__)
+
+          print("\n=== CME CALENDAR NAMES ===")
+          names = xcals.get_calendar_names()
+          for name in names:
+              if any(x in name.upper() for x in ("CME", "CMES", "CBOT")):
+                  print(name)
+
+          print("\n=== CALENDAR INSPECTION ===")
+          for name in ("CMES", "CME"):
+              if name not in names:
+                  print(name, "NOT AVAILABLE")
+                  continue
+
+              try:
+                  cal = xcals.get_calendar(name)
+                  print("calendar:", name)
+                  print("class:", type(cal).__name__)
+
+                  for day in (
+                      "2026-10-30",
+                      "2026-11-02",
+                      "2026-11-26",
+                      "2026-11-27",
+                      "2026-12-24",
+                      "2026-12-25",
+                      "2027-01-01",
+                  ):
+                      stamp = pd.Timestamp(day)
+                      regular_end = datetime.combine(
+                          date.fromisoformat(day),
+                          time(17, 0),
+                          tzinfo=ET,
+                      ).astimezone(JST)
+
+                      try:
+                          is_session = bool(cal.is_session(stamp))
+                          print(
+                              "DAY",
+                              day,
+                              "session=", is_session,
+                              "NKD_regular_end_JST=",
+                              regular_end.isoformat(),
+                          )
+
+                          if is_session:
+                              print(
+                                  "CALENDAR_OPEN",
+                                  cal.session_open(stamp),
+                              )
+                              print(
+                                  "CALENDAR_CLOSE",
+                                  cal.session_close(stamp),
+                              )
+                      except Exception as exc:
+                          print(
+                              "DAY_ERROR",
+                              day,
+                              type(exc).__name__,
+                              str(exc),
+                          )
+
+                  try:
+                      print(
+                          "EARLY_CLOSES",
+                          cal.early_closes[
+                              (cal.early_closes >= pd.Timestamp("2026-10-01", tz="UTC"))
+                              & (cal.early_closes <= pd.Timestamp("2027-01-31", tz="UTC"))
+                          ].tolist(),
+                      )
+                  except Exception as exc:
+                      print(
+                          "EARLY_CLOSES_ERROR",
+                          type(exc).__name__,
+                          str(exc),
+                      )
+
+              except Exception as exc:
+                  print(
+                      "CALENDAR_ERROR",
+                      name,
+                      type(exc).__name__,
+                      str(exc),
+                  )
+
+          print("\n=== IMPORTANT ===")
+          print(
+              "This is diagnostic output only. "
+              "CMES/CME is not assumed to be "
+              "an NKD-specific verified calendar."
+          )
+          print(
+              "Do not remove VERIFIED_SESSIONS "
+              "based only on this test."
+          )
+          PY
