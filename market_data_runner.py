@@ -27,7 +27,7 @@ from market_data.normalizers import (
     normalize_verified_osaka,
 )
 from market_data.validators import validate_freshness
-
+from market_data.cme_calendar import get_verified_session_end
 
 JST = ZoneInfo("Asia/Tokyo")
 
@@ -142,7 +142,7 @@ def fetch_cme(base_date, cutoff):
             # --------------------------------------------
             # CME通常取引終了時刻との照合（診断のみ）
             # --------------------------------------------
-            expected_end = get_cme_regular_session_end(
+            expected_end = get_verified_session_end(
                 base_date
             )
 
