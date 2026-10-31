@@ -1,36 +1,47 @@
 
 """
-CME日経225先物（NKD）の取引カレンダー。
+CME日経225米ドル建て先物（NKD）の取引カレンダー。
 
-公式スケジュールで個別確認した日付のみ登録する。
-未登録日は安全のため評価を停止する。
+通常取引終了時刻は米国東部時間17:00から計算する。
+ただし、公式確認済みの日付のみ正式評価を許可する。
 
-注意:
-- 自動的に休日・短縮取引日を判定するものではない。
-- 取引時間の変更時には登録内容の再確認が必要。
+未確認日・休場日・短縮取引日の未確認データは停止する。
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, time
 from zoneinfo import ZoneInfo
 
 
 JST = ZoneInfo("Asia/Tokyo")
+EASTERN = ZoneInfo("America/New_York")
 
 # CME公式スケジュールで個別確認した取引日
-# キー: CME取引日
-# 値: 日本時間での取引終了日時
+# 値は日本時間での終了日時
 VERIFIED_SESSIONS = {
     "2026-10-30": "2026-10-31T06:00:00+09:00",
 }
 
 
+def get_regular_session_end(base_date: date) -> datetime:
+    """
+    通常取引終了時刻を日本時間で返す。
+    米国夏時間・冬時間の切り替えに対応。
+    休日・短縮取引日は判定しない。
+    """
+    eastern_end = datetime.combine(
+        base_date,
+        time(17, 0),
+        tzinfo=EASTERN,
+    )
+    return eastern_end.astimezone(JST)
+
+
 def get_verified_session_end(base_date: date) -> datetime:
     """
-    確認済みのCME取引終了時刻を返す。
-    未登録日・不正な日時は正式評価を停止する。
+    公式確認済みの日付だけ終了時刻を返す。
+    未登録日は正式評価を停止する。
     """
     key = base_date.isoformat()
-
     raw = VERIFIED_SESSIONS.get(key)
 
     if raw is None:
