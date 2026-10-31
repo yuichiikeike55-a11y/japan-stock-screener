@@ -77,6 +77,21 @@ def normalize_yfinance(
         daily.index.tz
     ).date() if daily.index.tz is not None else latest_start.date()
 
+    # --------------------------------------------------------
+    # CME日時診断ログ
+    # --------------------------------------------------------
+    print(
+        "[CME DATE CHECK]",
+        f"symbol={symbol}",
+        f"hourly_timezone={hourly.index.tz}",
+        f"daily_timezone={daily.index.tz}",
+        f"latest_bar_start_jst={latest_start.isoformat()}",
+        f"latest_bar_completed_jst={latest_end.isoformat()}",
+        f"latest_market_date={latest_market_date}",
+        f"evaluation_cutoff_jst={cutoff.isoformat()}",
+        flush=True,
+    )    
+
     previous_rows = daily.loc[
         [
             timestamp.date() < latest_market_date
