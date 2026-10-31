@@ -5366,7 +5366,7 @@ def main():
     # ========================================================
 
     strategy_hits = (
-        attach_final_evaluations(
+        apply_final_evaluation_to_hits(
             strategy_hits
         )
     )
