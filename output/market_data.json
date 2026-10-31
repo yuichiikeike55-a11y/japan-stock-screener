@@ -1,6 +1,6 @@
 {
   "base_date": "2026-10-30",
-  "generated_at_jst": "2026-10-31T14:54:46.411757+09:00",
+  "generated_at_jst": "2026-10-31T15:15:52.500107+09:00",
   "evaluation_status": "ok",
   "results": [
     {
@@ -23,7 +23,7 @@
       "reason": "within_age_limit",
       "usable": true,
       "evaluation_base_date": "2026-10-30",
-      "evaluation_cutoff_jst": "2026-10-31T14:54:45.963941+09:00",
+      "evaluation_cutoff_jst": "2026-10-31T15:15:51.718488+09:00",
       "attempts": 1
     }
   ]
