@@ -153,7 +153,15 @@ def fetch_cme(base_date, cutoff):
             session_end_match = (
                 actual_end == expected_end
             )
-
+            # --------------------------------------------
+            # CME終了時刻の不一致は正式評価を停止
+            # --------------------------------------------
+            if not session_end_match:
+                raise RuntimeError(
+                    "CME session end mismatch: "
+                    f"expected={expected_end.isoformat()}, "
+                    f"actual={actual_end.isoformat()}"
+                )
             print(
                 "[CME SESSION CHECK]",
                 f"base_date={base_date.isoformat()}",
