@@ -1,81 +1,46 @@
+
+"""
+大阪先物の旧Yahoo取得方法が
+正式評価に使用されないことを確認するテスト。
+
+正式な市場評価はCME先物を使用する。
+"""
+
 from market_data.providers import (
     fetch_yahoo_japan_osaka_futures,
 )
-from market_data.normalizers import (
-    normalize_yahoo_japan_osaka,
-)
-from market_data.validators import (
-    validate_freshness,
-)
+
 
 def main():
     print(
-        "=== Osaka Nikkei 225 Futures "
-        "Provider Test ==="
+        "=== Osaka Legacy Provider "
+        "Disabled Test ==="
     )
 
-    data = (
+    try:
         fetch_yahoo_japan_osaka_futures()
-    )
-    normalized = (
-        normalize_yahoo_japan_osaka(
-            data
-        )
-    )
-    validated = validate_freshness(
-        normalized,
-        180,
-    )
-    print()
-    print("=== RESULT ===")
 
-    for key, value in data.items():
+    except RuntimeError as exc:
+        message = str(exc)
+
+        if (
+            "Osaka futures Yahoo source is disabled"
+            not in message
+        ):
+            raise AssertionError(
+                "Unexpected Osaka provider error: "
+                f"{message}"
+            ) from exc
+
         print(
-            f"{key}: {value}"
+            "PASS: Osaka Yahoo provider "
+            "is disabled"
         )
-    print()
-    print("=== NORMALIZED RESULT ===")
+        return
 
-    for key, value in normalized.items():
-        print(
-            f"{key}: {value}"
-        )
-    print()
-    print("=== VALIDATED RESULT ===")
-
-    for key, value in validated.items():
-        print(
-            f"{key}: {value}"
-        )        
-    required = [
-        "symbol",
-        "source",
-        "value",
-        "change",
-        "change_pct",
-        "quote_time",
-        "previous_close",
-        "previous_close_date",
-        "open",
-        "high",
-        "low",
-        "volume",
-    ]
-
-    missing = [
-        key
-        for key in required
-        if data.get(key) is None
-    ]
-
-    if missing:
-        raise RuntimeError(
-            f"Missing fields: {missing}"
-        )
-
-    print()
-    print(
-        "SUCCESS: Osaka futures provider"
+    raise AssertionError(
+        "FAIL: Disabled Osaka Yahoo provider "
+        "returned without an error"
     )
 
 
