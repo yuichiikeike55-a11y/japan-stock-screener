@@ -19,13 +19,32 @@ def get_latest_trading_date(now):
     return now.date()
 
 
+
 def validate_freshness(
     data,
     max_age_minutes,
     now=None,
 ):
+    """
+    CME先物の鮮度検証。
+
+    ・as_of必須
+    ・タイムゾーン必須
+    ・未来時刻は禁止
+    ・指定された最大経過時間以内のみok
+    ・古い価格はstale
+    ・未検証データをokにしない
+    """
+
+    if not isinstance(data, dict):
+        raise RuntimeError(
+            "CME data must be a dictionary"
+        )
+
     if not data.get("as_of"):
-        raise RuntimeError("as_of is missing")
+        raise RuntimeError(
+            "CME as_of is missing"
+        )
 
     try:
         as_of = datetime.fromisoformat(
@@ -33,12 +52,12 @@ def validate_freshness(
         )
     except (TypeError, ValueError) as exc:
         raise RuntimeError(
-            "Invalid as_of timestamp"
+            "Invalid CME as_of timestamp"
         ) from exc
 
     if as_of.tzinfo is None:
         raise RuntimeError(
-            "as_of must include timezone"
+            "CME as_of must include timezone"
         )
 
     if now is None:
@@ -46,7 +65,7 @@ def validate_freshness(
 
     if now.tzinfo is None:
         raise RuntimeError(
-            "now must include timezone"
+            "Evaluation time must include timezone"
         )
 
     as_of = as_of.astimezone(JST)
@@ -54,7 +73,7 @@ def validate_freshness(
 
     if as_of > now:
         raise RuntimeError(
-            "as_of is after evaluation time"
+            "CME quote is after evaluation cutoff"
         )
 
     age_minutes = (
@@ -62,15 +81,25 @@ def validate_freshness(
     ).total_seconds() / 60
 
     result = dict(data)
+
     result["age_minutes"] = round(
-        age_minutes, 1
+        age_minutes,
+        1,
     )
 
-    if age_minutes <= max_age_minutes:
-        result["status"] = "ok"
-        result["reason"] = "within_age_limit"
-    else:
+    result["as_of_jst"] = as_of.isoformat()
+
+    result["evaluation_time_jst"] = (
+        now.isoformat()
+    )
+
+    if age_minutes > max_age_minutes:
         result["status"] = "stale"
         result["reason"] = "age_exceeds_max_age"
+        result["usable"] = False
+    else:
+        result["status"] = "ok"
+        result["reason"] = "within_age_limit"
+        result["usable"] = True
 
     return result
