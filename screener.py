@@ -3577,50 +3577,37 @@ def score_market_condition_15(
             "market_internal_score": internal_score,
         }
 
+
     # --------------------------------------------------------
-    # 5. 大阪・CMEを取得
+    # 5. CME日経225先物を取得
     # --------------------------------------------------------
 
     market_lookup = {}
 
     for row in results:
 
-        key = row.get(
-            "key"
-        )
+        key = row.get("key")
 
         if key:
-            market_lookup[
-                key
-            ] = row
-
-    osaka = market_lookup.get(
-        "nikkei225_futures_osaka"
-    )
+            market_lookup[key] = row
 
     cme = market_lookup.get(
         "nikkei225_futures_cme"
     )
 
     # --------------------------------------------------------
-    # 6. 先物データ利用可否
+    # 6. CME先物データ利用可否
     # --------------------------------------------------------
 
     def usable_futures_row(row):
 
-        if not row:
+        if not isinstance(row, dict):
             return False
 
-        status = row.get(
-            "status"
-        )
+        status = row.get("status")
 
-        # staleは使わない
-        # ok / closed は利用可能
-        if status not in (
-            "ok",
-            "closed",
-        ):
+        # stale / error / missing は使用不可
+        if status not in ("ok", "closed"):
             return False
 
         change_pct = _num(
@@ -3633,17 +3620,7 @@ def score_market_condition_15(
 
         return True
 
-    osaka_usable = (
-        usable_futures_row(
-            osaka
-        )
-    )
-
-    cme_usable = (
-        usable_futures_row(
-            cme
-        )
-    )
+    cme_usable = usable_futures_row(cme)
 
 
     # --------------------------------------------------------
@@ -3678,84 +3655,82 @@ def score_market_condition_15(
 
     expected_date = next(iter(expected_dates))
 
-    # 大阪・CMEの両方が使えなければ停止
-    if not osaka_usable or not cme_usable:
+
+    # --------------------------------------------------------
+    # 7. CME先物の必須チェック
+    # --------------------------------------------------------
+
+    if not cme_usable:
         return {
             "market_score": None,
             "evaluation_status": "stopped",
-            "stop_reason": "futures_data_unavailable",
+            "stop_reason": "cme_data_unavailable",
             "market_internal_score": internal_score,
         }
 
-    # 利用可能な先物は必ず基準日を照合
-    for name, row, usable in (
-        ("osaka", osaka, osaka_usable),
-        ("cme", cme, cme_usable),
-    ):
-        if usable and (
-            row.get("evaluation_base_date")
-            != expected_date
-        ):
-            return {
-                "market_score": None,
-                "evaluation_status": "stopped",
-                "stop_reason": f"{name}_base_date_mismatch",
-            }
+    # CMEの基準日は必ず一致させる
+    if cme.get("evaluation_base_date") != expected_date:
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "cme_base_date_mismatch",
+            "market_internal_score": internal_score,
+        }
 
     # --------------------------------------------------------
-    # 8. 大阪先物 最大4点
+    # 8. CME先物 最大6点
     # --------------------------------------------------------
 
-    osaka_score = 0
-    osaka_change_pct = None
-
-    if osaka_usable:
-        osaka_change_pct = _num(
-            osaka, "change_pct"
-        )
-
-        if osaka_change_pct >= 1.0:
-            osaka_score = 4
-        elif osaka_change_pct >= 0.5:
-            osaka_score = 3
-        elif osaka_change_pct >= 0.0:
-            osaka_score = 2
-        elif osaka_change_pct >= -0.5:
-            osaka_score = 1
-
-    # --------------------------------------------------------
-    # 9. CME先物 最大2点
-    # --------------------------------------------------------
-
-    cme_score = 0
-    cme_change_pct = None
-
-    if cme_usable:
-        cme_change_pct = _num(
-            cme, "change_pct"
-        )
-
-        if cme_change_pct >= 0.5:
-            cme_score = 2
-        elif cme_change_pct >= 0.0:
-            cme_score = 1
-
-    # --------------------------------------------------------
-    # 10. 先物合計 最大6点
-    # --------------------------------------------------------
-
-    futures_score = (
-        osaka_score + cme_score
+    cme_change_pct = _num(
+        cme,
+        "change_pct",
     )
 
+    # データが欠損している場合は採点しない
+    if cme_change_pct is None:
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "cme_change_pct_missing",
+            "market_internal_score": internal_score,
+        }
+
+    if cme_change_pct >= 1.0:
+        cme_score = 6
+    elif cme_change_pct >= 0.5:
+        cme_score = 5
+    elif cme_change_pct >= 0.0:
+        cme_score = 4
+    elif cme_change_pct >= -0.5:
+        cme_score = 2
+    elif cme_change_pct >= -1.0:
+        cme_score = 1
+    else:
+        cme_score = 0
+
+
     # --------------------------------------------------------
-    # 9. 合計 15点
+    # 9. 地合い合計 最大15点
+    # 日本市場9点 + CME先物6点
     # --------------------------------------------------------
+
+    futures_score = cme_score
 
     total = (
         internal_score
         + futures_score
     )
+
+    # 必須データ未評価の場合は停止
+    if (
+        internal_score is None
+        or cme_score is None
+    ):
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "market_score_incomplete",
+        }
 
     total = max(
         0,
@@ -3766,7 +3741,7 @@ def score_market_condition_15(
     )
 
     # --------------------------------------------------------
-    # 10. 判定補助情報
+    # 10. 地合い判定
     # --------------------------------------------------------
 
     if total >= 12:
@@ -3784,126 +3759,70 @@ def score_market_condition_15(
     else:
         market_condition = "very_weak"
 
-    return {
-        "market_score":
-            total,
+    # --------------------------------------------------------
+    # 11. 評価結果
+    # --------------------------------------------------------
 
-        "market_condition":
-            market_condition,
+    return {
+        "market_score": total,
+
+        "market_condition": market_condition,
 
         "market_score_breakdown": {
-            "internal":
-                internal_score,
+            "internal": internal_score,
 
-            "above_ma25":
-                above_ma25_score,
+            "above_ma25": above_ma25_score,
 
-            "ma25_up":
-                ma25_up_score,
+            "ma25_up": ma25_up_score,
 
-            "advancing":
-                advancing_score,
+            "advancing": advancing_score,
 
-            "futures":
-                futures_score,
+            "futures": futures_score,
 
-            "osaka_futures":
-                osaka_score,
-
-            "cme_futures":
-                cme_score,
+            "cme_futures": cme_score,
         },
 
         "market_internal": {
-            "above_ma25_ratio":
-                round(
-                    float(
-                        above_ma25_ratio
-                    ),
-                    2,
-                ),
+            "above_ma25_ratio": round(
+                float(above_ma25_ratio), 2
+            ),
 
-            "ma25_up_ratio":
-                round(
-                    float(
-                        ma25_up_ratio
-                    ),
-                    2,
-                ),
+            "ma25_up_ratio": round(
+                float(ma25_up_ratio), 2
+            ),
 
-            "advancing_ratio":
-                round(
-                    float(
-                        advancing_ratio
-                    ),
-                    2,
-                ),
+            "advancing_ratio": round(
+                float(advancing_ratio), 2
+            ),
 
-            "sample_count":
-                int(
-                    len(metrics)
-                ),
+            "sample_count": int(
+                len(metrics)
+            ),
         },
 
         "futures": {
-            "osaka": {
-                "usable":
-                    osaka_usable,
-
-                "status":
-                    (
-                        osaka.get(
-                            "status"
-                        )
-                        if osaka
-                        else None
-                    ),
-
-                "change_pct":
-                    osaka_change_pct,
-
-                "as_of":
-                    (
-                        osaka.get(
-                            "as_of"
-                        )
-                        if osaka
-                        else None
-                    ),
-            },
-
             "cme": {
-                "usable":
-                    cme_usable,
+                "usable": cme_usable,
 
-                "status":
-                    (
-                        cme.get(
-                            "status"
-                        )
-                        if cme
-                        else None
-                    ),
+                "status": cme.get(
+                    "status"
+                ),
 
-                "change_pct":
-                    cme_change_pct,
+                "change_pct": cme_change_pct,
 
-                "as_of":
-                    (
-                        cme.get(
-                            "as_of"
-                        )
-                        if cme
-                        else None
-                    ),
+                "as_of": cme.get(
+                    "as_of"
+                ),
+
+                "evaluation_base_date": cme.get(
+                    "evaluation_base_date"
+                ),
             },
         },
 
-        "evaluation_status":
-            "ok",
+        "evaluation_status": "ok",
 
-        "stop_reason":
-            None,
+        "stop_reason": None,
     }
 # ============================================================
 # 出来高・需給評価 10点
