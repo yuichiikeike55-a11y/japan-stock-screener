@@ -1,6 +1,6 @@
 {
   "base_date": "2026-10-30",
-  "generated_at_jst": "2026-10-31T14:44:51.661334+09:00",
+  "generated_at_jst": "2026-10-31T14:54:46.411757+09:00",
   "evaluation_status": "ok",
   "results": [
     {
@@ -9,10 +9,10 @@
       "category": "futures",
       "symbol": "NKD=F",
       "source": "yfinance",
-      "value": 62480.0,
+      "value": 62635.0,
       "previous_close": 64935.0,
-      "change": -2455.0,
-      "change_pct": -3.7807037807037807,
+      "change": -2300.0,
+      "change_pct": -3.542003542003542,
       "as_of": "2026-10-31T06:00:00+09:00",
       "bar_start_jst": "2026-10-31T05:00:00+09:00",
       "bar_completed_jst": "2026-10-31T06:00:00+09:00",
@@ -23,7 +23,7 @@
       "reason": "within_age_limit",
       "usable": true,
       "evaluation_base_date": "2026-10-30",
-      "evaluation_cutoff_jst": "2026-10-31T14:44:50.924937+09:00",
+      "evaluation_cutoff_jst": "2026-10-31T14:54:45.963941+09:00",
       "attempts": 1
     }
   ]
