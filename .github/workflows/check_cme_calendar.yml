@@ -23,111 +23,143 @@ jobs:
           python -m pip install --upgrade pip
           pip install exchange-calendars pandas
 
-      - name: Inspect CME calendar
+      - name: Inspect NKD calendar candidates
         run: |
           python - <<'PY'
-          import exchange_calendars as xcals
-          import pandas as pd
-          from datetime import date, datetime, time
+          from datetime import date, datetime, time, timedelta
           from zoneinfo import ZoneInfo
+
+          import pandas as pd
+          import exchange_calendars as xcals
 
           JST = ZoneInfo("Asia/Tokyo")
           ET = ZoneInfo("America/New_York")
 
-          print("=== VERSION ===")
+          cal = xcals.get_calendar("CMES")
+
+          test_dates = [
+              "2026-10-30",
+              "2026-11-02",
+              "2026-11-03",
+              "2026-11-26",
+              "2026-11-27",
+              "2026-12-24",
+              "2026-12-25",
+              "2026-12-31",
+              "2027-01-01",
+          ]
+
+          print("=== CALENDAR VERSION ===")
           print("exchange_calendars:", xcals.__version__)
+          print("calendar:", type(cal).__name__)
 
-          print("\n=== CME CALENDAR NAMES ===")
-          names = xcals.get_calendar_names()
-          for name in names:
-              if any(x in name.upper() for x in ("CME", "CMES", "CBOT")):
-                  print(name)
+          print("\n=== NKD SESSION CANDIDATES ===")
 
-          print("\n=== CALENDAR INSPECTION ===")
-          for name in ("CMES", "CME"):
-              if name not in names:
-                  print(name, "NOT AVAILABLE")
+          for raw in test_dates:
+              day = date.fromisoformat(raw)
+              stamp = pd.Timestamp(raw)
+
+              if not cal.is_session(stamp):
+                  print(
+                      "DATE:", raw,
+                      "STATUS: CLOSED",
+                      "ACTION: STOP",
+                  )
                   continue
 
-              try:
-                  cal = xcals.get_calendar(name)
-                  print("calendar:", name)
-                  print("class:", type(cal).__name__)
+              cmes_close = cal.session_close(stamp)
+              cmes_close_jst = cmes_close.tz_convert(JST)
 
-                  for day in (
-                      "2026-10-30",
-                      "2026-11-02",
-                      "2026-11-26",
-                      "2026-11-27",
-                      "2026-12-24",
-                      "2026-12-25",
-                      "2027-01-01",
-                  ):
-                      stamp = pd.Timestamp(day)
-                      regular_end = datetime.combine(
-                          date.fromisoformat(day),
-                          time(17, 0),
-                          tzinfo=ET,
-                      ).astimezone(JST)
+              # NKDの通常終了時刻の候補。
+              # これだけで正式検証済みとはしない。
+              nkd_regular_end = datetime.combine(
+                  day,
+                  time(17, 0),
+                  tzinfo=ET,
+              ).astimezone(JST)
 
-                      try:
-                          is_session = bool(cal.is_session(stamp))
-                          print(
-                              "DAY",
-                              day,
-                              "session=", is_session,
-                              "NKD_regular_end_JST=",
-                              regular_end.isoformat(),
-                          )
+              # CMES通常終了時刻との差は
+              # これまでの検証例では1時間。
+              expected_cmes_regular_close = (
+                  nkd_regular_end + timedelta(hours=1)
+              )
 
-                          if is_session:
-                              print(
-                                  "CALENDAR_OPEN",
-                                  cal.session_open(stamp),
-                              )
-                              print(
-                                  "CALENDAR_CLOSE",
-                                  cal.session_close(stamp),
-                              )
-                      except Exception as exc:
-                          print(
-                              "DAY_ERROR",
-                              day,
-                              type(exc).__name__,
-                              str(exc),
-                          )
+              is_regular_candidate = (
+                  cmes_close_jst.to_pydatetime()
+                  == expected_cmes_regular_close
+              )
 
-                  try:
-                      print(
-                          "EARLY_CLOSES",
-                          cal.early_closes[
-                              (cal.early_closes >= pd.Timestamp("2026-10-01", tz="UTC"))
-                              & (cal.early_closes <= pd.Timestamp("2027-01-31", tz="UTC"))
-                          ].tolist(),
-                      )
-                  except Exception as exc:
-                      print(
-                          "EARLY_CLOSES_ERROR",
-                          type(exc).__name__,
-                          str(exc),
-                      )
+              print("DATE:", raw)
+              print(
+                  "  CMES_CLOSE_JST:",
+                  cmes_close_jst.isoformat(),
+              )
+              print(
+                  "  NKD_REGULAR_END_CANDIDATE:",
+                  nkd_regular_end.isoformat(),
+              )
+              print(
+                  "  CMES_REGULAR_RELATION_MATCH:",
+                  is_regular_candidate,
+              )
 
-              except Exception as exc:
+              if is_regular_candidate:
                   print(
-                      "CALENDAR_ERROR",
-                      name,
-                      type(exc).__name__,
-                      str(exc),
+                      "  STATUS: REGULAR_CANDIDATE"
+                  )
+                  print(
+                      "  ACTION: REQUIRE_NKD_VERIFICATION"
+                  )
+              else:
+                  print(
+                      "  STATUS: SPECIAL_OR_UNKNOWN"
+                  )
+                  print(
+                      "  ACTION: STOP"
                   )
 
-          print("\n=== IMPORTANT ===")
+          print("\n=== EARLY CLOSES ===")
+          try:
+              early = cal.early_closes
+
+              # DatetimeIndexのタイムゾーン差による
+              # 比較エラーを避ける。
+              early = pd.DatetimeIndex(early)
+              if early.tz is not None:
+                  early = early.tz_localize(None)
+
+              start = pd.Timestamp("2026-10-01")
+              end = pd.Timestamp("2027-01-31")
+
+              selected = early[
+                  (early >= start) & (early <= end)
+              ]
+
+              for item in selected:
+                  print("EARLY_CLOSE:", item.date())
+
+              if len(selected) == 0:
+                  print("No early closes in selected range")
+
+          except Exception as exc:
+              print(
+                  "EARLY_CLOSES_ERROR:",
+                  type(exc).__name__,
+                  str(exc),
+              )
+              raise
+
+          print("\n=== SAFETY ===")
           print(
-              "This is diagnostic output only. "
-              "CMES/CME is not assumed to be "
-              "an NKD-specific verified calendar."
+              "This workflow does not approve "
+              "NKD sessions for production."
           )
           print(
-              "Do not remove VERIFIED_SESSIONS "
-              "based only on this test."
+              "CMES is used only to identify "
+              "regular candidates and special dates."
+          )
+          print(
+              "NKD-specific official verification "
+              "is still required."
           )
           PY
