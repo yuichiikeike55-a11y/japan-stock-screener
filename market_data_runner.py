@@ -116,7 +116,23 @@ def fetch_cme(base_date, cutoff):
         try:
             hourly = fetch_yfinance(CME_SYMBOL)
             daily = fetch_yfinance_daily(CME_SYMBOL)
+            # --------------------------------------------
+            # CME日足の基準日検証
+            # 日付が異なる場合は正式評価を停止
+            # --------------------------------------------
+            if daily is None or daily.empty:
+                raise RuntimeError(
+                    "CME daily data missing"
+                )
 
+            latest_daily_date = daily.index[-1].date()
+
+            if latest_daily_date != base_date:
+                raise RuntimeError(
+                    "CME daily base date mismatch: "
+                    f"expected={base_date.isoformat()}, "
+                    f"actual={latest_daily_date.isoformat()}"
+                )
             normalized = normalize_yfinance(
                 CME_SYMBOL,
                 hourly,
