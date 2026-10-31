@@ -91,7 +91,18 @@ def normalize_yfinance(
         f"evaluation_cutoff_jst={cutoff.isoformat()}",
         flush=True,
     )    
-
+    # --------------------------------------------------------
+    # CME日足の日付ラベルを診断
+    # 日付の意味が未確認のため、正式評価にはまだ使用しない
+    # --------------------------------------------------------
+    print(
+        "[CME DAILY CHECK]",
+        f"symbol={symbol}",
+        f"daily_last_dates={[str(x) for x in daily.index[-5:]]}",
+        f"hourly_last_start_jst={latest_start.isoformat()}",
+        f"hourly_last_end_jst={latest_end.isoformat()}",
+        flush=True,
+    )
     previous_rows = daily.loc[
         [
             timestamp.date() < latest_market_date
