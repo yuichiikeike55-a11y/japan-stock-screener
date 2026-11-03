@@ -297,6 +297,16 @@ jobs:
       - name: Show generated files
         run: find output -maxdepth 3 -type f -print
 
+      - name: Upload screening diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screening-diagnostics
+          path: |
+            output/strategy_hits_diagnostic_latest.json
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Check publication readiness
         id: publication
         if: always()
