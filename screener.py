@@ -5598,6 +5598,7 @@ def main():
             or final_eval.get("final_score") is None
             or final_eval.get("final_rank") is None
         ):
+
             invalid_stocks.append({
                 "code": stock.get("code"),
                 "status": (
@@ -5609,6 +5610,16 @@ def main():
                     final_eval.get("stop_reason")
                     if isinstance(final_eval, dict)
                     else "final_evaluation_invalid"
+                ),
+                "component": (
+                    final_eval.get("component")
+                    if isinstance(final_eval, dict)
+                    else None
+                ),
+                "component_reason": (
+                    final_eval.get("component_reason")
+                    if isinstance(final_eval, dict)
+                    else None
                 ),
             })
 
