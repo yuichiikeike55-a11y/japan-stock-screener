@@ -5522,73 +5522,117 @@ def main():
             ),
         )
 
+
     # ========================================================
     # 正式評価の公開前チェック
+    # 欠損があっても診断結果を保存し、処理は正常終了する。
+    # 正式ランキングは上書きしない。
     # ========================================================
-
-    if not strategy_hits:
-        raise RuntimeError(
-            "PUBLICATION STOPPED: "
-            "no strategy hits; "
-            "latest JSON will not be overwritten"
-        )
 
     invalid_stocks = []
 
     for stock in strategy_hits:
-        final_eval = stock.get(
-            "final_evaluation",
-            {}
-        )
+        final_eval = stock.get("final_evaluation", {})
+
+        if not isinstance(final_eval, dict):
+            final_eval = {}
 
         if (
-            not isinstance(final_eval, dict)
-            or final_eval.get("evaluation_status") != "ok"
+            final_eval.get("evaluation_status") != "ok"
             or final_eval.get("final_score") is None
             or final_eval.get("final_rank") is None
         ):
-
             invalid_stocks.append({
                 "code": stock.get("code"),
-                "status": (
-                    final_eval.get("evaluation_status")
-                    if isinstance(final_eval, dict)
-                    else "invalid"
+                "status": final_eval.get(
+                    "evaluation_status", "invalid"
                 ),
-                "reason": (
-                    final_eval.get("stop_reason")
-                    if isinstance(final_eval, dict)
-                    else "final_evaluation_invalid"
+                "reason": final_eval.get("stop_reason"),
+                "component": final_eval.get("component"),
+                "component_reason": final_eval.get(
+                    "component_reason"
                 ),
-                "component": (
-                    final_eval.get("component")
-                    if isinstance(final_eval, dict)
-                    else None
+                "missing_components": final_eval.get(
+                    "missing_components", []
                 ),
-                "component_reason": (
-                    final_eval.get("component_reason")
-                    if isinstance(final_eval, dict)
-                    else None
+                "missing_reasons": final_eval.get(
+                    "missing_reasons", {}
                 ),
             })
 
-    if invalid_stocks:
-        print(
-            "[PUBLICATION BLOCKED]",
-            json.dumps(
-                invalid_stocks,
+    if not strategy_hits or invalid_stocks:
+        diagnostic_path = (
+            OUTPUT_DIR / "strategy_hits_diagnostic_latest.json"
+        )
+
+        diagnostic_results = []
+
+        for stock in strategy_hits:
+            item = dict(stock)
+            evaluation = dict(
+                item.get("final_evaluation") or {}
+            )
+
+            if (
+                evaluation.get("evaluation_status") != "ok"
+                or evaluation.get("final_score") is None
+                or evaluation.get("final_rank") is None
+            ):
+                evaluation["evaluation_status"] = "incomplete"
+                evaluation["final_score"] = None
+                evaluation["final_rank"] = None
+                evaluation["uncapped_rank"] = None
+                evaluation["base_score"] = None
+
+            item["final_evaluation"] = evaluation
+            diagnostic_results.append(item)
+
+        diagnostic_payload = {
+            "generated_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
+            "base_date": (
+                base_date.strftime("%Y-%m-%d")
+                if base_date is not None
+                else None
+            ),
+            "strategy_count": 4,
+            "unique_stock_count": len(strategy_hits),
+            "evaluation_status": "incomplete",
+            "official_publication_allowed": False,
+            "incomplete_count": len(invalid_stocks),
+            "invalid_stocks": invalid_stocks,
+            "results": make_json_safe(diagnostic_results),
+        }
+
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+        with open(
+            diagnostic_path,
+            "w",
+            encoding="utf-8",
+        ) as f:
+            json.dump(
+                diagnostic_payload,
+                f,
                 ensure_ascii=False,
                 indent=2,
-            ),
+                allow_nan=False,
+            )
+
+        print(
+            "[DIAGNOSTIC SAVED]",
+            diagnostic_path,
+            flush=True,
+        )
+        print(
+            "[OFFICIAL PUBLICATION SKIPPED]",
+            f"hits={len(strategy_hits)}",
+            f"incomplete={len(invalid_stocks)}",
             flush=True,
         )
 
-        raise RuntimeError(
-            "PUBLICATION STOPPED: "
-            f"{len(invalid_stocks)} stocks "
-            "have incomplete final evaluations; "
-            "latest JSON will not be overwritten"
-        )
+        return
 
     print(
         "[PUBLICATION CHECK PASSED]",
