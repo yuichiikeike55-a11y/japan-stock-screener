@@ -1,3 +1,4 @@
+
 name: Update Sector Indices
 
 on:
@@ -9,178 +10,190 @@ on:
         type: string
 
   schedule:
-    # ============================================================
-    # 平日定期実行
-    # UTC → JST
-    # 08:30 UTC = 17:30 JST
-    # 09:30 UTC = 18:30 JST
-    # 10:30 UTC = 19:30 JST
-    # 11:30 UTC = 20:30 JST
-    # 12:30 UTC = 21:30 JST
-    # ============================================================
+    # Weekdays JST 17:30 - 21:30
     - cron: "30 8 * * 1-5"
     - cron: "30 9 * * 1-5"
     - cron: "30 10 * * 1-5"
     - cron: "30 11 * * 1-5"
     - cron: "30 12 * * 1-5"
 
-    # ============================================================
-    # 土日回復実行
-    #
-    # 金曜日のETFデータが yfinance に遅れて反映された場合に
-    # 自動で金曜日分を再取得する。
-    #
-    # 01:30 UTC = 10:30 JST
-    # 09:30 UTC = 18:30 JST
-    # ============================================================
+    # Weekend recovery
     - cron: "30 1 * * 6,0"
     - cron: "30 9 * * 6,0"
 
 permissions:
   contents: write
 
+concurrency:
+  group: update-sector-indices
+  cancel-in-progress: false
+
 jobs:
   update-sector-indices:
     runs-on: ubuntu-latest
 
     steps:
-      # ==========================================================
-      # Repository checkout
-      # ==========================================================
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ==========================================================
-      # Python
-      # ==========================================================
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # ==========================================================
-      # Dependencies
-      # ==========================================================
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas numpy yfinance
+          pip install pandas numpy yfinance exchange_calendars
 
-      # ==========================================================
-      # BASE_DATE
-      #
-      # 優先順位:
-      #
-      # 1. workflow_dispatch で base_date が指定されていれば
-      #    その日付を使用
-      #
-      # 2. 土曜日なら前日の金曜日
-      #
-      # 3. 日曜日なら2日前の金曜日
-      #
-      # 4. 平日はJST当日
-      #
-      # これにより土日に
-      # BASE_DATE=土曜日/日曜日
-      # となることを防止する。
-      # ==========================================================
       - name: Set BASE_DATE
         id: base_date
         shell: bash
+        env:
+          MANUAL_BASE_DATE: ${{ github.event.inputs.base_date }}
         run: |
-          MANUAL_BASE_DATE="${{ github.event.inputs.base_date }}"
+          python - <<'PY'
+          import os
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          import pandas as pd
+          import exchange_calendars as xcals
 
-          if [ -n "$MANUAL_BASE_DATE" ]; then
+          manual = os.environ.get(
+              "MANUAL_BASE_DATE", ""
+          ).strip()
 
-            BASE_DATE="$MANUAL_BASE_DATE"
+          calendar = xcals.get_calendar("XTKS")
 
-            echo "Manual BASE_DATE specified."
-            echo "BASE_DATE=$BASE_DATE"
+          if manual:
+              target = pd.Timestamp(manual)
 
-          else
+              if target.strftime("%Y-%m-%d") != manual:
+                  raise ValueError(
+                      "Invalid manual BASE_DATE format"
+                  )
 
-            JST_DATE=$(TZ=Asia/Tokyo date +%Y-%m-%d)
-            JST_DOW=$(TZ=Asia/Tokyo date +%u)
+              if not calendar.is_session(target):
+                  raise RuntimeError(
+                      f"Manual BASE_DATE {manual} "
+                      "is not a TSE trading session."
+                  )
 
-            echo "JST_DATE=$JST_DATE"
-            echo "JST_DOW=$JST_DOW"
+              base_date = manual
+              print("Manual trading date:", base_date)
 
-            # Saturday
-            if [ "$JST_DOW" = "6" ]; then
+          else:
+              today = datetime.now(
+                  ZoneInfo("Asia/Tokyo")
+              ).date()
 
-              BASE_DATE=$(TZ=Asia/Tokyo date -d "1 day ago" +%Y-%m-%d)
+              target = pd.Timestamp(today)
 
-              echo "Saturday recovery run."
-              echo "Using previous Friday."
+              if calendar.is_session(target):
+                  session = target
+              else:
+                  session = calendar.date_to_session(
+                      target,
+                      direction="previous"
+                  )
 
-            # Sunday
-            elif [ "$JST_DOW" = "7" ]; then
+              base_date = session.strftime("%Y-%m-%d")
 
-              BASE_DATE=$(TZ=Asia/Tokyo date -d "2 days ago" +%Y-%m-%d)
+              print("JST date:", today)
+              print("TSE trading date:", base_date)
 
-              echo "Sunday recovery run."
-              echo "Using previous Friday."
+          with open(
+              os.environ["GITHUB_OUTPUT"],
+              "a",
+              encoding="utf-8"
+          ) as f:
+              f.write(f"base_date={base_date}\n")
 
-            # Monday-Friday
-            else
+          print("FINAL BASE_DATE:", base_date)
+          PY
 
-              BASE_DATE="$JST_DATE"
-
-              echo "Weekday run."
-              echo "Using current JST date as action date."
-              echo "BASE_DATE=$BASE_DATE"
-
-            fi
-          fi
-
-          echo "FINAL BASE_DATE=$BASE_DATE"
-
-          echo "base_date=$BASE_DATE" >> "$GITHUB_OUTPUT"
-
-      # ==========================================================
-      # Run sector downloader
-      #
-      # sector_indices.py 側で
-      # ・18/18 完全取得
-      # ・BASE_DATE一致
-      # を確認する。
-      #
-      # 1セクターでも不足していれば exit 1 となり、
-      # latest JSON は公開しない。
-      # ==========================================================
       - name: Run sector index downloader
         env:
           BASE_DATE: ${{ steps.base_date.outputs.base_date }}
         run: |
           echo "Running sector_indices.py"
           echo "BASE_DATE=$BASE_DATE"
-
           python sector_indices.py
 
-      # ==========================================================
-      # Output確認
-      # ==========================================================
+      - name: Validate generated sector data
+        env:
+          BASE_DATE: ${{ steps.base_date.outputs.base_date }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(
+              "output/sector_indices_latest.json"
+          )
+
+          if not path.exists():
+              raise RuntimeError(
+                  "Sector latest JSON not found"
+              )
+
+          with path.open(
+              encoding="utf-8"
+          ) as f:
+              data = json.load(f)
+
+          expected = os.environ["BASE_DATE"]
+          results = data.get("results", [])
+
+          if len(results) != 18:
+              raise RuntimeError(
+                  f"Expected 18 sectors, "
+                  f"got {len(results)}"
+              )
+
+          if data.get("failure_count") != 0:
+              raise RuntimeError(
+                  "Sector failures detected"
+              )
+
+          if data.get("processed_count") != 18:
+              raise RuntimeError(
+                  "Processed count is not 18"
+              )
+
+          if data.get("latest_base_date") != expected:
+              raise RuntimeError(
+                  "Latest base date mismatch"
+              )
+
+          dates = {
+              row.get("base_date")
+              for row in results
+          }
+
+          if dates != {expected}:
+              raise RuntimeError(
+                  f"Sector dates mismatch: {dates}"
+              )
+
+          print(
+              "VALIDATED: 18/18 sectors",
+              "BASE_DATE:", expected
+          )
+          PY
+
       - name: Show generated files
         run: |
           echo "=== output ==="
-          ls -lah output || true
+          ls -lah output
 
-          echo ""
           echo "=== sector history ==="
-          ls -lah output/sector_history || true
+          ls -lah output/sector_history
 
-          echo ""
           echo "=== latest sector JSON ==="
-          if [ -f output/sector_indices_latest.json ]; then
-            head -n 40 output/sector_indices_latest.json
-          else
-            echo "sector_indices_latest.json not found"
-            exit 1
-          fi
+          head -n 40 output/sector_indices_latest.json
 
-      # ==========================================================
-      # Commit & Push
-      # ==========================================================
       - name: Commit and push sector data
         shell: bash
         run: |
