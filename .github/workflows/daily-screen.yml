@@ -152,10 +152,24 @@ jobs:
               raise SystemExit("STOP: market_data.json missing")
 
           data = json.loads(path.read_text(encoding="utf-8"))
-          expected = os.environ["BASE_DATE"]
 
-          if data.get("base_date") != expected:
-              raise SystemExit("STOP: market JSON base date mismatch")
+          expected = os.environ["BASE_DATE"]
+          actual = data.get("base_date")
+
+          print(
+              "[MARKET JSON DIAGNOSTICS]",
+              f"expected_base_date={expected}",
+              f"actual_base_date={actual}",
+              f"evaluation_status={data.get('evaluation_status')}",
+              f"generated_at={data.get('generated_at')}",
+              flush=True,
+          )
+
+          if actual != expected:
+              raise SystemExit(
+                  "STOP: market JSON base date mismatch; "
+                  f"expected={expected}, actual={actual}"
+              )
 
           rows = data.get("results")
           if not isinstance(rows, list):
