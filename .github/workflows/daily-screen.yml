@@ -8,10 +8,8 @@ on:
         description: "Base date YYYY-MM-DD (blank = latest JP trading day)"
         required: false
         type: string
-
-
   schedule:
-    - cron: "0 23 * * 0-4"
+    - cron: "50 23 * * 0-4"
 permissions:
   contents: write
 
