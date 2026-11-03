@@ -130,14 +130,17 @@ jobs:
             screener.py \
             validate_screening_output.py
 
+
       - name: Update CME futures market data
+        id: market_update
+        continue-on-error: true
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: python market_data_runner.py
 
-
-
       - name: Validate CME market data
+        id: market_validation
+        continue-on-error: true
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: |
@@ -209,11 +212,14 @@ jobs:
           print("CME futures validation OK")
           PY
       - name: Update 18 sector indices
+        id: sector_update
+        continue-on-error: true
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: python sector_indices.py
-
       - name: Validate 18 sector data
+        id: sector_validation
+        continue-on-error: true
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: |
@@ -274,13 +280,18 @@ jobs:
 
           print("18 sector validation OK")
           PY
-
       - name: Run four-strategy stock screener
+        id: screener
+        continue-on-error: true
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: python screener.py
 
+
       - name: Validate screening output
+        id: screening_validation
+        if: steps.screener.outcome == 'success'
+        continue-on-error: true
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: python validate_screening_output.py
@@ -288,7 +299,57 @@ jobs:
       - name: Show generated files
         run: find output -maxdepth 3 -type f -print
 
+      - name: Check publication readiness
+        id: publication
+        if: always()
+        env:
+          MARKET_UPDATE: ${{ steps.market_update.outcome }}
+          MARKET_VALIDATION: ${{ steps.market_validation.outcome }}
+          SECTOR_UPDATE: ${{ steps.sector_update.outcome }}
+          SECTOR_VALIDATION: ${{ steps.sector_validation.outcome }}
+          SCREENER: ${{ steps.screener.outcome }}
+          SCREENING_VALIDATION: ${{ steps.screening_validation.outcome }}
+        run: |
+          python - <<'PY'
+          import os
+
+          checks = {
+              "market_update": os.environ["MARKET_UPDATE"],
+              "market_validation": os.environ["MARKET_VALIDATION"],
+              "sector_update": os.environ["SECTOR_UPDATE"],
+              "sector_validation": os.environ["SECTOR_VALIDATION"],
+              "screener": os.environ["SCREENER"],
+              "screening_validation": os.environ["SCREENING_VALIDATION"],
+          }
+
+          print("[PUBLICATION READINESS]", flush=True)
+
+          for name, status in checks.items():
+              print(
+                  f"{name}={status}",
+                  flush=True,
+              )
+
+          failures = [
+              name
+              for name, status in checks.items()
+              if status != "success"
+          ]
+
+          if failures:
+              raise SystemExit(
+                  "PUBLICATION STOPPED: "
+                  + ", ".join(failures)
+              )
+
+          print(
+              "[PUBLICATION READY]",
+              flush=True,
+          )
+          PY
+
       - name: Commit validated results
+        if: steps.publication.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
