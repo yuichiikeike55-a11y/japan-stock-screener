@@ -100,6 +100,14 @@ def get_verified_session_end(base_date: date) -> datetime:
                 f"CME verified session mismatch: {key}"
             )
 
+  
+    if verified_raw is None:
+        raise RuntimeError(
+            "NKD session is not independently verified: "
+            f"date={key}. "
+            "CMES regular pattern alone is insufficient."
+        )
+
     print(
         "[CME CALENDAR]",
         f"date={key}",
