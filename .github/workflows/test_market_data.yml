@@ -3,9 +3,8 @@ name: Test Market Data
 
 on:
   workflow_dispatch:
-
-schedule:
-  - cron: "50 23 * * 0-4"
+  schedule:
+    - cron: "50 23 * * 0-4"
 
 permissions:
   contents: write
