@@ -331,10 +331,24 @@ def write_json_atomic(path, data):
             temp.unlink()
 
 
+
 def main():
-    base_date, cutoff = (
-        get_base_date_and_cutoff()
-    )
+    try:
+        base_date, cutoff = get_base_date_and_cutoff()
+    except RuntimeError as exc:
+        message = str(exc)
+
+        if message.startswith(
+            "Pre-open evaluation time has not arrived:"
+        ):
+            print(
+                "[MARKET DATA SKIPPED]",
+                message,
+                flush=True,
+            )
+            return
+
+        raise
 
     print(
         "BASE_DATE:",
