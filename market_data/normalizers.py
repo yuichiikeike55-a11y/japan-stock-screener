@@ -65,8 +65,28 @@ def normalize_yfinance(
             f"{symbol}: no completed hourly bar"
         )
 
+
     latest_start = hourly.index[-1]
     latest_end = latest_start + timedelta(hours=1)
+
+    # CMEセッション終了時刻をcutoffとして受け取る。
+    # 最後の確定足が終了時刻から大きく離れていれば停止。
+    gap_minutes = (
+        cutoff - latest_end
+    ).total_seconds() / 60
+
+    if gap_minutes < 0:
+        raise RuntimeError(
+            f"{symbol}: hourly bar ends after CME cutoff"
+        )
+
+    if gap_minutes > 60:
+        raise RuntimeError(
+            f"{symbol}: no hourly bar near CME session end; "
+            f"gap_minutes={gap_minutes:.1f}, "
+            f"last_bar_end={latest_end.isoformat()}, "
+            f"session_end={cutoff.isoformat()}"
+        )
 
     value = float(hourly.iloc[-1]["Close"])
 
