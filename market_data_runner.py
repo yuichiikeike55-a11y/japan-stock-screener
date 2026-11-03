@@ -197,7 +197,7 @@ def build_market_data(base_date, cutoff):
     validated = validate_freshness(
         normalized,
         MAX_AGE_MINUTES,
-        now=cme_end,
+        now=cutoff,
     )
 
     if validated.get("status") != "ok":
@@ -289,10 +289,36 @@ def main():
         cutoff.isoformat(),
     )
 
+
     payload = build_market_data(
         base_date,
         cutoff,
     )
+
+    if payload.get("evaluation_status") != "ok":
+        raise RuntimeError(
+            "Market data validation failed; "
+            "latest JSON will not be overwritten"
+        )
+
+    results = payload.get("results")
+
+    if not isinstance(results, list) or len(results) != 1:
+        raise RuntimeError(
+            "Market data results are invalid"
+        )
+
+    cme = results[0]
+
+    if (
+        cme.get("status") != "ok"
+        or cme.get("usable") is not True
+        or cme.get("evaluation_base_date")
+        != base_date.isoformat()
+    ):
+        raise RuntimeError(
+            "CME data is not eligible for official evaluation"
+        )
 
     history_path = (
         HISTORY_DIR
