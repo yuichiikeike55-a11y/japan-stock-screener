@@ -1,0 +1,37 @@
+
+name: Diagnose CME Reference
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 21 * * 0-4"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy yfinance
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile diagnose_cme_reference.py
+
+      - name: Run CME reference diagnostic
+        run: |
+          python diagnose_cme_reference.py
