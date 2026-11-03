@@ -338,15 +338,22 @@ def main():
     except RuntimeError as exc:
         message = str(exc)
 
+
         if message.startswith(
             "Pre-open evaluation time has not arrived:"
         ):
             print(
-                "[MARKET DATA SKIPPED]",
+                "[MARKET DATA NOT READY]",
                 message,
                 flush=True,
             )
-            return
+            raise RuntimeError(
+                "MARKET_DATA_NOT_READY: "
+                "official evaluation cutoff "
+                "has not arrived; "
+                "existing market JSON must not "
+                "be treated as newly generated"
+            ) from exc
 
         raise
 
