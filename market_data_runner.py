@@ -139,12 +139,18 @@ def get_base_date_and_cutoff():
 
     return base_date, cutoff
 
+
 def get_cme_session_date(cutoff):
     """
-    評価時刻までに終了したCMEセッションを探す。
+    評価時刻までに終了した直近のCMEセッションを探す。
 
-    CMEの取引日と東証の基準日は別々に管理する。
+    - CMEカレンダーで非営業日と確認できた日だけ飛ばす
+    - カレンダー検証の異常は握りつぶさず停止
+    - 直近セッションが未終了なら正式評価を停止
     """
+    import exchange_calendars as xcals
+
+    calendar = xcals.get_calendar("CMES")
     candidate = cutoff.astimezone(EASTERN).date()
 
     for days_back in range(8):
@@ -152,18 +158,38 @@ def get_cme_session_date(cutoff):
             days=days_back
         )
 
-        try:
-            session_end = get_verified_session_end(
-                session_date
-            )
-        except Exception:
+        stamp = pd.Timestamp(
+            session_date.isoformat()
+        )
+
+        if not calendar.is_session(stamp):
             continue
 
-        if session_end <= cutoff:
-            return session_date, session_end
+        session_end = get_verified_session_end(
+            session_date
+        )
+
+        if session_end > cutoff:
+            raise RuntimeError(
+                "Latest CME session has not ended: "
+                f"session={session_date}, "
+                f"end={session_end.isoformat()}, "
+                f"cutoff={cutoff.isoformat()}"
+            )
+
+        print(
+            "CME SESSION DATE:",
+            session_date.isoformat(),
+        )
+        print(
+            "CME SESSION END:",
+            session_end.isoformat(),
+        )
+
+        return session_date, session_end
 
     raise RuntimeError(
-        "No verified CME session before cutoff"
+        "No verified CME session within 8 days"
     )
 
 
