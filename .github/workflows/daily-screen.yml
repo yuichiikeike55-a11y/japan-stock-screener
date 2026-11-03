@@ -286,12 +286,23 @@ jobs:
         run: python screener.py
 
 
-      - name: Validate screening output
+
+      - name: Validate official screening output
         id: screening_validation
         if: steps.screener.outcome == 'success'
         continue-on-error: true
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
+          VALIDATION_MODE: official
+        run: python validate_screening_output.py
+
+      - name: Validate screening diagnostics
+        id: diagnostic_validation
+        if: steps.screener.outcome == 'success'
+        continue-on-error: true
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+          VALIDATION_MODE: diagnostic
         run: python validate_screening_output.py
 
       - name: Show generated files
@@ -365,7 +376,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add output/
+
+          git add \
+            output/market_data.json \
+            output/sector_indices_latest.json \
+            output/strategy_hits_latest.json
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
