@@ -74,8 +74,18 @@ def next_tse_session(day):
     return calendar.next_session(stamp).date()
 
 
+
 def get_base_date_and_cutoff():
+    """
+    翌東証営業日の寄り付き前評価。
+
+    - 評価時刻は東証営業日の08:45 JST
+    - 基準日は評価日の前東証営業日
+    - 08:45前は正式評価を停止
+    - BASE_DATE指定時も営業日を厳密検証
+    """
     now = datetime.now(JST)
+    calendar = get_tse_calendar()
 
     raw = os.getenv("BASE_DATE", "").strip()
 
@@ -86,13 +96,26 @@ def get_base_date_and_cutoff():
             raise RuntimeError(
                 f"BASE_DATE is not a TSE session: {base_date}"
             )
-    else:
-        base_date = previous_tse_session(now.date())
 
-    next_session = next_tse_session(base_date)
+        evaluation_date = next_tse_session(base_date)
+    else:
+        today = now.date()
+        today_stamp = pd.Timestamp(today.isoformat())
+
+        if calendar.is_session(today_stamp):
+            evaluation_date = today
+        else:
+            evaluation_date = calendar.date_to_session(
+                today_stamp,
+                direction="next",
+            ).date()
+
+        base_date = previous_tse_session(
+            evaluation_date
+        )
 
     cutoff = datetime.combine(
-        next_session,
+        evaluation_date,
         EVALUATION_TIME,
         tzinfo=JST,
     )
@@ -109,8 +132,12 @@ def get_base_date_and_cutoff():
             "BASE_DATE is older than 7 days"
         )
 
-    return base_date, cutoff
+    print(
+        "TSE EVALUATION DATE:",
+        evaluation_date.isoformat(),
+    )
 
+    return base_date, cutoff
 
 def get_cme_session_date(cutoff):
     """
