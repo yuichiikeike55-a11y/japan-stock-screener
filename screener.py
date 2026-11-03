@@ -4338,12 +4338,11 @@ def score_final_evaluation_100(stock):
         else:
             reason = evaluation.get("stop_reason")
 
-
         if status != "ok":
             return stopped(
                 "required_evaluation_stopped",
                 component=component,
-                reason=reason or "evaluation_unavailable",
+                component_reason=reason or "evaluation_unavailable",
             )
 
         value = evaluation.get(score_key)
