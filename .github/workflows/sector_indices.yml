@@ -194,6 +194,7 @@ jobs:
           echo "=== latest sector JSON ==="
           head -n 40 output/sector_indices_latest.json
 
+
       - name: Commit and push sector data
         shell: bash
         run: |
@@ -210,5 +211,12 @@ jobs:
 
           git commit -m "Update sector indices ${{ steps.base_date.outputs.base_date }}"
 
+          # Rebase前に未ステージ変更を退避
+          git stash push --include-untracked -m "temporary workflow changes"
+
           git pull --rebase origin main
+
+          git push origin HEAD:main
+
+          echo "Sector data pushed successfully."
           git push origin main
