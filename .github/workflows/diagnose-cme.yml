@@ -3,6 +3,10 @@ name: Diagnose CME Futures
 
 on:
   workflow_dispatch:
+  schedule:
+    # Monday-Friday 06:15 JST
+    # Sunday-Thursday 21:15 UTC
+    - cron: "15 21 * * 0-4"
 
 permissions:
   contents: read
@@ -27,7 +31,9 @@ jobs:
           pip install pandas numpy yfinance
 
       - name: Check diagnostic syntax
-        run: python -m py_compile diagnose_cme.py
+        run: |
+          python -m py_compile diagnose_cme.py
 
       - name: Run CME diagnostic
-        run: python diagnose_cme.py
+        run: |
+          python diagnose_cme.py
