@@ -165,6 +165,14 @@ def get_cme_session_date(cutoff):
         if not calendar.is_session(stamp):
             continue
 
+
+        print(
+            "[CME SESSION CANDIDATE]",
+            f"date={session_date.isoformat()}",
+            f"cutoff={cutoff.isoformat()}",
+            flush=True,
+        )
+
         session_end = get_verified_session_end(
             session_date
         )
@@ -201,6 +209,28 @@ def build_market_data(base_date, cutoff):
     hourly = fetch_yfinance(CME_SYMBOL)
     daily = fetch_yfinance_daily(CME_SYMBOL)
 
+    print(
+        "[CME DATA FETCH]",
+        f"hourly_rows={0 if hourly is None else len(hourly)}",
+        f"daily_rows={0 if daily is None else len(daily)}",
+        flush=True,
+    )
+
+    if hourly is not None and not hourly.empty:
+        print(
+            "[CME HOURLY RANGE]",
+            f"first={hourly.index[0]}",
+            f"last={hourly.index[-1]}",
+            flush=True,
+        )
+
+    if daily is not None and not daily.empty:
+        print(
+            "[CME DAILY RANGE]",
+            f"first={daily.index[0]}",
+            f"last={daily.index[-1]}",
+            flush=True,
+        )
     if daily is None or daily.empty:
         raise RuntimeError("CME daily data missing")
 
