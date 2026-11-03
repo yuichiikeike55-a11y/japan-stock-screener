@@ -963,7 +963,29 @@ def calculate_metrics(
             "volume_ratio_20d": volume_ratio,
         })
 
-    return pd.DataFrame(metrics), failures
+
+    result = pd.DataFrame(metrics)
+
+    if result.empty:
+        print(
+            "[METRICS EMPTY]",
+            f"failures={len(failures)}",
+            flush=True,
+        )
+
+        result = pd.DataFrame(
+            columns=[
+                "code",
+                "name",
+                "base_date",
+                "close",
+                "previous_close",
+                "ma25",
+                "ma25_direction",
+            ]
+        )
+
+    return result, failures
 
 
 # ============================================================
@@ -3561,6 +3583,60 @@ def score_market_condition_15(
             "market_internal_score": internal_score,
         }
 
+
+    # ========================================================
+    # 市場データJSON全体の正常性・基準日チェック
+    # ========================================================
+
+    if not isinstance(market_data, dict):
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "market_data_structure_invalid",
+        }
+
+    if market_data.get("evaluation_status") != "ok":
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "market_data_not_ready",
+        }
+
+    if "base_date" not in metrics.columns:
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "stock_base_date_missing",
+        }
+
+    stock_dates = metrics["base_date"]
+
+    if stock_dates.isna().any():
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "stock_base_date_missing",
+        }
+
+    expected_dates = set(stock_dates.astype(str))
+
+    if len(expected_dates) != 1:
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "stock_base_date_invalid",
+        }
+
+    expected_date = next(iter(expected_dates))
+
+    if market_data.get("base_date") != expected_date:
+        return {
+            "market_score": None,
+            "evaluation_status": "stopped",
+            "stop_reason": "market_data_base_date_mismatch",
+            "expected_base_date": expected_date,
+            "actual_base_date": market_data.get("base_date"),
+        }    
     results = market_data.get(
         "results",
         []
@@ -3607,7 +3683,10 @@ def score_market_condition_15(
         status = row.get("status")
 
         # stale / error / missing は使用不可
-        if status not in ("ok", "closed"):
+        if status != "ok":
+            return False
+
+        if row.get("usable") is not True:
             return False
 
         change_pct = _num(
@@ -4168,15 +4247,22 @@ def score_final_evaluation_100(stock):
     if base_date is None:
         return stopped("base_date_missing_or_invalid")
 
-    metrics_raw_date = metrics.get("base_date")
 
-    if metrics_raw_date is not None:
-        metrics_date = normalized_date(metrics_raw_date)
+    metrics_date = normalized_date(
+        metrics.get("base_date")
+    )
 
-        if metrics_date != base_date:
-            return stopped(
-                "stock_metrics_base_date_mismatch"
-            )
+    if metrics_date is None:
+        return stopped(
+            "stock_metrics_base_date_missing"
+        )
+
+    if metrics_date != base_date:
+        return stopped(
+            "stock_metrics_base_date_mismatch",
+            expected=base_date,
+            actual=metrics_date,
+        )
 
     hit_count = stock.get("hit_count")
 
@@ -4252,32 +4338,17 @@ def score_final_evaluation_100(stock):
         else:
             reason = evaluation.get("stop_reason")
 
-        if status != "ok":
-            if component in ("sector", "market"):
-                scores[component] = 0.0
-                missing_components.append(component)
-                missing_reasons[component] = (
-                    reason or "evaluation_unavailable"
-                )
-                continue
 
+        if status != "ok":
             return stopped(
                 "required_evaluation_stopped",
                 component=component,
-                reason=reason,
+                reason=reason or "evaluation_unavailable",
             )
 
         value = evaluation.get(score_key)
 
         if not valid_number(value, limit):
-            if component in ("sector", "market"):
-                scores[component] = 0.0
-                missing_components.append(component)
-                missing_reasons[component] = (
-                    "invalid_or_missing_score"
-                )
-                continue
-
             return stopped(
                 "required_score_invalid",
                 component=component,
@@ -4924,52 +4995,99 @@ def main():
                 repr(e)
             )
 
+
+    # ========================================================
     # 4. Metrics
-    metrics, metric_failures = (
-        calculate_metrics(
-            universe,
-            price_data,
-            base_date
-        )
+    # ========================================================
+
+    metrics, metric_failures = calculate_metrics(
+        universe,
+        price_data,
+        base_date,
     )
-    print("Calculated metrics:", len(metrics))
-    print("Metric failures:", len(metric_failures))
 
     from collections import Counter
 
     print(
-        "Metric failure reasons:",
+        "[METRICS DIAGNOSTICS]",
+        flush=True,
+    )
+    print("BASE_DATE:", base_date)
+    print("METRICS_ROWS:", len(metrics))
+    print("METRICS_COLUMNS:", list(metrics.columns))
+    print("METRIC_FAILURES:", len(metric_failures))
+
+    print(
+        "METRIC_FAILURE_REASONS:",
         dict(
             Counter(
-                x.get("reason", "unknown")
-                for x in metric_failures
+                item.get("reason", "unknown")
+                for item in metric_failures
             )
-        )
+        ),
     )
 
-    if metrics.empty or "code" not in metrics.columns:
+    if metrics.empty:
         raise RuntimeError(
-            "No valid stock metrics. "
-            "Screening stopped before publishing results."
+            "SCREENING_STOPPED: "
+            "no valid stock metrics; "
+            "latest results will not be overwritten"
         )
-    # 地合い評価前：指標計算の診断
-    from collections import Counter
 
-    print("Calculated metrics:", len(metrics))
-    print("Metric failures:", len(metric_failures))
+    required_columns = [
+        "code",
+        "base_date",
+        "close",
+        "previous_close",
+        "ma25",
+        "ma25_direction",
+    ]
+
+    missing_columns = [
+        column
+        for column in required_columns
+        if column not in metrics.columns
+    ]
+
+    if missing_columns:
+        raise RuntimeError(
+            "SCREENING_STOPPED: "
+            f"required columns missing: {missing_columns}"
+        )
+
+    actual_dates = set(
+        metrics["base_date"].dropna().astype(str)
+    )
+
+    expected_date = base_date.strftime("%Y-%m-%d")
+
+    if (
+        metrics["base_date"].isna().any()
+        or actual_dates != {expected_date}
+    ):
+        raise RuntimeError(
+            "SCREENING_STOPPED: "
+            "stock metrics base date mismatch; "
+            f"expected={expected_date}, "
+            f"actual={sorted(actual_dates)}"
+        )
+
+    if (
+        metrics["code"].isna().any()
+        or metrics["code"].astype(str).str.strip().eq("").any()
+        or metrics["code"].duplicated().any()
+    ):
+        raise RuntimeError(
+            "SCREENING_STOPPED: "
+            "stock code missing or duplicated"
+        )
+
     print(
-        "Metric failure reasons:",
-        dict(Counter(
-            item.get("reason", "unknown")
-            for item in metric_failures
-        )),
+        "[METRICS VALIDATED]",
+        f"rows={len(metrics)}",
+        f"base_date={expected_date}",
+        flush=True,
     )
-
-    if metrics.empty or "code" not in metrics.columns:
-        raise RuntimeError(
-            "No valid stock metrics. "
-            "Screening stopped before publishing results."
-        )        
     # 5. Screen
     result = apply_screen(metrics)
     reacceleration_result = apply_reacceleration_screen(metrics)
@@ -5455,6 +5573,69 @@ def main():
                 "evaluation_status"
             ),
         )
+
+    # ========================================================
+    # 正式評価の公開前チェック
+    # ========================================================
+
+    if not strategy_hits:
+        raise RuntimeError(
+            "PUBLICATION STOPPED: "
+            "no strategy hits; "
+            "latest JSON will not be overwritten"
+        )
+
+    invalid_stocks = []
+
+    for stock in strategy_hits:
+        final_eval = stock.get(
+            "final_evaluation",
+            {}
+        )
+
+        if (
+            not isinstance(final_eval, dict)
+            or final_eval.get("evaluation_status") != "ok"
+            or final_eval.get("final_score") is None
+            or final_eval.get("final_rank") is None
+        ):
+            invalid_stocks.append({
+                "code": stock.get("code"),
+                "status": (
+                    final_eval.get("evaluation_status")
+                    if isinstance(final_eval, dict)
+                    else "invalid"
+                ),
+                "reason": (
+                    final_eval.get("stop_reason")
+                    if isinstance(final_eval, dict)
+                    else "final_evaluation_invalid"
+                ),
+            })
+
+    if invalid_stocks:
+        print(
+            "[PUBLICATION BLOCKED]",
+            json.dumps(
+                invalid_stocks,
+                ensure_ascii=False,
+                indent=2,
+            ),
+            flush=True,
+        )
+
+        raise RuntimeError(
+            "PUBLICATION STOPPED: "
+            f"{len(invalid_stocks)} stocks "
+            "have incomplete final evaluations; "
+            "latest JSON will not be overwritten"
+        )
+
+    print(
+        "[PUBLICATION CHECK PASSED]",
+        f"stocks={len(strategy_hits)}",
+        flush=True,
+    )        
     strategy_hits_json = {
         "generated_at": datetime.now(
             timezone.utc
