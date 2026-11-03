@@ -1808,6 +1808,7 @@ def attach_grades(df, strategy):
 # セクター評価 25点
 # ============================================================
 
+
 def score_sector_25(
     sector_row,
     relative_rank=None,
@@ -1816,33 +1817,59 @@ def score_sector_25(
     """
     セクター評価：25点満点
 
-    配点
-    1. 中期トレンド                 8点
-    2. 短中期モメンタム             7点
-    3. 高値位置                     4点
-    4. 出来高・資金流入             3点
-    5. 18セクター内相対順位         3点
+    中期トレンド       8点
+    モメンタム         7点
+    高値位置           4点
+    出来高・資金流入   3点
+    相対順位           3点
 
-    data_quality warning の場合も点数自体は計算するが、
-    最終評価側で S/A 禁止（最高B）を適用する。
+    必須データが不正なら評価停止。
+    warning時のランク上限Bは最終評価側で適用。
     """
 
-    if sector_row is None:
+    def stopped(reason, **details):
         return {
             "sector_score": None,
             "evaluation_status": "stopped",
-            "stop_reason": "sector_data_missing",
+            "stop_reason": reason,
+            **details,
         }
 
-    # --------------------------------------------------------
-    # 必須項目
-    # --------------------------------------------------------
+    if not isinstance(sector_row, dict):
+        return stopped("sector_data_missing")
 
-    required_keys = [
+    required_text = [
         "base_date",
+        "ma25_direction",
+    ]
+
+    missing_text = [
+        key
+        for key in required_text
+        if (
+            not isinstance(sector_row.get(key), str)
+            or not sector_row.get(key).strip()
+        )
+    ]
+
+    if missing_text:
+        return stopped(
+            "sector_required_data_missing",
+            missing_fields=missing_text,
+        )
+
+    if sector_row["ma25_direction"] not in (
+        "up",
+        "flat",
+        "down",
+    ):
+        return stopped(
+            "sector_ma25_direction_invalid"
+        )
+
+    required_numeric = [
         "close",
         "ma25",
-        "ma25_direction",
         "ma25_gap_pct",
         "return_1d_pct",
         "return_5d_pct",
@@ -1851,80 +1878,83 @@ def score_sector_25(
         "volume_ratio_20d",
     ]
 
-    missing = []
+    missing_numeric = [
+        key
+        for key in required_numeric
+        if sector_row.get(key) is None
+    ]
 
-    for key in required_keys:
+    if missing_numeric:
+        return stopped(
+            "sector_required_data_missing",
+            missing_fields=missing_numeric,
+        )
+
+    numbers = {}
+    invalid_numeric = []
+
+    for key in required_numeric:
         value = sector_row.get(key)
 
-        if value is None:
-            missing.append(key)
+        if isinstance(value, (bool, np.bool_)):
+            invalid_numeric.append(key)
+            continue
 
-    if missing:
-        return {
-            "sector_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "sector_required_data_missing",
-            "missing_fields": missing,
-        }
+        try:
+            number = float(value)
+        except (TypeError, ValueError, OverflowError):
+            invalid_numeric.append(key)
+            continue
 
-    # --------------------------------------------------------
-    # 数値取得
-    # --------------------------------------------------------
+        if not np.isfinite(number):
+            invalid_numeric.append(key)
+            continue
 
-    close = _num(
-        sector_row,
-        "close"
-    )
+        numbers[key] = number
 
-    ma25 = _num(
-        sector_row,
-        "ma25"
-    )
+    if invalid_numeric:
+        return stopped(
+            "sector_numeric_data_invalid",
+            invalid_fields=invalid_numeric,
+        )
 
-    ma25_gap = _num(
-        sector_row,
-        "ma25_gap_pct"
-    )
+    # 52週高値乖離は従来どおり任意項目。
+    high52_gap = None
+    raw_high52 = sector_row.get("high52_gap_pct")
 
-    ret1 = _num(
-        sector_row,
-        "return_1d_pct"
-    )
+    if raw_high52 is not None:
+        if isinstance(raw_high52, (bool, np.bool_)):
+            return stopped(
+                "sector_optional_numeric_invalid",
+                invalid_fields=["high52_gap_pct"],
+            )
 
-    ret5 = _num(
-        sector_row,
-        "return_5d_pct"
-    )
+        try:
+            high52_gap = float(raw_high52)
+        except (TypeError, ValueError, OverflowError):
+            return stopped(
+                "sector_optional_numeric_invalid",
+                invalid_fields=["high52_gap_pct"],
+            )
 
-    ret20 = _num(
-        sector_row,
-        "return_20d_pct"
-    )
+        if not np.isfinite(high52_gap):
+            return stopped(
+                "sector_optional_numeric_invalid",
+                invalid_fields=["high52_gap_pct"],
+            )
 
-    high20_gap = _num(
-        sector_row,
-        "high20_gap_pct"
-    )
+    close = numbers["close"]
+    ma25 = numbers["ma25"]
+    ma25_gap = numbers["ma25_gap_pct"]
+    ret1 = numbers["return_1d_pct"]
+    ret5 = numbers["return_5d_pct"]
+    ret20 = numbers["return_20d_pct"]
+    high20_gap = numbers["high20_gap_pct"]
+    volume_ratio = numbers["volume_ratio_20d"]
 
-    high52_gap = _num(
-        sector_row,
-        "high52_gap_pct"
-    )
+    ma25_direction = sector_row["ma25_direction"]
 
-    volume_ratio = _num(
-        sector_row,
-        "volume_ratio_20d"
-    )
-
-    ma25_direction = sector_row.get(
-        "ma25_direction"
-    )
-
-    # --------------------------------------------------------
-    # 1. 中期トレンド 8点
-    # MA25方向 + 株価位置
-    # --------------------------------------------------------
-
+    # 1. 中期トレンド：8点
     trend_score = 0
 
     if ma25_direction == "up":
@@ -1932,41 +1962,24 @@ def score_sector_25(
     elif ma25_direction == "flat":
         trend_score += 2
 
-    if (
-        close is not None
-        and ma25 is not None
-        and close >= ma25
-    ):
+    if close >= ma25:
         trend_score += 4
-    elif (
-        ma25_gap is not None
-        and ma25_gap >= -2
-    ):
+    elif ma25_gap >= -2:
         trend_score += 2
 
-    trend_score = min(
-        trend_score,
-        8
-    )
+    trend_score = min(trend_score, 8)
 
-    # --------------------------------------------------------
-    # 2. 短中期モメンタム 7点
-    # 1日 / 5日 / 20日
-    # --------------------------------------------------------
-
+    # 2. モメンタム：7点
     momentum_score = 0
 
-    # 1日：最大1点
     if ret1 > 0:
         momentum_score += 1
 
-    # 5日：最大2点
     if ret5 >= 3:
         momentum_score += 2
     elif ret5 > 0:
         momentum_score += 1
 
-    # 20日：最大4点
     if ret20 >= 8:
         momentum_score += 4
     elif ret20 >= 4:
@@ -1976,41 +1989,25 @@ def score_sector_25(
     elif ret20 >= -2:
         momentum_score += 1
 
-    momentum_score = min(
-        momentum_score,
-        7
-    )
+    momentum_score = min(momentum_score, 7)
 
-    # --------------------------------------------------------
-    # 3. 高値位置 4点
-    # 20日高値 + 52週高値
-    # --------------------------------------------------------
-
+    # 3. 高値位置：4点
     high_score = 0
 
-    # 20日高値：最大2点
     if high20_gap >= -2:
         high_score += 2
     elif high20_gap >= -5:
         high_score += 1
 
-    # 52週高値：最大2点
-    # high52欠損時は加点しない
     if high52_gap is not None:
         if high52_gap >= -5:
             high_score += 2
         elif high52_gap >= -10:
             high_score += 1
 
-    high_score = min(
-        high_score,
-        4
-    )
+    high_score = min(high_score, 4)
 
-    # --------------------------------------------------------
-    # 4. 出来高・資金流入 3点
-    # --------------------------------------------------------
-
+    # 4. 出来高・資金流入：3点
     volume_score = 0
 
     if volume_ratio >= 1.5:
@@ -2020,26 +2017,16 @@ def score_sector_25(
     elif volume_ratio >= 1.0:
         volume_score = 1
 
-    # --------------------------------------------------------
-    # 5. 18セクター内相対順位 3点
-    # --------------------------------------------------------
-
+    # 5. 18セクター内相対順位：3点
     relative_score = 0
 
-    if (
-        relative_rank is not None
-        and sector_count > 0
-    ):
+    if relative_rank is not None and sector_count > 0:
         if relative_rank <= 3:
             relative_score = 3
         elif relative_rank <= 6:
             relative_score = 2
         elif relative_rank <= 9:
             relative_score = 1
-
-    # --------------------------------------------------------
-    # 合計
-    # --------------------------------------------------------
 
     total = (
         trend_score
@@ -2049,69 +2036,31 @@ def score_sector_25(
         + relative_score
     )
 
-    total = max(
-        0,
-        min(
-            25,
-            int(total)
-        )
-    )
-
-    quality_status = sector_row.get(
-        "data_quality_status",
-        "ok"
-    )
-
-    quality_flags = sector_row.get(
-        "data_quality_flags",
-        []
-    )
+    total = max(0, min(25, int(total)))
 
     return {
         "sector_score": total,
-
         "sector_score_breakdown": {
-            "medium_term_trend":
-                trend_score,
-
-            "momentum":
-                momentum_score,
-
-            "high_position":
-                high_score,
-
-            "volume_flow":
-                volume_score,
-
-            "relative_rank":
-                relative_score,
+            "medium_term_trend": trend_score,
+            "momentum": momentum_score,
+            "high_position": high_score,
+            "volume_flow": volume_score,
+            "relative_rank": relative_score,
         },
+        "relative_rank": relative_rank,
+        "sector_count": sector_count,
+        "sector": sector_row.get("sector"),
+        "sector_base_date": sector_row.get("base_date"),
+        "data_quality_status": sector_row.get(
+            "data_quality_status", "ok"
+        ),
+        "data_quality_flags": sector_row.get(
+            "data_quality_flags", []
+        ),
+        "evaluation_status": "ok",
+    }
 
-        "relative_rank":
-            relative_rank,
 
-        "sector_count":
-            sector_count,
-
-        "sector":
-            sector_row.get(
-                "sector"
-            ),
-
-        "sector_base_date":
-            sector_row.get(
-                "base_date"
-            ),
-
-        "data_quality_status":
-            quality_status,
-
-        "data_quality_flags":
-            quality_flags,
-
-        "evaluation_status":
-            "ok",
-    }    
 def build_sector_relative_ranks(sector_results):
     """
     18セクターを相対評価して順位を付ける。
