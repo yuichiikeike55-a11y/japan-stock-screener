@@ -234,13 +234,49 @@ def build_market_data(base_date, cutoff):
     if daily is None or daily.empty:
         raise RuntimeError("CME daily data missing")
 
-    latest_daily_date = daily.index[-1].date()
+    # 日足の最終行ではなく、評価対象セッションを明示的に確認する。
+    # 日足インデックスはプロバイダー由来のラベルであり、
+    # それだけでは確定済みセッションとは断定しない。
 
-    if latest_daily_date != cme_date:
+    daily_dates = [
+        stamp.date()
+        for stamp in daily.index
+    ]
+
+    matching_positions = [
+        i
+        for i, session_day in enumerate(daily_dates)
+        if session_day == cme_date
+    ]
+
+    if len(matching_positions) != 1:
         raise RuntimeError(
-            "CME daily session mismatch: "
+            "CME target daily row missing or duplicated: "
             f"expected={cme_date}, "
-            f"actual={latest_daily_date}"
+            f"matches={len(matching_positions)}, "
+            f"available={daily_dates}"
+        )
+
+    target_position = matching_positions[0]
+
+    if target_position != len(daily) - 1:
+        print(
+            "[CME DAILY TARGET FOUND]",
+            f"target={cme_date}",
+            f"position={target_position}",
+            f"latest={daily_dates[-1]}",
+            flush=True,
+        )
+
+    # ここでは対象行の存在だけを確認する。
+    # 確定済みかどうかは時間足との照合が必要。
+    # 未検証の日足を正式評価へ渡さない。
+    if target_position != len(daily) - 1:
+        raise RuntimeError(
+            "CME target daily row requires independent "
+            "session-close verification: "
+            f"target={cme_date}, "
+            f"latest={daily_dates[-1]}"
         )
 
     normalized = normalize_yfinance(
