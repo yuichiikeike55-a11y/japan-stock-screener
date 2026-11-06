@@ -34,10 +34,11 @@ def _prepare_dataframe(symbol, df):
     return df.sort_index()
 
 
+
 def fetch_yfinance(symbol):
     df = yf.download(
         symbol,
-        period="5d",
+        period="14d",
         interval="1h",
         auto_adjust=False,
         progress=False,
