@@ -1,0 +1,35 @@
+{
+  "base_date": "2026-11-05",
+  "generated_at_jst": "2026-11-07T00:13:40.980867+09:00",
+  "evaluation_status": "reference_only",
+  "official_publication_allowed": false,
+  "results": [
+    {
+      "symbol": "NKD=F",
+      "source": "yfinance",
+      "value": 57195.0,
+      "previous_close": 63135.0,
+      "change": -5940.0,
+      "change_pct": -9.408410548823953,
+      "as_of": "2026-11-06T07:00:00+09:00",
+      "bar_start_jst": "2026-11-06T06:00:00+09:00",
+      "bar_completed_jst": "2026-11-06T07:00:00+09:00",
+      "previous_bar_completed_jst": "2026-11-05T07:00:00+09:00",
+      "price_basis": "completed_hourly_close",
+      "contract_month_verified": false,
+      "market_data_quality": "reference_only",
+      "age_minutes": 15.0,
+      "as_of_jst": "2026-11-06T07:00:00+09:00",
+      "evaluation_time_jst": "2026-11-06T07:15:00+09:00",
+      "status": "ok",
+      "reason": "within_age_limit",
+      "usable": false,
+      "key": "nikkei225_futures_cme",
+      "name": "日経225先物（CME）",
+      "category": "futures",
+      "evaluation_base_date": "2026-11-05",
+      "evaluation_cutoff_jst": "2026-11-06T07:15:00+09:00",
+      "reference_usable": true
+    }
+  ]
+}
