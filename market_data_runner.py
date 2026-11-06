@@ -237,7 +237,46 @@ def build_market_data(base_date, cutoff):
     # 日足の最終行ではなく、評価対象セッションを明示的に確認する。
     # 日足インデックスはプロバイダー由来のラベルであり、
     # それだけでは確定済みセッションとは断定しない。
+    # CME日足の直近5行を診断
+    print(
+        "[CME DAILY ROWS]",
+        [
+            {
+                "date": str(index),
+                "close": float(row["Close"]),
+            }
+            for index, row in daily.tail(5).iterrows()
+        ],
+        flush=True,
+    )
 
+    # CME時間足の終了時刻と終値を診断
+    if hourly is None or hourly.empty:
+        raise RuntimeError("CME hourly data missing")
+
+    if hourly.index.tz is None:
+        raise RuntimeError("CME hourly timezone missing")
+
+    hourly_jst = hourly.copy()
+    hourly_jst.index = hourly_jst.index.tz_convert(JST)
+
+    completed_hourly = hourly_jst.loc[
+        hourly_jst.index + pd.Timedelta(hours=1)
+        <= cme_end
+    ]
+
+    if completed_hourly.empty:
+        raise RuntimeError(
+            "CME completed hourly data missing"
+        )
+
+    print(
+        "[CME HOURLY CLOSE CHECK]",
+        f"last_start={completed_hourly.index[-1]}",
+        f"last_close={completed_hourly.iloc[-1]['Close']}",
+        f"session_end={cme_end.isoformat()}",
+        flush=True,
+    )
     daily_dates = [
         stamp.date()
         for stamp in daily.index
