@@ -355,6 +355,7 @@ def build_market_data(base_date, cutoff):
         hourly,
         daily,
         cutoff=cme_end,
+        session_date=cme_date,
     )
 
     validated = validate_freshness(
