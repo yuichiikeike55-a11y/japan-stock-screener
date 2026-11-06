@@ -1,17 +1,16 @@
 
 """
-翌東証営業日の寄り付き前に評価する市場データランナー。
+翌東証営業日の寄り付き前に評価するCME市場データランナー。
 
-正式評価条件:
-- 東証の直近取引終了済み営業日を基準日とする
-- 翌東証営業日の08:45 JSTを評価時刻とする
-- CMEの確定済み1時間足のみ利用
-- CMEセッション・日足の対応が未検証なら停止
-- 正常データのみ最新JSONへ公開
+- 基準日は前東証営業日
+- 評価時刻は07:15 JST
+- 07:00以前の確定1時間足を使用
+- 前CMEセッションの同時刻と比較
+- 限月未検証のため参考データとして保存
+- 正式評価用market_data.jsonは上書きしない
 """
 
 import json
-import math
 import os
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
@@ -20,23 +19,25 @@ from zoneinfo import ZoneInfo
 import exchange_calendars as xcals
 import pandas as pd
 
-from market_data.providers import (
-    fetch_yfinance,
-    fetch_yfinance_daily,
-)
+from market_data.providers import fetch_yfinance
 from market_data.normalizers import normalize_yfinance
 from market_data.validators import validate_freshness
-from market_data.cme_calendar import get_verified_session_end
+
 
 JST = ZoneInfo("Asia/Tokyo")
-EASTERN = ZoneInfo("America/New_York")
-
-OUTPUT = Path("output/market_data.json")
-HISTORY_DIR = Path("output/market_data_history")
 
 CME_SYMBOL = "NKD=F"
-MAX_AGE_MINUTES = 180
 EVALUATION_TIME = time(7, 15)
+PRICE_CUTOFF_TIME = time(7, 0)
+MAX_AGE_MINUTES = 180
+
+REFERENCE_OUTPUT = Path(
+    "output/market_data_reference_latest.json"
+)
+
+REFERENCE_HISTORY = Path(
+    "output/market_data_reference_history"
+)
 
 
 def get_tse_calendar():
@@ -44,9 +45,8 @@ def get_tse_calendar():
 
 
 def is_tse_session(day):
-    calendar = get_tse_calendar()
     return bool(
-        calendar.is_session(
+        get_tse_calendar().is_session(
             pd.Timestamp(day.isoformat())
         )
     )
@@ -69,21 +69,12 @@ def previous_tse_session(day):
 
 def next_tse_session(day):
     calendar = get_tse_calendar()
-    stamp = pd.Timestamp(day.isoformat())
-
-    return calendar.next_session(stamp).date()
-
+    return calendar.next_session(
+        pd.Timestamp(day.isoformat())
+    ).date()
 
 
 def get_base_date_and_cutoff():
-    """
-    翌東証営業日の寄り付き前評価。
-
-    - 評価時刻は東証営業日の08:45 JST
-    - 基準日は評価日の前東証営業日
-    - 08:45前は正式評価を停止
-    - BASE_DATE指定時も営業日を厳密検証
-    """
     now = datetime.now(JST)
     calendar = get_tse_calendar()
 
@@ -100,13 +91,13 @@ def get_base_date_and_cutoff():
         evaluation_date = next_tse_session(base_date)
     else:
         today = now.date()
-        today_stamp = pd.Timestamp(today.isoformat())
+        stamp = pd.Timestamp(today.isoformat())
 
-        if calendar.is_session(today_stamp):
+        if calendar.is_session(stamp):
             evaluation_date = today
         else:
             evaluation_date = calendar.date_to_session(
-                today_stamp,
+                stamp,
                 direction="next",
             ).date()
 
@@ -132,256 +123,81 @@ def get_base_date_and_cutoff():
             "BASE_DATE is older than 7 days"
         )
 
-    print(
-        "TSE EVALUATION DATE:",
-        evaluation_date.isoformat(),
-    )
-
     return base_date, cutoff
 
 
-def get_cme_session_date(cutoff):
+def get_comparison_cutoffs(evaluation_cutoff):
     """
-    評価時刻までに終了した直近のCMEセッションを探す。
+    朝07:00の確定価格を取得する。
+    直近のCME平日取引日と、その前の取引日を選択。
 
-    - CMEカレンダーで非営業日と確認できた日だけ飛ばす
-    - カレンダー検証の異常は握りつぶさず停止
-    - 直近セッションが未終了なら正式評価を停止
+    CMEの祝日・短縮取引はこの関数では
+    完全検証できないため、参考データ専用。
     """
-    import exchange_calendars as xcals
-
-    calendar = xcals.get_calendar("CMES")
-    candidate = cutoff.astimezone(EASTERN).date()
-
-    for days_back in range(8):
-        session_date = candidate - timedelta(
-            days=days_back
-        )
-
-        stamp = pd.Timestamp(
-            session_date.isoformat()
-        )
-
-        if not calendar.is_session(stamp):
-            continue
-
-
-        print(
-            "[CME SESSION CANDIDATE]",
-            f"date={session_date.isoformat()}",
-            f"cutoff={cutoff.isoformat()}",
-            flush=True,
-        )
-
-        session_end = get_verified_session_end(
-            session_date
-        )
-
-        if session_end > cutoff:
-            raise RuntimeError(
-                "Latest CME session has not ended: "
-                f"session={session_date}, "
-                f"end={session_end.isoformat()}, "
-                f"cutoff={cutoff.isoformat()}"
-            )
-
-        print(
-            "CME SESSION DATE:",
-            session_date.isoformat(),
-        )
-        print(
-            "CME SESSION END:",
-            session_end.isoformat(),
-        )
-
-        return session_date, session_end
-
-    raise RuntimeError(
-        "No verified CME session within 8 days"
+    price_cutoff = datetime.combine(
+        evaluation_cutoff.date(),
+        PRICE_CUTOFF_TIME,
+        tzinfo=JST,
     )
 
+    calendar = xcals.get_calendar("CMES")
+    candidates = []
 
-def build_market_data(base_date, cutoff):
-    cme_date, cme_end = get_cme_session_date(
-        cutoff
+    for days_back in range(10):
+        candidate = (
+            price_cutoff.date()
+            - timedelta(days=days_back)
+        )
+
+        stamp = pd.Timestamp(candidate.isoformat())
+
+        if calendar.is_session(stamp):
+            candidates.append(candidate)
+
+        if len(candidates) == 2:
+            break
+
+    if len(candidates) != 2:
+        raise RuntimeError(
+            "Two CME comparison dates unavailable"
+        )
+
+    current_date, previous_date = candidates
+
+    current_cutoff = datetime.combine(
+        current_date,
+        PRICE_CUTOFF_TIME,
+        tzinfo=JST,
+    )
+
+    previous_cutoff = datetime.combine(
+        previous_date,
+        PRICE_CUTOFF_TIME,
+        tzinfo=JST,
+    )
+
+    return current_cutoff, previous_cutoff
+
+
+def build_market_data(base_date, evaluation_cutoff):
+    current_cutoff, previous_cutoff = (
+        get_comparison_cutoffs(evaluation_cutoff)
     )
 
     hourly = fetch_yfinance(CME_SYMBOL)
-    daily = fetch_yfinance_daily(CME_SYMBOL)
-
-    print(
-        "[CME DATA FETCH]",
-        f"hourly_rows={0 if hourly is None else len(hourly)}",
-        f"daily_rows={0 if daily is None else len(daily)}",
-        flush=True,
-    )
-
-    if hourly is not None and not hourly.empty:
-        print(
-            "[CME HOURLY RANGE]",
-            f"first={hourly.index[0]}",
-            f"last={hourly.index[-1]}",
-            flush=True,
-        )
-
-    if daily is not None and not daily.empty:
-        print(
-            "[CME DAILY RANGE]",
-            f"first={daily.index[0]}",
-            f"last={daily.index[-1]}",
-            flush=True,
-        )
-    if daily is None or daily.empty:
-        raise RuntimeError("CME daily data missing")
-
-    # 日足の最終行ではなく、評価対象セッションを明示的に確認する。
-    # 日足インデックスはプロバイダー由来のラベルであり、
-    # それだけでは確定済みセッションとは断定しない。
-    # CME日足の直近5行を診断
-    print(
-        "[CME DAILY ROWS]",
-        [
-            {
-                "date": str(index),
-                "close": float(row["Close"]),
-            }
-            for index, row in daily.tail(5).iterrows()
-        ],
-        flush=True,
-    )
-
-    # CME時間足の終了時刻と終値を診断
-    if hourly is None or hourly.empty:
-        raise RuntimeError("CME hourly data missing")
-
-    if hourly.index.tz is None:
-        raise RuntimeError("CME hourly timezone missing")
-
-    hourly_jst = hourly.copy()
-    hourly_jst.index = hourly_jst.index.tz_convert(JST)
-
-    completed_hourly = hourly_jst.loc[
-        hourly_jst.index + pd.Timedelta(hours=1)
-        <= cme_end
-    ]
-
-    if completed_hourly.empty:
-        raise RuntimeError(
-            "CME completed hourly data missing"
-        )
-
-    print(
-        "[CME HOURLY CLOSE CHECK]",
-        f"last_start={completed_hourly.index[-1]}",
-        f"last_close={completed_hourly.iloc[-1]['Close']}",
-        f"session_end={cme_end.isoformat()}",
-        flush=True,
-    )
-    # CMEセッション終了前後の時間足を診断
-    hourly_debug = hourly.copy()
-
-    if hourly_debug.index.tz is None:
-        raise RuntimeError(
-            "CME hourly timezone missing"
-        )
-
-    hourly_debug.index = hourly_debug.index.tz_convert(JST)
-
-    print(
-        "[CME HOURLY SESSION DETAIL]",
-        [
-            {
-                "start_jst": index.isoformat(),
-                "close": float(row["Close"]),
-                "volume": (
-                    float(row["Volume"])
-                    if "Volume" in hourly_debug.columns
-                    and pd.notna(row["Volume"])
-                    else None
-                ),
-            }
-            for index, row in hourly_debug.iterrows()
-            if (
-                cme_end - timedelta(hours=8)
-                <= index
-                <= cme_end + timedelta(hours=2)
-            )
-        ],
-        flush=True,
-    )    
-    daily_dates = [
-        stamp.date()
-        for stamp in daily.index
-    ]
-
-    matching_positions = [
-        i
-        for i, session_day in enumerate(daily_dates)
-        if session_day == cme_date
-    ]
-
-    if len(matching_positions) != 1:
-        raise RuntimeError(
-            "CME target daily row missing or duplicated: "
-            f"expected={cme_date}, "
-            f"matches={len(matching_positions)}, "
-            f"available={daily_dates}"
-        )
-
-    target_position = matching_positions[0]
-
-    if target_position != len(daily) - 1:
-        print(
-            "[CME DAILY TARGET FOUND]",
-            f"target={cme_date}",
-            f"position={target_position}",
-            f"latest={daily_dates[-1]}",
-            flush=True,
-        )
-
-    # ここでは対象行の存在だけを確認する。
-    # 確定済みかどうかは時間足との照合が必要。
-    # 未検証の日足を正式評価へ渡さない。
-
-    # 対象セッション以降の未確定日足を除外する。
-    # ただし、対象日の清算値が検証済みかは別途確認する。
-    target_close = float(
-        daily.iloc[target_position]["Close"]
-    )
-
-    if not math.isfinite(target_close) or target_close <= 0:
-        raise RuntimeError(
-            "CME target daily Close invalid"
-        )
-
-    daily = daily.iloc[:target_position + 1].copy()
-
-    print(
-        "[CME DAILY TARGET SELECTED]",
-        f"target={cme_date}",
-        f"close={target_close}",
-        f"rows={len(daily)}",
-        flush=True,
-    )
-
-    # 公式清算値との照合が自動化されるまでは停止する。
-    raise RuntimeError(
-        "CME daily settlement verification required: "
-        f"session={cme_date}"
-    )
 
     normalized = normalize_yfinance(
         CME_SYMBOL,
         hourly,
-        daily,
-        cutoff=cme_end,
-        session_date=cme_date,
+        daily_df=None,
+        cutoff=current_cutoff,
+        previous_session_end=previous_cutoff,
     )
 
     validated = validate_freshness(
         normalized,
         MAX_AGE_MINUTES,
-        now=cutoff,
+        now=evaluation_cutoff,
     )
 
     if validated.get("status") != "ok":
@@ -390,45 +206,27 @@ def build_market_data(base_date, cutoff):
             f"{validated.get('reason')}"
         )
 
-    as_of = datetime.fromisoformat(
-        validated["as_of"]
-    ).astimezone(JST)
-
-    if as_of > cme_end:
-        raise RuntimeError(
-            "CME quote after session end"
-        )
-
-    change = validated.get("change_pct")
-
-    if (
-        not isinstance(change, (int, float))
-        or isinstance(change, bool)
-        or not math.isfinite(change)
-    ):
-        raise RuntimeError(
-            "CME change_pct invalid"
-        )
-
-    result = {
-        **validated,
-        "key": "nikkei225_futures_cme",
-        "name": "日経225先物（CME）",
-        "category": "futures",
-        "usable": True,
-        "evaluation_base_date": base_date.isoformat(),
-        "evaluation_cutoff_jst": cutoff.isoformat(),
-        "cme_session_date": cme_date.isoformat(),
-        "cme_session_end_jst": cme_end.isoformat(),
-    }
+    validated["key"] = "nikkei225_futures_cme"
+    validated["name"] = "日経225先物（CME）"
+    validated["category"] = "futures"
+    validated["evaluation_base_date"] = (
+        base_date.isoformat()
+    )
+    validated["evaluation_cutoff_jst"] = (
+        evaluation_cutoff.isoformat()
+    )
+    validated["contract_month_verified"] = False
+    validated["usable"] = False
+    validated["reference_usable"] = True
 
     return {
         "base_date": base_date.isoformat(),
-        "generated_at_jst": datetime.now(
-            JST
-        ).isoformat(),
-        "evaluation_status": "ok",
-        "results": [result],
+        "generated_at_jst": (
+            datetime.now(JST).isoformat()
+        ),
+        "evaluation_status": "reference_only",
+        "official_publication_allowed": False,
+        "results": [validated],
     }
 
 
@@ -438,9 +236,7 @@ def write_json_atomic(path, data):
         exist_ok=True,
     )
 
-    temp = path.with_name(
-        path.name + ".tmp"
-    )
+    temp = path.with_name(path.name + ".tmp")
 
     try:
         temp.write_text(
@@ -459,31 +255,10 @@ def write_json_atomic(path, data):
             temp.unlink()
 
 
-
 def main():
-    try:
-        base_date, cutoff = get_base_date_and_cutoff()
-    except RuntimeError as exc:
-        message = str(exc)
-
-
-        if message.startswith(
-            "Pre-open evaluation time has not arrived:"
-        ):
-            print(
-                "[MARKET DATA NOT READY]",
-                message,
-                flush=True,
-            )
-            raise RuntimeError(
-                "MARKET_DATA_NOT_READY: "
-                "official evaluation cutoff "
-                "has not arrived; "
-                "existing market JSON must not "
-                "be treated as newly generated"
-            ) from exc
-
-        raise
+    base_date, evaluation_cutoff = (
+        get_base_date_and_cutoff()
+    )
 
     print(
         "BASE_DATE:",
@@ -491,61 +266,32 @@ def main():
     )
     print(
         "EVALUATION_CUTOFF:",
-        cutoff.isoformat(),
+        evaluation_cutoff.isoformat(),
     )
-
 
     payload = build_market_data(
         base_date,
-        cutoff,
+        evaluation_cutoff,
     )
 
-    if payload.get("evaluation_status") != "ok":
-        raise RuntimeError(
-            "Market data validation failed; "
-            "latest JSON will not be overwritten"
-        )
-
-    results = payload.get("results")
-
-    if not isinstance(results, list) or len(results) != 1:
-        raise RuntimeError(
-            "Market data results are invalid"
-        )
-
-    cme = results[0]
-
-    if (
-        cme.get("status") != "ok"
-        or cme.get("usable") is not True
-        or cme.get("evaluation_base_date")
-        != base_date.isoformat()
-    ):
-        raise RuntimeError(
-            "CME data is not eligible for official evaluation"
-        )
-
     history_path = (
-        HISTORY_DIR
+        REFERENCE_HISTORY
         / f"market_data_{base_date.isoformat()}.json"
     )
 
-    write_json_atomic(
-        history_path,
-        payload,
-    )
-    write_json_atomic(
-        OUTPUT,
-        payload,
+    write_json_atomic(history_path, payload)
+    write_json_atomic(REFERENCE_OUTPUT, payload)
+
+    print(
+        "[MARKET DATA REFERENCE READY]",
+        base_date.isoformat(),
+        flush=True,
     )
 
     print(
-        "MARKET DATA STATUS:",
-        payload["evaluation_status"],
-    )
-    print(
-        "MARKET DATA READY:",
-        base_date.isoformat(),
+        "[OFFICIAL MARKET DATA]",
+        "not published: contract month unverified",
+        flush=True,
     )
 
 
