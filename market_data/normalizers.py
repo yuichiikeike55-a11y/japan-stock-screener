@@ -17,6 +17,7 @@ def normalize_yfinance(
     hourly_df,
     daily_df,
     cutoff=None,
+    session_date=None,
 ):
     if hourly_df is None or hourly_df.empty:
         raise RuntimeError(f"{symbol}: hourly data missing")
@@ -124,28 +125,49 @@ def normalize_yfinance(
         f"hourly_last_end_jst={latest_end.isoformat()}",
         flush=True,
     )
-    previous_rows = daily.loc[
-        [
-            timestamp.date() < latest_market_date
-            for timestamp in daily.index
-        ]
-    ]
 
-    if previous_rows.empty:
+    if session_date is None:
         raise RuntimeError(
-            f"{symbol}: previous daily Close missing"
+            f"{symbol}: CME session_date missing"
         )
 
+    daily_dates = [
+        timestamp.date()
+        for timestamp in daily.index
+    ]
+
+    target_positions = [
+        i
+        for i, day in enumerate(daily_dates)
+        if day == session_date
+    ]
+
+    if len(target_positions) != 1:
+        raise RuntimeError(
+            f"{symbol}: CME target daily row missing "
+            f"or duplicated: {session_date}"
+        )
+
+    target_position = target_positions[0]
+
+    if target_position == 0:
+        raise RuntimeError(
+            f"{symbol}: previous settlement missing"
+        )
+
+    previous_position = target_position - 1
+
     previous_close = float(
-        previous_rows.iloc[-1]["Close"]
+        daily.iloc[previous_position]["Close"]
     )
+
     print(
         "[CME PREVIOUS CLOSE CHECK]",
         f"symbol={symbol}",
-        f"selected_previous_date={previous_rows.index[-1]}",
-        f"selected_previous_close={previous_close}",
-        f"latest_daily_date={daily.index[-1]}",
-        f"latest_daily_close={daily.iloc[-1]['Close']}",
+        f"target_session={session_date}",
+        f"target_settlement={daily.iloc[target_position]['Close']}",
+        f"previous_date={daily.index[previous_position]}",
+        f"previous_settlement={previous_close}",
         flush=True,
     )
     if previous_close <= 0:
