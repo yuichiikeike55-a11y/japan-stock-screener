@@ -277,6 +277,38 @@ def build_market_data(base_date, cutoff):
         f"session_end={cme_end.isoformat()}",
         flush=True,
     )
+    # CMEセッション終了前後の時間足を診断
+    hourly_debug = hourly.copy()
+
+    if hourly_debug.index.tz is None:
+        raise RuntimeError(
+            "CME hourly timezone missing"
+        )
+
+    hourly_debug.index = hourly_debug.index.tz_convert(JST)
+
+    print(
+        "[CME HOURLY SESSION DETAIL]",
+        [
+            {
+                "start_jst": index.isoformat(),
+                "close": float(row["Close"]),
+                "volume": (
+                    float(row["Volume"])
+                    if "Volume" in hourly_debug.columns
+                    and pd.notna(row["Volume"])
+                    else None
+                ),
+            }
+            for index, row in hourly_debug.iterrows()
+            if (
+                cme_end - timedelta(hours=8)
+                <= index
+                <= cme_end + timedelta(hours=2)
+            )
+        ],
+        flush=True,
+    )    
     daily_dates = [
         stamp.date()
         for stamp in daily.index
