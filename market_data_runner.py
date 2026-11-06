@@ -342,13 +342,33 @@ def build_market_data(base_date, cutoff):
     # ここでは対象行の存在だけを確認する。
     # 確定済みかどうかは時間足との照合が必要。
     # 未検証の日足を正式評価へ渡さない。
-    if target_position != len(daily) - 1:
+
+    # 対象セッション以降の未確定日足を除外する。
+    # ただし、対象日の清算値が検証済みかは別途確認する。
+    target_close = float(
+        daily.iloc[target_position]["Close"]
+    )
+
+    if not math.isfinite(target_close) or target_close <= 0:
         raise RuntimeError(
-            "CME target daily row requires independent "
-            "session-close verification: "
-            f"target={cme_date}, "
-            f"latest={daily_dates[-1]}"
+            "CME target daily Close invalid"
         )
+
+    daily = daily.iloc[:target_position + 1].copy()
+
+    print(
+        "[CME DAILY TARGET SELECTED]",
+        f"target={cme_date}",
+        f"close={target_close}",
+        f"rows={len(daily)}",
+        flush=True,
+    )
+
+    # 公式清算値との照合が自動化されるまでは停止する。
+    raise RuntimeError(
+        "CME daily settlement verification required: "
+        f"session={cme_date}"
+    )
 
     normalized = normalize_yfinance(
         CME_SYMBOL,
