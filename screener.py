@@ -4114,19 +4114,12 @@ def attach_volume_supply_scores(
 # 最終評価 100点
 # ============================================================
 
-
-
 def score_final_evaluation_100(stock):
     """
-    最終100点評価。
-
-    戦略35、セクター25、テクニカル15、
-    地合い15、出来高需給10。
-
-    地合い・セクター欠損時のみ暫定評価。
-    暫定評価は最高B。
+    地合い正常: 100点満点の正式評価
+    地合い失敗: 85点満点の暫定評価
+    その他の必須項目欠損: 採点停止
     """
-
     import math
     from datetime import date, datetime
 
@@ -4134,6 +4127,8 @@ def score_final_evaluation_100(stock):
         return {
             "final_score": None,
             "final_rank": None,
+            "normalized_score": None,
+            "max_score": None,
             "evaluation_status": "stopped",
             "stop_reason": reason,
             **extra,
@@ -4185,36 +4180,19 @@ def score_final_evaluation_100(stock):
         return stopped("stock_data_missing")
 
     metrics = stock.get("metrics")
-
     if not isinstance(metrics, dict) or not metrics:
         return stopped("stock_metrics_missing")
 
-    base_date = normalized_date(
-        stock.get("base_date")
-    )
+    base_date = normalized_date(stock.get("base_date"))
+    metrics_date = normalized_date(metrics.get("base_date"))
 
-    if base_date is None:
-        return stopped("base_date_missing_or_invalid")
+    if base_date is None or metrics_date is None:
+        return stopped("base_date_missing")
 
-
-    metrics_date = normalized_date(
-        metrics.get("base_date")
-    )
-
-    if metrics_date is None:
-        return stopped(
-            "stock_metrics_base_date_missing"
-        )
-
-    if metrics_date != base_date:
-        return stopped(
-            "stock_metrics_base_date_mismatch",
-            expected=base_date,
-            actual=metrics_date,
-        )
+    if base_date != metrics_date:
+        return stopped("stock_metrics_base_date_mismatch")
 
     hit_count = stock.get("hit_count")
-
     if (
         isinstance(hit_count, bool)
         or not isinstance(hit_count, int)
@@ -4225,39 +4203,32 @@ def score_final_evaluation_100(stock):
     definitions = {
         "strategy_fit": (
             "strategy_fit_evaluation",
-            "strategy_fit_score",
-            35,
+            "strategy_fit_score", 35,
         ),
         "sector": (
             "sector_evaluation",
-            "sector_score",
-            25,
+            "sector_score", 25,
         ),
         "technical": (
             "technical_evaluation",
-            "technical_score",
-            15,
+            "technical_score", 15,
         ),
         "market": (
             "market_evaluation",
-            "market_score",
-            15,
+            "market_score", 15,
         ),
         "volume_supply": (
             "volume_supply_evaluation",
-            "volume_supply_score",
-            10,
+            "volume_supply_score", 10,
         ),
     }
 
     scores = {}
-    missing_components = []
-    missing_reasons = {}
+    market_excluded = False
+    market_reason = None
 
     for component, (
-        section_key,
-        score_key,
-        limit,
+        section_key, score_key, limit
     ) in definitions.items():
 
         evaluation = stock.get(section_key)
@@ -4269,23 +4240,23 @@ def score_final_evaluation_100(stock):
             )
 
         status = evaluation.get("evaluation_status")
+        reason = evaluation.get("stop_reason")
 
         if component == "sector" and status == "ok":
             sector_date = normalized_date(
-                evaluation.get("base_date")
-                or evaluation.get("sector_base_date")
+                evaluation.get("sector_base_date")
+                or evaluation.get("base_date")
             )
-
             if sector_date != base_date:
-                status = "stopped"
-                reason = "sector_base_date_mismatch"
-            elif evaluation.get("sector_count") != 18:
-                status = "stopped"
-                reason = "sector_count_mismatch"
-            else:
-                reason = None
-        else:
-            reason = evaluation.get("stop_reason")
+                return stopped("sector_base_date_mismatch")
+            if evaluation.get("sector_count") != 18:
+                return stopped("sector_count_mismatch")
+
+        if component == "market" and status != "ok":
+            market_excluded = True
+            market_reason = reason or "market_unavailable"
+            scores["market"] = None
+            continue
 
         if status != "ok":
             return stopped(
@@ -4304,14 +4275,25 @@ def score_final_evaluation_100(stock):
 
         scores[component] = float(value)
 
+    max_score = 85 if market_excluded else 100
     bonus = min(3, hit_count - 1)
-    base_score = sum(scores.values())
+
+    base_score = sum(
+        value for value in scores.values()
+        if value is not None
+    )
+
     final_score = round(
-        min(100.0, base_score + bonus),
+        min(float(max_score), base_score + bonus),
         1,
     )
 
-    uncapped_rank = rank_from_score(final_score)
+    normalized_score = round(
+        final_score / max_score * 100,
+        1,
+    )
+
+    uncapped_rank = rank_from_score(normalized_score)
     final_rank = uncapped_rank
 
     sector_eval = stock.get("sector_evaluation", {})
@@ -4331,7 +4313,7 @@ def score_final_evaluation_100(stock):
         if not isinstance(hit, dict):
             continue
 
-        flags = hit.get("condition_flags", [])
+        flags = hit.get("condition_flags", {})
 
         if isinstance(flags, dict):
             flag_values = list(flags.values())
@@ -4342,7 +4324,6 @@ def score_final_evaluation_100(stock):
 
         for flag in flag_values:
             text = str(flag).lower()
-
             if any(
                 keyword in text
                 for keyword in (
@@ -4373,22 +4354,25 @@ def score_final_evaluation_100(stock):
             "strategy_negated_rank_cap_C"
         )
 
-    provisional = bool(missing_components)
-
-    if provisional:
-        final_rank = cap_rank(final_rank, "B")
+    if market_excluded:
         safety_flags.append(
-            "provisional_rank_cap_B"
+            "market_excluded_85_point_scoring"
         )
 
     return {
         "final_score": final_score,
+        "max_score": max_score,
+        "normalized_score": normalized_score,
         "final_rank": final_rank,
         "uncapped_rank": uncapped_rank,
         "base_score": round(base_score, 1),
         "multi_strategy_bonus": bonus,
         "score_breakdown": {
-            key: round(value, 1)
+            key: (
+                round(value, 1)
+                if value is not None
+                else None
+            )
             for key, value in scores.items()
         },
         "safety": {
@@ -4397,10 +4381,20 @@ def score_final_evaluation_100(stock):
             "flags": safety_flags,
         },
         "evaluation_status": (
-            "provisional" if provisional else "ok"
+            "provisional" if market_excluded else "ok"
         ),
-        "missing_components": missing_components,
-        "missing_reasons": missing_reasons,
+        "publication_status": (
+            "provisional" if market_excluded else "official"
+        ),
+        "market_excluded": market_excluded,
+        "market_exclusion_reason": market_reason,
+        "missing_components": (
+            ["market"] if market_excluded else []
+        ),
+        "missing_reasons": (
+            {"market": market_reason}
+            if market_excluded else {}
+        ),
         "stop_reason": None,
     }
 
@@ -5524,182 +5518,171 @@ def main():
 
 
     # ========================================================
-    # 正式評価の公開前チェック
-    # 欠損があっても診断結果を保存し、処理は正常終了する。
-    # 正式ランキングは上書きしない。
+    # 正式・暫定・診断の公開振り分け
     # ========================================================
 
-    invalid_stocks = []
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    for stock in strategy_hits:
-        final_eval = stock.get("final_evaluation", {})
+    generated_at = datetime.now(timezone.utc).isoformat()
+    expected_date = base_date.strftime("%Y-%m-%d")
 
-        if not isinstance(final_eval, dict):
-            final_eval = {}
+    def save_payload(filename, payload):
+        path = OUTPUT_DIR / filename
 
-        if (
-            final_eval.get("evaluation_status") != "ok"
-            or final_eval.get("final_score") is None
-            or final_eval.get("final_rank") is None
-        ):
-            invalid_stocks.append({
-                "code": stock.get("code"),
-                "status": final_eval.get(
-                    "evaluation_status", "invalid"
-                ),
-                "reason": final_eval.get("stop_reason"),
-                "component": final_eval.get("component"),
-                "component_reason": final_eval.get(
-                    "component_reason"
-                ),
-                "missing_components": final_eval.get(
-                    "missing_components", []
-                ),
-                "missing_reasons": final_eval.get(
-                    "missing_reasons", {}
-                ),
-            })
-
-    if not strategy_hits or invalid_stocks:
-        diagnostic_path = (
-            OUTPUT_DIR / "strategy_hits_diagnostic_latest.json"
-        )
-
-        diagnostic_results = []
-
-        for stock in strategy_hits:
-            item = dict(stock)
-            evaluation = dict(
-                item.get("final_evaluation") or {}
-            )
-
-            if (
-                evaluation.get("evaluation_status") != "ok"
-                or evaluation.get("final_score") is None
-                or evaluation.get("final_rank") is None
-            ):
-                evaluation["evaluation_status"] = "incomplete"
-                evaluation["final_score"] = None
-                evaluation["final_rank"] = None
-                evaluation["uncapped_rank"] = None
-                evaluation["base_score"] = None
-
-            item["final_evaluation"] = evaluation
-            diagnostic_results.append(item)
-
-        diagnostic_payload = {
-            "generated_at": datetime.now(
-                timezone.utc
-            ).isoformat(),
-            "base_date": (
-                base_date.strftime("%Y-%m-%d")
-                if base_date is not None
-                else None
-            ),
-            "strategy_count": 4,
-            "unique_stock_count": len(strategy_hits),
-            "evaluation_status": "incomplete",
-            "official_publication_allowed": False,
-            "incomplete_count": len(invalid_stocks),
-            "invalid_stocks": invalid_stocks,
-            "results": make_json_safe(diagnostic_results),
-        }
-
-        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-        with open(
-            diagnostic_path,
-            "w",
-            encoding="utf-8",
-        ) as f:
+        with open(path, "w", encoding="utf-8") as f:
             json.dump(
-                diagnostic_payload,
+                make_json_safe(payload),
                 f,
                 ensure_ascii=False,
                 indent=2,
                 allow_nan=False,
             )
 
-        print(
-            "[DIAGNOSTIC SAVED]",
-            diagnostic_path,
-            flush=True,
-        )
-        print(
-            "[OFFICIAL PUBLICATION SKIPPED]",
-            f"hits={len(strategy_hits)}",
-            f"incomplete={len(invalid_stocks)}",
-            flush=True,
-        )
+        print("[OUTPUT SAVED]", path, flush=True)
 
-        return
+    def build_payload(status, rows, **extra):
+        return {
+            "generated_at": generated_at,
+            "base_date": expected_date,
+            "strategy_count": 4,
+            "unique_stock_count": len(rows),
+            "publication_status": status,
+            "evaluation_status": status,
+            "official_publication_allowed": status == "official",
+            "results": rows,
+            **extra,
+        }
 
-    print(
-        "[PUBLICATION CHECK PASSED]",
-        f"stocks={len(strategy_hits)}",
-        flush=True,
-    )        
-    strategy_hits_json = {
-        "generated_at": datetime.now(
-            timezone.utc
-        ).isoformat(),
+    # 同じ実行で生成していないファイルを
+    # 誤って次の公開処理に渡さない。
+    for filename in (
+        "strategy_hits_latest.json",
+        "strategy_hits_provisional_latest.json",
+        "strategy_hits_diagnostic_latest.json",
+    ):
+        path = OUTPUT_DIR / filename
+        if path.exists():
+            path.unlink()
 
-        "base_date": (
-            base_date.strftime("%Y-%m-%d")
-            if base_date is not None
-            else None
-        ),
-
-        "strategy_count": 4,
-
-        "unique_stock_count": len(
-            strategy_hits
-        ),
-
-        "results": make_json_safe(
-            strategy_hits
-        ),
-    }
-
-    strategy_hits_path = (
-        OUTPUT_DIR
-        / "strategy_hits_latest.json"
-    )
-
-    with open(
-        strategy_hits_path,
-        "w",
-        encoding="utf-8",
-    ) as f:
-        json.dump(
-            strategy_hits_json,
-            f,
-            ensure_ascii=False,
-            indent=2,
-            allow_nan=False,
-        )
-
-    print()
-    print(
-        "=== 4 STRATEGY HITS ==="
-    )
-    print(
-        "Unique stocks:",
-        len(strategy_hits),
-    )
-    print(
-        "Saved:",
-        strategy_hits_path,
-    )
+    official_rows = []
+    provisional_rows = []
+    incomplete_rows = []
+    invalid_stocks = []
 
     for stock in strategy_hits:
-        print(
-            stock["code"],
-            stock["name"],
-            "hits:",
-            stock["hit_count"],
-            stock["hit_strategies"],
-        )    
+        final = stock.get("final_evaluation") or {}
+        status = final.get("evaluation_status")
+
+        if (
+            status == "ok"
+            and final.get("max_score") == 100
+            and final.get("final_score") is not None
+            and final.get("final_rank") is not None
+        ):
+            official_rows.append(stock)
+
+        elif (
+            status == "provisional"
+            and final.get("max_score") == 85
+            and final.get("market_excluded") is True
+            and final.get("final_score") is not None
+            and final.get("final_rank") is not None
+        ):
+            provisional_rows.append(stock)
+
+        else:
+            incomplete_rows.append(stock)
+
+            invalid_stocks.append({
+                "code": stock.get("code"),
+                "reason": final.get("stop_reason")
+                    or "final_evaluation_incomplete",
+                "missing_components": final.get(
+                    "missing_components", []
+                ),
+                "missing_reasons": final.get(
+                    "missing_reasons", {}
+                ),
+            })
+
+    if not strategy_hits:
+        save_payload(
+            "strategy_hits_diagnostic_latest.json",
+            build_payload(
+                "diagnostic",
+                [],
+                incomplete_count=0,
+                invalid_stocks=[],
+                warnings=[
+                    "ヒット銘柄0件。処理の正常性を確認してください"
+                ],
+            ),
+        )
+        return
+
+    # すべてのヒット銘柄が正式評価済み
+    if len(official_rows) == len(strategy_hits):
+        save_payload(
+            "strategy_hits_latest.json",
+            build_payload(
+                "official",
+                official_rows,
+                max_score=100,
+                warnings=[],
+            ),
+        )
+        return
+
+    # 正式と暫定が混在していても、
+    # 必須項目欠損がなければ全銘柄を暫定側へ公開。
+    if not incomplete_rows:
+        provisional_output = []
+
+        for stock in strategy_hits:
+            item = dict(stock)
+            final = dict(item["final_evaluation"])
+
+            # 正式100点の銘柄を暫定85点に
+            # 勝手に変換しない。
+            # 混在時は採点方式の異なる銘柄を
+            # 同一ランキングにしない。
+            if final.get("max_score") != 85:
+                break
+
+            provisional_output.append(item)
+
+        if len(provisional_output) == len(strategy_hits):
+            save_payload(
+                "strategy_hits_provisional_latest.json",
+                build_payload(
+                    "provisional",
+                    provisional_output,
+                    max_score=85,
+                    warnings=[
+                        "地合い15点を除外",
+                        "85点満点で採点",
+                        "ランクは100点換算",
+                    ],
+                ),
+            )
+            return
+
+    # 必須項目欠損、採点方式混在などは診断公開。
+    # 有効な個別点数は残すが、
+    # 全銘柄ランキングとしては公開しない。
+    save_payload(
+        "strategy_hits_diagnostic_latest.json",
+        build_payload(
+            "diagnostic",
+            strategy_hits,
+            incomplete_count=len(incomplete_rows),
+            invalid_stocks=invalid_stocks,
+            warnings=[
+                "正式または暫定ランキングの"
+                "全銘柄一括検証が未完了"
+            ],
+        ),
+    )
     # 6. Failure table
     failure_rows = []
 
