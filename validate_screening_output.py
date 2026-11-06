@@ -369,12 +369,183 @@ def validate_diagnostic(data, expected):
         flush=True,
     )
 
+def validate_provisional(data, expected):
+    rows = check_common(data, expected)
 
+    if not rows:
+        fail("provisional ranking has zero rows")
+
+    if data.get("publication_status") != "provisional":
+        fail("publication_status must be provisional")
+
+    if data.get("official_publication_allowed") is not False:
+        fail("official publication must be prohibited")
+
+    if data.get("max_score") != 85:
+        fail("provisional max_score must be 85")
+
+    for row in rows:
+        code = str(row["code"])
+        final = row.get("final_evaluation")
+
+        if not isinstance(final, dict):
+            fail(f"{code}: final evaluation missing")
+
+        if final.get("evaluation_status") != "provisional":
+            fail(f"{code}: not provisional")
+
+        if final.get("market_excluded") is not True:
+            fail(f"{code}: market exclusion missing")
+
+        if final.get("max_score") != 85:
+            fail(f"{code}: max_score must be 85")
+
+        breakdown = final.get("score_breakdown")
+
+        if not isinstance(breakdown, dict):
+            fail(f"{code}: breakdown missing")
+
+        if breakdown.get("market") is not None:
+            fail(f"{code}: market must be null")
+
+        market = row.get("market_evaluation")
+
+        if not isinstance(market, dict):
+            fail(f"{code}: market evaluation missing")
+
+        if market.get("evaluation_status") == "ok":
+            fail(f"{code}: usable market cannot be excluded")
+
+        total = 0.0
+
+        for key in (
+            "strategy_fit",
+            "sector",
+            "technical",
+            "volume_supply",
+        ):
+            section_name, score_name = SECTIONS[key]
+            section = row.get(section_name)
+
+            if not isinstance(section, dict):
+                fail(f"{code}: {section_name} missing")
+
+            if section.get("evaluation_status") != "ok":
+                fail(f"{code}: {section_name} not ok")
+
+            value = section.get(score_name)
+            recorded = breakdown.get(key)
+
+            if not number(value, 0, LIMITS[key]):
+                fail(f"{code}: invalid {score_name}")
+
+            if not number(recorded, 0, LIMITS[key]):
+                fail(f"{code}: invalid breakdown {key}")
+
+            if abs(value - recorded) > 0.11:
+                fail(f"{code}: breakdown mismatch {key}")
+
+            total += value
+
+        sector = row["sector_evaluation"]
+
+        check_date(
+            sector.get("sector_base_date"),
+            expected,
+            f"{code} sector",
+        )
+
+        if sector.get("sector_count") != 18:
+            fail(f"{code}: sector count != 18")
+
+        hits = row.get("hit_count")
+
+        if (
+            isinstance(hits, bool)
+            or not isinstance(hits, int)
+            or not 1 <= hits <= 4
+        ):
+            fail(f"{code}: invalid hit_count")
+
+        bonus = final.get("multi_strategy_bonus")
+
+        if (
+            not number(bonus, 0, 3)
+            or bonus > hits - 1
+        ):
+            fail(f"{code}: invalid bonus")
+
+        expected_total = round(
+            min(85, total + bonus), 1
+        )
+
+        actual_total = final.get("final_score")
+
+        if not number(actual_total, 0, 85):
+            fail(f"{code}: invalid final_score")
+
+        if abs(actual_total - expected_total) > 0.11:
+            fail(f"{code}: total mismatch")
+
+        expected_normalized = round(
+            actual_total / 85 * 100, 1
+        )
+
+        normalized = final.get("normalized_score")
+
+        if not number(normalized, 0, 100):
+            fail(f"{code}: normalized_score invalid")
+
+        if abs(normalized - expected_normalized) > 0.11:
+            fail(f"{code}: normalized score mismatch")
+
+        expected_rank = rank_from_score(normalized)
+
+        safety = final.get("safety")
+
+        if not isinstance(safety, dict):
+            fail(f"{code}: safety missing")
+
+        metrics = row.get("metrics") or {}
+
+        if not isinstance(metrics, dict):
+            fail(f"{code}: metrics invalid")
+
+        if (
+            safety.get("data_quality_warning") is True
+            or metrics.get("data_quality_status") == "warning"
+            or sector.get("data_quality_status") == "warning"
+        ):
+            expected_rank = cap_rank(expected_rank, "B")
+
+        if safety.get("strategy_negated") is True:
+            expected_rank = cap_rank(expected_rank, "C")
+
+        if final.get("final_rank") != expected_rank:
+            fail(
+                f"{code}: rank mismatch "
+                f"{final.get('final_rank')} != {expected_rank}"
+            )
+
+    print(
+        "PROVISIONAL VALIDATION PASSED:",
+        f"base_date={expected}",
+        f"stocks={len(rows)}",
+        "max_score=85",
+        flush=True,
+    )
 def main():
-    mode = os.getenv("VALIDATION_MODE", "official").strip()
+    mode = os.getenv(
+        "VALIDATION_MODE", "official"
+    ).strip()
+
     expected = os.getenv("BASE_DATE", "").strip()
 
-    if mode not in ("official", "diagnostic"):
+    if mode not in (
+        "official",
+        "provisional",
+        "diagnostic",
+    ):
         fail(f"unknown validation mode: {mode}")
 
     if not expected:
@@ -383,9 +554,27 @@ def main():
     check_date(expected, expected, "requested base date")
 
     if mode == "official":
-        validate_official(read_file(OFFICIAL_FILE), expected)
+        validate_official(
+            read_file(OFFICIAL_FILE),
+            expected,
+        )
+
+    elif mode == "provisional":
+        validate_provisional(
+            read_file(
+                Path(
+                    "output/"
+                    "strategy_hits_provisional_latest.json"
+                )
+            ),
+            expected,
+        )
+
     else:
-        validate_diagnostic(read_file(DIAGNOSTIC_FILE), expected)
+        validate_diagnostic(
+            read_file(DIAGNOSTIC_FILE),
+            expected,
+        )
 
 
 if __name__ == "__main__":
