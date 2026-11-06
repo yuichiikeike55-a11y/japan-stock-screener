@@ -524,6 +524,3 @@ jobs:
 
           git commit -m "Publish validated screening for ${BASE_DATE}"
           git push
-
-          git commit -m "Publish validated screening for ${BASE_DATE}"
-          git push
