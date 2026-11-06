@@ -145,9 +145,22 @@ def normalize_yfinance(
             f"{symbol}: invalid hourly comparison prices"
         )
 
+
     change_pct = (
         (value / previous_close) - 1
     ) * 100
+
+    # 参考データの異常変動を検出する。
+    # 5%以上の変動は自動採点に使用しない。
+    large_change_detected = abs(change_pct) >= 5.0
+
+    if large_change_detected:
+        print(
+            "[CME PRICE ANOMALY WARNING]",
+            f"change_pct={change_pct:.4f}",
+            "manual_review_required=True",
+            flush=True,
+        )
 
     print(
         "[CME HOURLY COMPARISON]",
