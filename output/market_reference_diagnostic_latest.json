@@ -1,0 +1,20 @@
+{
+  "base_date": "2026-11-05",
+  "generated_at": "2026-11-07T00:29:11.097488+09:00",
+  "evaluation_status": "reference_only",
+  "publication_status": "diagnostic",
+  "official_publication_allowed": false,
+  "market_score": null,
+  "market_score_max": 15,
+  "reference_cme": {
+    "value": 57195.0,
+    "previous_close": 63135.0,
+    "change_pct": -9.408410548823953,
+    "contract_month_verified": false
+  },
+  "quality_warnings": [
+    "contract_month_unverified",
+    "large_futures_change_requires_review"
+  ],
+  "reason": "CME contract month not verified"
+}
