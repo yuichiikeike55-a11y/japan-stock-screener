@@ -209,6 +209,13 @@ jobs:
 
           print("CME futures validation OK")
           PY
+
+      - name: Diagnose CME reference market data
+        id: reference_diagnostic
+        continue-on-error: true
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+        run: python market_reference_diagnostic.py          
       - name: Update 18 sector indices
         id: sector_update
         continue-on-error: true
@@ -517,6 +524,10 @@ jobs:
             echo "[REFERENCE MARKET STAGED]"
           fi
 
+          if [[ "${{ steps.reference_diagnostic.outcome }}" == "success" ]]; then
+            git add output/market_reference_diagnostic_latest.json
+            echo "[REFERENCE DIAGNOSTIC STAGED]"
+          fi
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
