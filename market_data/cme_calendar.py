@@ -27,8 +27,8 @@ EASTERN = ZoneInfo("America/New_York")
 # 過去に個別確認した日付を保存
 VERIFIED_SESSIONS = {
     "2026-10-30": "2026-10-31T06:00:00+09:00",
+    "2026-11-05": "2026-11-06T07:00:00+09:00",
 }
-
 
 def get_regular_session_end(base_date: date) -> datetime:
     """NKD通常取引終了時刻の候補を計算する。"""
