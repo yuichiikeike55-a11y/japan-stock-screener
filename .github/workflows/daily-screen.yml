@@ -302,6 +302,14 @@ jobs:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
           VALIDATION_MODE: official
         run: python validate_screening_output.py
+      - name: Validate provisional screening output
+        id: provisional_validation
+        if: steps.screener.outcome == 'success'
+        continue-on-error: true
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+          VALIDATION_MODE: provisional
+        run: python validate_screening_output.py        
 
       - name: Validate screening diagnostics
         id: diagnostic_validation
@@ -325,6 +333,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+
       - name: Check publication readiness
         id: publication
         if: always()
@@ -334,67 +343,99 @@ jobs:
           SECTOR_UPDATE: ${{ steps.sector_update.outcome }}
           SECTOR_VALIDATION: ${{ steps.sector_validation.outcome }}
           SCREENER: ${{ steps.screener.outcome }}
-          SCREENING_VALIDATION: ${{ steps.screening_validation.outcome }}
+          OFFICIAL_VALIDATION: ${{ steps.screening_validation.outcome }}
+          PROVISIONAL_VALIDATION: ${{ steps.provisional_validation.outcome }}
         run: |
           python - <<'PY'
           import os
 
-          checks = {
-              "market_update": os.environ["MARKET_UPDATE"],
-              "market_validation": os.environ["MARKET_VALIDATION"],
-              "sector_update": os.environ["SECTOR_UPDATE"],
-              "sector_validation": os.environ["SECTOR_VALIDATION"],
-              "screener": os.environ["SCREENER"],
-              "screening_validation": os.environ["SCREENING_VALIDATION"],
-          }
+          def success(name):
+              return os.environ.get(name) == "success"
+
+          sector_ready = (
+              success("SECTOR_UPDATE")
+              and success("SECTOR_VALIDATION")
+          )
+
+          market_ready = (
+              success("MARKET_UPDATE")
+              and success("MARKET_VALIDATION")
+          )
+
+          screener_ready = success("SCREENER")
+
+          official_ready = (
+              market_ready
+              and sector_ready
+              and screener_ready
+              and success("OFFICIAL_VALIDATION")
+          )
+
+          provisional_ready = (
+              sector_ready
+              and screener_ready
+              and success("PROVISIONAL_VALIDATION")
+          )
 
           print("[PUBLICATION READINESS]", flush=True)
 
-          for name, status in checks.items():
+          if official_ready:
               print(
-                  f"{name}={status}",
+                  "[PUBLICATION READY] official",
                   flush=True,
               )
-
-          failures = [
-              name
-              for name, status in checks.items()
-              if status != "success"
-          ]
-
-          if failures:
-              raise SystemExit(
-                  "PUBLICATION STOPPED: "
-                  + ", ".join(failures)
+          elif provisional_ready:
+              print(
+                  "[PUBLICATION READY] provisional",
+                  flush=True,
               )
-
-          print(
-              "[PUBLICATION READY]",
-              flush=True,
-          )
+          else:
+              raise SystemExit(
+                  "RANKING PUBLICATION NOT READY"
+              )
           PY
 
       - name: Commit validated results
         if: steps.publication.outcome == 'success'
         shell: bash
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+          OFFICIAL_VALIDATION: ${{ steps.screening_validation.outcome }}
+          PROVISIONAL_VALIDATION: ${{ steps.provisional_validation.outcome }}
+          MARKET_UPDATE: ${{ steps.market_update.outcome }}
+          MARKET_VALIDATION: ${{ steps.market_validation.outcome }}
         run: |
           set -euo pipefail
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          if [[ "$OFFICIAL_VALIDATION" == "success" ]] \
+             && [[ "$MARKET_UPDATE" == "success" ]] \
+             && [[ "$MARKET_VALIDATION" == "success" ]]; then
 
-          git add \
-            output/market_data.json \
-            output/sector_indices_latest.json \
-            output/strategy_hits_latest.json
+            git add output/strategy_hits_latest.json
+
+          elif [[ "$PROVISIONAL_VALIDATION" == "success" ]]; then
+
+            git add output/strategy_hits_provisional_latest.json
+
+          else
+            echo "No validated ranking"
+            exit 1
+          fi
+
+          git add output/sector_indices_latest.json
+
+          if [[ "$MARKET_UPDATE" == "success" ]] \
+             && [[ "$MARKET_VALIDATION" == "success" ]]; then
+            git add output/market_data.json
+          fi
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
-          else
-            git commit -m "Update validated screening results"
-            git pull --rebase origin main
-            git push origin main
+            exit 0
           fi
 
-          echo "Commit step completed successfully"
+          git commit -m "Publish validated screening for ${BASE_DATE}"
+          git push
