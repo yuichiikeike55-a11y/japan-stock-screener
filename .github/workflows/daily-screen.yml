@@ -289,7 +289,14 @@ jobs:
 
       - name: Validate official screening output
         id: screening_validation
-        if: steps.screener.outcome == 'success'
+        if: >-
+          ${{
+            steps.market_update.outcome == 'success' &&
+            steps.market_validation.outcome == 'success' &&
+            steps.sector_update.outcome == 'success' &&
+            steps.sector_validation.outcome == 'success' &&
+            steps.screener.outcome == 'success'
+          }}
         continue-on-error: true
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
