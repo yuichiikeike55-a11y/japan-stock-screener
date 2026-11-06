@@ -36,7 +36,7 @@ HISTORY_DIR = Path("output/market_data_history")
 
 CME_SYMBOL = "NKD=F"
 MAX_AGE_MINUTES = 180
-EVALUATION_TIME = time(8, 45)
+EVALUATION_TIME = time(7, 15)
 
 
 def get_tse_calendar():
