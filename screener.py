@@ -3301,6 +3301,7 @@ def attach_technical_scores(
         ] = evaluation
 
     return strategy_hits    
+
 # ============================================================
 # 地合い評価 15点
 # ============================================================
@@ -3309,547 +3310,402 @@ def score_market_condition_15(
     metrics,
     market_data_path=None,
 ):
-
     """
     地合い評価：15点満点
 
-    配点
-    1. 日本市場内部 9点
-       ・25MAより上の銘柄比率 3点
-       ・25MA上向き銘柄比率   3点
-       ・前日比上昇銘柄比率   3点
+    日本市場内部：9点
+      25MA上回り率  3点
+      25MA上向き率  3点
+      値上がり率    3点
 
-    2. CME日経225先物 6点
-       ・CME先物の騰落率で評価
-       ・大阪先物は使用しない
+    CME日経225先物：6点
 
-    安全弁
-    ・市場内部データ不足 → 評価停止
-    ・market_data.json 読込不能 → 評価停止
-    ・CMEデータ欠損 → 評価停止
-    ・CME鮮度不良 → 評価停止
-    ・CME基準日不一致 → 評価停止
-    ・未評価を0点扱いしない
-    ・評価停止時のmarket_scoreはNone
+    市場内部9点は診断情報として保持する。
+    CME未検証の場合、正式15点は評価停止する。
     """
 
+    def stopped(reason, internal=None, **details):
+        result = {
+            "market_score": None,
+            "market_condition": None,
+            "evaluation_status": "stopped",
+            "stop_reason": reason,
+        }
+
+        if internal is not None:
+            result["market_internal_score"] = internal["score"]
+            result["market_internal"] = internal["metrics"]
+            result["market_score_breakdown"] = {
+                **internal["breakdown"],
+                "internal": internal["score"],
+                "futures": None,
+                "cme_futures": None,
+            }
+
+        result.update(details)
+        return result
+
     # --------------------------------------------------------
-    # 0. 基本確認
+    # 1. 市場内部データ確認
     # --------------------------------------------------------
 
-    if (
-        metrics is None
-        or metrics.empty
-    ):
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "market_metrics_missing",
-        }
+    if metrics is None or metrics.empty:
+        return stopped("market_metrics_missing")
 
     required_columns = [
         "close",
         "previous_close",
         "ma25",
         "ma25_direction",
+        "base_date",
     ]
 
     missing_columns = [
-        column
-        for column in required_columns
-        if column not in metrics.columns
+        col for col in required_columns
+        if col not in metrics.columns
     ]
 
     if missing_columns:
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "market_required_columns_missing",
-            "missing_columns": missing_columns,
-        }
+        return stopped(
+            "market_required_columns_missing",
+            missing_columns=missing_columns,
+        )
 
-    # --------------------------------------------------------
-    # 1. 市場内部データを数値化
-    # --------------------------------------------------------
+    stock_dates = metrics["base_date"]
+
+    if stock_dates.isna().any():
+        return stopped("stock_base_date_missing")
+
+    expected_dates = set(stock_dates.astype(str))
+
+    if len(expected_dates) != 1:
+        return stopped("stock_base_date_invalid")
+
+    expected_date = next(iter(expected_dates))
 
     close = pd.to_numeric(
-        metrics["close"],
-        errors="coerce",
+        metrics["close"], errors="coerce"
     )
 
     previous_close = pd.to_numeric(
-        metrics["previous_close"],
-        errors="coerce",
+        metrics["previous_close"], errors="coerce"
     )
 
     ma25 = pd.to_numeric(
-        metrics["ma25"],
-        errors="coerce",
+        metrics["ma25"], errors="coerce"
     )
 
-    ma25_direction = (
-        metrics["ma25_direction"]
-        .astype(str)
+    direction = metrics["ma25_direction"].astype(str)
+
+    valid_above = (
+        np.isfinite(close)
+        & np.isfinite(ma25)
+        & (ma25 > 0)
     )
 
-    valid_above_ma25 = (
-        close.notna()
-        & ma25.notna()
+    valid_change = (
+        np.isfinite(close)
+        & np.isfinite(previous_close)
+        & (previous_close > 0)
     )
 
-    valid_price_change = (
-        close.notna()
-        & previous_close.notna()
+    valid_direction = direction.isin(
+        ["up", "flat", "down"]
     )
 
-    valid_ma25_direction = (
-        ma25_direction.isin(
-            [
-                "up",
-                "flat",
-                "down",
-            ]
-        )
-    )
+    total_count = len(metrics)
 
-    # 十分な母数が取れない場合は停止
-    if (
-        valid_above_ma25.sum() == 0
-        or valid_price_change.sum() == 0
-        or valid_ma25_direction.sum() == 0
+    counts = {
+        "above_ma25": int(valid_above.sum()),
+        "ma25_direction": int(valid_direction.sum()),
+        "advancing": int(valid_change.sum()),
+    }
+
+    # 市場全体の評価なので、有効率を確認する
+    minimum_coverage = 0.95
+
+    coverage = {
+        key: value / total_count
+        for key, value in counts.items()
+    }
+
+    if any(
+        value < minimum_coverage
+        for value in coverage.values()
     ):
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "market_internal_data_invalid",
-        }
+        return stopped(
+            "market_internal_coverage_insufficient",
+            sample_count=total_count,
+            valid_counts=counts,
+            coverage=coverage,
+        )
 
     # --------------------------------------------------------
     # 2. 市場内部比率
     # --------------------------------------------------------
 
-    above_ma25_ratio = (
-        (
-            close[valid_above_ma25]
-            >= ma25[valid_above_ma25]
-        ).mean()
+    above_ratio = float(
+        (close[valid_above] >= ma25[valid_above]).mean()
         * 100.0
     )
 
-    ma25_up_ratio = (
-        (
-            ma25_direction[
-                valid_ma25_direction
-            ]
-            == "up"
-        ).mean()
+    up_ratio = float(
+        (direction[valid_direction] == "up").mean()
         * 100.0
     )
 
-    advancing_ratio = (
+    advancing_ratio = float(
         (
-            close[valid_price_change]
-            > previous_close[
-                valid_price_change
-            ]
+            close[valid_change]
+            > previous_close[valid_change]
         ).mean()
         * 100.0
     )
 
     # --------------------------------------------------------
-    # 3. 市場内部 9点
+    # 3. 市場内部9点
     # --------------------------------------------------------
 
-    above_ma25_score = 0
+    def score_three(ratio, high, middle, low):
+        if ratio >= high:
+            return 3
+        if ratio >= middle:
+            return 2
+        if ratio >= low:
+            return 1
+        return 0
 
-    if above_ma25_ratio >= 65:
-        above_ma25_score = 3
-    elif above_ma25_ratio >= 50:
-        above_ma25_score = 2
-    elif above_ma25_ratio >= 40:
-        above_ma25_score = 1
+    above_score = score_three(
+        above_ratio, 65, 50, 40
+    )
 
-    ma25_up_score = 0
+    up_score = score_three(
+        up_ratio, 65, 50, 40
+    )
 
-    if ma25_up_ratio >= 65:
-        ma25_up_score = 3
-    elif ma25_up_ratio >= 50:
-        ma25_up_score = 2
-    elif ma25_up_ratio >= 40:
-        ma25_up_score = 1
-
-    advancing_score = 0
-
-    if advancing_ratio >= 60:
-        advancing_score = 3
-    elif advancing_ratio >= 50:
-        advancing_score = 2
-    elif advancing_ratio >= 40:
-        advancing_score = 1
+    advancing_score = score_three(
+        advancing_ratio, 60, 50, 40
+    )
 
     internal_score = (
-        above_ma25_score
-        + ma25_up_score
-        + advancing_score
+        above_score + up_score + advancing_score
+    )
+
+    internal = {
+        "score": internal_score,
+        "breakdown": {
+            "above_ma25": above_score,
+            "ma25_up": up_score,
+            "advancing": advancing_score,
+        },
+        "metrics": {
+            "above_ma25_ratio": round(above_ratio, 2),
+            "ma25_up_ratio": round(up_ratio, 2),
+            "advancing_ratio": round(advancing_ratio, 2),
+            "sample_count": total_count,
+            "valid_counts": counts,
+            "coverage": {
+                key: round(value, 4)
+                for key, value in coverage.items()
+            },
+            "base_date": expected_date,
+        },
+    }
+
+    print(
+        "[MARKET INTERNAL DIAGNOSTICS]",
+        f"base_date={expected_date}",
+        f"score={internal_score}/9",
+        f"above_ma25={above_ratio:.2f}%",
+        f"ma25_up={up_ratio:.2f}%",
+        f"advancing={advancing_ratio:.2f}%",
+        flush=True,
     )
 
     # --------------------------------------------------------
-    # 4. market_data.json 読み込み
+    # 4. 正式市場JSON確認
     # --------------------------------------------------------
 
     if market_data_path is None:
-        market_data_path = (
-            OUTPUT_DIR
-            / "market_data.json"
+        market_data_path = OUTPUT_DIR / "market_data.json"
+
+    market_data_path = Path(market_data_path)
+
+    if not market_data_path.is_file():
+        return stopped(
+            "market_data_file_missing",
+            internal=internal,
         )
-
-    market_data_path = Path(
-        market_data_path
-    )
-
-    if not market_data_path.exists():
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "market_data_file_missing",
-            "market_internal_score": internal_score,
-        }
 
     try:
-        with open(
-            market_data_path,
-            "r",
-            encoding="utf-8",
+        with market_data_path.open(
+            "r", encoding="utf-8"
         ) as f:
             market_data = json.load(f)
-
     except Exception as e:
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "market_data_json_load_failed",
-            "error": str(e),
-            "market_internal_score": internal_score,
-        }
-
-
-    # ========================================================
-    # 市場データJSON全体の正常性・基準日チェック
-    # ========================================================
-
-    if not isinstance(market_data, dict):
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "market_data_structure_invalid",
-        }
-
-    if market_data.get("evaluation_status") != "ok":
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "market_data_not_ready",
-        }
-
-    if "base_date" not in metrics.columns:
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "stock_base_date_missing",
-        }
-
-    stock_dates = metrics["base_date"]
-
-    if stock_dates.isna().any():
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "stock_base_date_missing",
-        }
-
-    expected_dates = set(stock_dates.astype(str))
-
-    if len(expected_dates) != 1:
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "stock_base_date_invalid",
-        }
-
-    expected_date = next(iter(expected_dates))
-
-    if market_data.get("base_date") != expected_date:
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "market_data_base_date_mismatch",
-            "expected_base_date": expected_date,
-            "actual_base_date": market_data.get("base_date"),
-        }    
-    results = market_data.get(
-        "results",
-        []
-    )
-
-    if not isinstance(
-        results,
-        list,
-    ):
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "market_data_results_invalid",
-            "market_internal_score": internal_score,
-        }
-
-
-    # --------------------------------------------------------
-    # 5. CME日経225先物を取得
-    # --------------------------------------------------------
-
-    market_lookup = {}
-
-    for row in results:
-
-        key = row.get("key")
-
-        if key:
-            market_lookup[key] = row
-
-    cme = market_lookup.get(
-        "nikkei225_futures_cme"
-    )
-
-    # --------------------------------------------------------
-    # 6. CME先物データ利用可否
-    # --------------------------------------------------------
-
-    def usable_futures_row(row):
-
-        if not isinstance(row, dict):
-            return False
-
-        status = row.get("status")
-
-        # stale / error / missing は使用不可
-        if status != "ok":
-            return False
-
-        if row.get("usable") is not True:
-            return False
-
-        change_pct = _num(
-            row,
-            "change_pct",
+        return stopped(
+            "market_data_json_load_failed",
+            internal=internal,
+            error=str(e),
         )
 
-        if change_pct is None:
-            return False
+    if not isinstance(market_data, dict):
+        return stopped(
+            "market_data_structure_invalid",
+            internal=internal,
+        )
 
-        return True
+    if market_data.get("evaluation_status") != "ok":
+        return stopped(
+            "market_data_not_ready",
+            internal=internal,
+        )
 
-    cme_usable = usable_futures_row(cme)
+    if market_data.get("base_date") != expected_date:
+        return stopped(
+            "market_data_base_date_mismatch",
+            internal=internal,
+            expected_base_date=expected_date,
+            actual_base_date=market_data.get("base_date"),
+        )
 
+    if market_data.get("official_publication_allowed") is not True:
+        return stopped(
+            "market_official_permission_missing",
+            internal=internal,
+        )
 
-    # --------------------------------------------------------
-    # 7. 株価・先物の基準日整合性
-    # --------------------------------------------------------
+    results = market_data.get("results")
 
-    if "base_date" not in metrics.columns:
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "stock_base_date_missing",
-        }
-
-    # 基準日が1件でも欠損していたら停止
-    if metrics["base_date"].isna().any():
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "stock_base_date_missing",
-        }
-
-    expected_dates = set(
-        metrics["base_date"].astype(str)
-    )
-
-    if len(expected_dates) != 1:
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "stock_base_date_invalid",
-        }
-
-    expected_date = next(iter(expected_dates))
-
+    if not isinstance(results, list):
+        return stopped(
+            "market_data_results_invalid",
+            internal=internal,
+        )
 
     # --------------------------------------------------------
-    # 7. CME先物の必須チェック
+    # 5. CME先物検証
     # --------------------------------------------------------
 
-    if not cme_usable:
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "cme_data_unavailable",
-            "market_internal_score": internal_score,
-        }
+    matches = [
+        row for row in results
+        if isinstance(row, dict)
+        and row.get("key") == "nikkei225_futures_cme"
+    ]
 
-    # CMEの基準日は必ず一致させる
+    if len(matches) != 1:
+        return stopped(
+            "cme_missing_or_duplicated",
+            internal=internal,
+        )
+
+    cme = matches[0]
+
+    if (
+        cme.get("status") != "ok"
+        or cme.get("usable") is not True
+    ):
+        return stopped(
+            "cme_data_unavailable",
+            internal=internal,
+        )
+
     if cme.get("evaluation_base_date") != expected_date:
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "cme_base_date_mismatch",
-            "market_internal_score": internal_score,
-        }
+        return stopped(
+            "cme_base_date_mismatch",
+            internal=internal,
+        )
+
+    if cme.get("contract_month_verified") is not True:
+        return stopped(
+            "cme_contract_month_unverified",
+            internal=internal,
+        )
+
+    if cme.get("manual_review_required") is True:
+        return stopped(
+            "cme_manual_review_required",
+            internal=internal,
+        )
+
+    change_pct = _num(cme, "change_pct")
+
+    if change_pct is None:
+        return stopped(
+            "cme_change_pct_missing",
+            internal=internal,
+        )
+
+    # 異常値は正式採点に使用しない
+    if abs(change_pct) >= 5.0:
+        return stopped(
+            "cme_large_change_requires_review",
+            internal=internal,
+            cme_change_pct=change_pct,
+        )
 
     # --------------------------------------------------------
-    # 8. CME先物 最大6点
+    # 6. CME先物6点
     # --------------------------------------------------------
 
-    cme_change_pct = _num(
-        cme,
-        "change_pct",
-    )
-
-    # データが欠損している場合は採点しない
-    if cme_change_pct is None:
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "cme_change_pct_missing",
-            "market_internal_score": internal_score,
-        }
-
-    if cme_change_pct >= 1.0:
+    if change_pct >= 1.0:
         cme_score = 6
-    elif cme_change_pct >= 0.5:
+    elif change_pct >= 0.5:
         cme_score = 5
-    elif cme_change_pct >= 0.0:
+    elif change_pct >= 0.0:
         cme_score = 4
-    elif cme_change_pct >= -0.5:
+    elif change_pct >= -0.5:
         cme_score = 2
-    elif cme_change_pct >= -1.0:
+    elif change_pct >= -1.0:
         cme_score = 1
     else:
         cme_score = 0
 
-
     # --------------------------------------------------------
-    # 9. 地合い合計 最大15点
-    # 日本市場9点 + CME先物6点
+    # 7. 地合い15点
     # --------------------------------------------------------
 
-    futures_score = cme_score
+    total = internal_score + cme_score
 
-    total = (
-        internal_score
-        + futures_score
-    )
-
-    # 必須データ未評価の場合は停止
-    if (
-        internal_score is None
-        or cme_score is None
-    ):
-        return {
-            "market_score": None,
-            "evaluation_status": "stopped",
-            "stop_reason": "market_score_incomplete",
-        }
-
-    total = max(
-        0,
-        min(
-            15,
-            int(total),
-        ),
-    )
-
-    # --------------------------------------------------------
-    # 10. 地合い判定
-    # --------------------------------------------------------
+    if not 0 <= total <= 15:
+        return stopped(
+            "market_score_out_of_range",
+            internal=internal,
+        )
 
     if total >= 12:
-        market_condition = "strong"
-
+        condition = "strong"
     elif total >= 9:
-        market_condition = "positive"
-
+        condition = "positive"
     elif total >= 6:
-        market_condition = "neutral"
-
+        condition = "neutral"
     elif total >= 3:
-        market_condition = "weak"
-
+        condition = "weak"
     else:
-        market_condition = "very_weak"
-
-    # --------------------------------------------------------
-    # 11. 評価結果
-    # --------------------------------------------------------
+        condition = "very_weak"
 
     return {
-        "market_score": total,
-
-        "market_condition": market_condition,
-
+        "market_score": int(total),
+        "market_condition": condition,
+        "market_internal_score": internal_score,
+        "market_internal": internal["metrics"],
         "market_score_breakdown": {
+            **internal["breakdown"],
             "internal": internal_score,
-
-            "above_ma25": above_ma25_score,
-
-            "ma25_up": ma25_up_score,
-
-            "advancing": advancing_score,
-
-            "futures": futures_score,
-
+            "futures": cme_score,
             "cme_futures": cme_score,
         },
-
-        "market_internal": {
-            "above_ma25_ratio": round(
-                float(above_ma25_ratio), 2
-            ),
-
-            "ma25_up_ratio": round(
-                float(ma25_up_ratio), 2
-            ),
-
-            "advancing_ratio": round(
-                float(advancing_ratio), 2
-            ),
-
-            "sample_count": int(
-                len(metrics)
-            ),
-        },
-
         "futures": {
             "cme": {
-                "usable": cme_usable,
-
-                "status": cme.get(
-                    "status"
-                ),
-
-                "change_pct": cme_change_pct,
-
-                "as_of": cme.get(
-                    "as_of"
-                ),
-
-                "evaluation_base_date": cme.get(
-                    "evaluation_base_date"
-                ),
+                "usable": True,
+                "status": cme.get("status"),
+                "change_pct": change_pct,
+                "as_of": cme.get("as_of"),
+                "evaluation_base_date": expected_date,
+                "contract_month_verified": True,
             },
         },
-
         "evaluation_status": "ok",
-
         "stop_reason": None,
     }
 # ============================================================
