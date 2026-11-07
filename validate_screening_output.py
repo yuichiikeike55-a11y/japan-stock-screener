@@ -263,8 +263,8 @@ def check_official_row(row):
 def validate_official(data, expected):
     rows = check_common(data, expected)
 
-    if data.get("official_publication_allowed") is False:
-        fail("official publication explicitly prohibited")
+    if data.get("official_publication_allowed") is not True:
+        fail("official publication not authorized")
 
     if not rows:
         fail("official ranking has zero rows")
