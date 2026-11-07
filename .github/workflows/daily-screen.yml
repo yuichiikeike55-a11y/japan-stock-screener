@@ -9,7 +9,7 @@ on:
         required: false
         type: string
   schedule:
-    - cron: "15 22 * * 0-4"
+    - cron: "0 22 * * 0-4"
 permissions:
   contents: write
 
@@ -341,6 +341,7 @@ jobs:
           retention-days: 14
 
 
+
       - name: Check publication readiness
         id: publication
         if: always()
@@ -351,7 +352,6 @@ jobs:
           SECTOR_VALIDATION: ${{ steps.sector_validation.outcome }}
           SCREENER: ${{ steps.screener.outcome }}
           OFFICIAL_VALIDATION: ${{ steps.screening_validation.outcome }}
-          PROVISIONAL_VALIDATION: ${{ steps.provisional_validation.outcome }}
         run: |
           python - <<'PY'
           import os
@@ -378,30 +378,18 @@ jobs:
               and success("OFFICIAL_VALIDATION")
           )
 
-          provisional_ready = (
-              sector_ready
-              and screener_ready
-              and success("PROVISIONAL_VALIDATION")
-          )
-
           print("[PUBLICATION READINESS]", flush=True)
 
-          if official_ready:
-              print(
-                  "[PUBLICATION READY] official",
-                  flush=True,
-              )
-          elif provisional_ready:
-              print(
-                  "[PUBLICATION READY] provisional",
-                  flush=True,
-              )
-          else:
+          if not official_ready:
               raise SystemExit(
-                  "RANKING PUBLICATION NOT READY"
+                  "STOP: OFFICIAL PUBLICATION NOT READY"
               )
-          PY
 
+          print(
+              "[PUBLICATION READY] official",
+              flush=True,
+          )
+          PY
 
       - name: Commit validated results
         if: steps.publication.outcome == 'success'
