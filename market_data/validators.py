@@ -93,6 +93,7 @@ def validate_freshness(
         now.isoformat()
     )
 
+
     if age_minutes > max_age_minutes:
         result["status"] = "stale"
         result["reason"] = "age_exceeds_max_age"
@@ -101,5 +102,15 @@ def validate_freshness(
         result["status"] = "ok"
         result["reason"] = "within_age_limit"
         result["usable"] = True
+
+    result["freshness_verified"] = (
+        result["status"] == "ok"
+    )
+
+    result["contract_month_verified"] = False
+    result["contract_month_note"] = (
+        "CME continuous futures; individual "
+        "contract month not independently verified"
+    )
 
     return result
