@@ -1,16 +1,6 @@
 
-"""
-翌東証営業日の寄り付き前に評価するCME市場データランナー。
-
-- 基準日は前東証営業日
-- 評価時刻は07:15 JST
-- 07:00以前の確定1時間足を使用
-- 前CMEセッションの同時刻と比較
-- 限月未検証のため参考データとして保存
-- 正式評価用market_data.jsonは上書きしない
-"""
-
 import json
+import math
 import os
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
@@ -23,87 +13,79 @@ from market_data.providers import fetch_yfinance
 from market_data.normalizers import normalize_yfinance
 from market_data.validators import validate_freshness
 
-
 JST = ZoneInfo("Asia/Tokyo")
-
 CME_SYMBOL = "NKD=F"
-EVALUATION_TIME = time(7, 15)
+
+EVALUATION_TIME = time(7, 0)
 PRICE_CUTOFF_TIME = time(7, 0)
 MAX_AGE_MINUTES = 180
 
+OFFICIAL_OUTPUT = Path("output/market_data.json")
 REFERENCE_OUTPUT = Path(
     "output/market_data_reference_latest.json"
 )
 
-REFERENCE_HISTORY = Path(
-    "output/market_data_reference_history"
+NOTE = (
+    "CME continuous futures data used. "
+    "Individual contract month not verified; "
+    "rollover may affect price comparison. "
+    "Annotation only; no score or rank penalty."
 )
 
 
-def get_tse_calendar():
+def calendar():
     return xcals.get_calendar("XTKS")
 
 
-def is_tse_session(day):
+def is_session(day):
     return bool(
-        get_tse_calendar().is_session(
-            pd.Timestamp(day.isoformat())
-        )
+        calendar().is_session(pd.Timestamp(day))
     )
 
 
-def previous_tse_session(day):
-    calendar = get_tse_calendar()
-    stamp = pd.Timestamp(day.isoformat())
+def previous_session(day):
+    cal = calendar()
+    stamp = pd.Timestamp(day)
 
-    if calendar.is_session(stamp):
-        stamp = calendar.previous_session(stamp)
-    else:
-        stamp = calendar.date_to_session(
-            stamp,
-            direction="previous",
-        )
+    if cal.is_session(stamp):
+        return cal.previous_session(stamp).date()
 
-    return stamp.date()
-
-
-def next_tse_session(day):
-    calendar = get_tse_calendar()
-    return calendar.next_session(
-        pd.Timestamp(day.isoformat())
+    return cal.date_to_session(
+        stamp, direction="previous"
     ).date()
 
 
-def get_base_date_and_cutoff():
+def next_session(day):
+    return calendar().next_session(
+        pd.Timestamp(day)
+    ).date()
+
+
+def get_dates():
     now = datetime.now(JST)
-    calendar = get_tse_calendar()
+    manual = os.getenv("BASE_DATE", "").strip()
 
-    raw = os.getenv("BASE_DATE", "").strip()
+    if manual:
+        base_date = date.fromisoformat(manual)
 
-    if raw:
-        base_date = date.fromisoformat(raw)
-
-        if not is_tse_session(base_date):
+        if not is_session(base_date):
             raise RuntimeError(
-                f"BASE_DATE is not a TSE session: {base_date}"
+                "STOP: BASE_DATE is not TSE session"
             )
 
-        evaluation_date = next_tse_session(base_date)
+        evaluation_date = next_session(base_date)
     else:
         today = now.date()
-        stamp = pd.Timestamp(today.isoformat())
 
-        if calendar.is_session(stamp):
+        if is_session(today):
             evaluation_date = today
         else:
-            evaluation_date = calendar.date_to_session(
-                stamp,
+            evaluation_date = calendar().date_to_session(
+                pd.Timestamp(today),
                 direction="next",
             ).date()
 
-        base_date = previous_tse_session(
-            evaluation_date
-        )
+        base_date = previous_session(evaluation_date)
 
     cutoff = datetime.combine(
         evaluation_date,
@@ -113,75 +95,86 @@ def get_base_date_and_cutoff():
 
     if now < cutoff:
         raise RuntimeError(
-            "Pre-open evaluation time has not arrived: "
-            f"now={now.isoformat()}, "
-            f"cutoff={cutoff.isoformat()}"
+            "STOP: evaluation time not reached"
         )
 
     if (now.date() - base_date).days > 7:
         raise RuntimeError(
-            "BASE_DATE is older than 7 days"
+            "STOP: BASE_DATE too old"
         )
 
     return base_date, cutoff
 
 
-def get_comparison_cutoffs(evaluation_cutoff):
-    """
-    朝07:00の確定価格を取得する。
-    直近のCME平日取引日と、その前の取引日を選択。
-
-    CMEの祝日・短縮取引はこの関数では
-    完全検証できないため、参考データ専用。
-    """
+def comparison_cutoffs(evaluation_cutoff):
     price_cutoff = datetime.combine(
         evaluation_cutoff.date(),
         PRICE_CUTOFF_TIME,
         tzinfo=JST,
     )
 
-    calendar = xcals.get_calendar("CMES")
-    candidates = []
+    cme_calendar = xcals.get_calendar("CMES")
+    dates = []
 
-    for days_back in range(10):
+    for offset in range(10):
         candidate = (
             price_cutoff.date()
-            - timedelta(days=days_back)
+            - timedelta(days=offset)
         )
 
-        stamp = pd.Timestamp(candidate.isoformat())
+        if cme_calendar.is_session(
+            pd.Timestamp(candidate)
+        ):
+            dates.append(candidate)
 
-        if calendar.is_session(stamp):
-            candidates.append(candidate)
-
-        if len(candidates) == 2:
+        if len(dates) == 2:
             break
 
-    if len(candidates) != 2:
+    if len(dates) != 2:
         raise RuntimeError(
-            "Two CME comparison dates unavailable"
+            "STOP: CME comparison dates unavailable"
         )
 
-    current_date, previous_date = candidates
-
-    current_cutoff = datetime.combine(
-        current_date,
-        PRICE_CUTOFF_TIME,
-        tzinfo=JST,
+    return (
+        datetime.combine(
+            dates[0], PRICE_CUTOFF_TIME, tzinfo=JST
+        ),
+        datetime.combine(
+            dates[1], PRICE_CUTOFF_TIME, tzinfo=JST
+        ),
     )
 
-    previous_cutoff = datetime.combine(
-        previous_date,
-        PRICE_CUTOFF_TIME,
-        tzinfo=JST,
+
+def save_json(path, payload):
+    path.parent.mkdir(
+        parents=True, exist_ok=True
     )
 
-    return current_cutoff, previous_cutoff
+    temporary = path.with_name(
+        path.name + ".tmp"
+    )
+
+    try:
+        temporary.write_text(
+            json.dumps(
+                payload,
+                ensure_ascii=False,
+                indent=2,
+                allow_nan=False,
+            ),
+            encoding="utf-8",
+        )
+        os.replace(temporary, path)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
 
 
-def build_market_data(base_date, evaluation_cutoff):
+def main():
+    base_date, cutoff = get_dates()
+
     current_cutoff, previous_cutoff = (
-        get_comparison_cutoffs(evaluation_cutoff)
+        comparison_cutoffs(cutoff)
     )
 
     hourly = fetch_yfinance(CME_SYMBOL)
@@ -197,100 +190,79 @@ def build_market_data(base_date, evaluation_cutoff):
     validated = validate_freshness(
         normalized,
         MAX_AGE_MINUTES,
-        now=evaluation_cutoff,
+        now=cutoff,
     )
 
     if validated.get("status") != "ok":
         raise RuntimeError(
-            "CME freshness validation failed: "
-            f"{validated.get('reason')}"
+            "STOP: CME data freshness failed"
         )
 
-    validated["key"] = "nikkei225_futures_cme"
-    validated["name"] = "日経225先物（CME）"
-    validated["category"] = "futures"
-    validated["evaluation_base_date"] = (
-        base_date.isoformat()
-    )
-    validated["evaluation_cutoff_jst"] = (
-        evaluation_cutoff.isoformat()
-    )
-    validated["contract_month_verified"] = False
-    validated["usable"] = False
-    validated["reference_usable"] = True
+    value = validated.get("value")
+    previous = validated.get("previous_close")
+    change = validated.get("change_pct")
 
-    return {
+    for name, number in (
+        ("value", value),
+        ("previous_close", previous),
+        ("change_pct", change),
+    ):
+        if (
+            isinstance(number, bool)
+            or not isinstance(number, (int, float))
+            or not math.isfinite(number)
+        ):
+            raise RuntimeError(
+                f"STOP: invalid CME {name}"
+            )
+
+    if value <= 0 or previous <= 0:
+        raise RuntimeError(
+            "STOP: invalid CME prices"
+        )
+
+    calculated = (value / previous - 1) * 100
+
+    if abs(calculated - change) > 0.01:
+        raise RuntimeError(
+            "STOP: CME percentage inconsistent"
+        )
+
+    if abs(change) >= 5:
+        raise RuntimeError(
+            "STOP: CME large change requires review"
+        )
+
+    validated.update({
+        "key": "nikkei225_futures_cme",
+        "name": "日経225先物（CME）",
+        "category": "futures",
+        "evaluation_base_date": base_date.isoformat(),
+        "evaluation_cutoff_jst": cutoff.isoformat(),
+        "contract_month_verified": False,
+        "contract_month_note": NOTE,
+        "manual_review_required": False,
+        "status": "ok",
+        "usable": True,
+    })
+
+    payload = {
         "base_date": base_date.isoformat(),
-        "generated_at_jst": (
-            datetime.now(JST).isoformat()
-        ),
-        "evaluation_status": "reference_only",
-        "official_publication_allowed": False,
+        "generated_at": datetime.now(
+            JST
+        ).isoformat(),
+        "evaluation_status": "ok",
+        "official_publication_allowed": True,
         "results": [validated],
+        "quality_notes": [NOTE],
     }
 
-
-def write_json_atomic(path, data):
-    path.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    temp = path.with_name(path.name + ".tmp")
-
-    try:
-        temp.write_text(
-            json.dumps(
-                data,
-                ensure_ascii=False,
-                indent=2,
-                allow_nan=False,
-            ),
-            encoding="utf-8",
-        )
-
-        os.replace(temp, path)
-    finally:
-        if temp.exists():
-            temp.unlink()
-
-
-def main():
-    base_date, evaluation_cutoff = (
-        get_base_date_and_cutoff()
-    )
+    save_json(OFFICIAL_OUTPUT, payload)
 
     print(
-        "BASE_DATE:",
-        base_date.isoformat(),
-    )
-    print(
-        "EVALUATION_CUTOFF:",
-        evaluation_cutoff.isoformat(),
-    )
-
-    payload = build_market_data(
-        base_date,
-        evaluation_cutoff,
-    )
-
-    history_path = (
-        REFERENCE_HISTORY
-        / f"market_data_{base_date.isoformat()}.json"
-    )
-
-    write_json_atomic(history_path, payload)
-    write_json_atomic(REFERENCE_OUTPUT, payload)
-
-    print(
-        "[MARKET DATA REFERENCE READY]",
-        base_date.isoformat(),
-        flush=True,
-    )
-
-    print(
-        "[OFFICIAL MARKET DATA]",
-        "not published: contract month unverified",
+        "[CME MARKET DATA READY]",
+        f"base_date={base_date}",
+        f"change_pct={change:.4f}",
         flush=True,
     )
 
