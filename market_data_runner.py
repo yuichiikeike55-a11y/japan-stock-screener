@@ -193,9 +193,23 @@ def main():
         now=cutoff,
     )
 
+
+    print(
+        "[CME VALIDATION]",
+        json.dumps(
+            validated,
+            ensure_ascii=False,
+            default=str,
+        ),
+        flush=True,
+    )
+
     if validated.get("status") != "ok":
         raise RuntimeError(
-            "STOP: CME data freshness failed"
+            "STOP: CME validation failed: "
+            f"status={validated.get('status')}, "
+            f"reason={validated.get('reason')}, "
+            f"age_minutes={validated.get('age_minutes')}"
         )
 
     value = validated.get("value")
