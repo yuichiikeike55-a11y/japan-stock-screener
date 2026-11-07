@@ -340,8 +340,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-
-
       - name: Check publication readiness
         id: publication
         if: always()
@@ -356,33 +354,29 @@ jobs:
           python - <<'PY'
           import os
 
-          def success(name):
-              return os.environ.get(name) == "success"
-
-          sector_ready = (
-              success("SECTOR_UPDATE")
-              and success("SECTOR_VALIDATION")
-          )
-
-          market_ready = (
-              success("MARKET_UPDATE")
-              and success("MARKET_VALIDATION")
-          )
-
-          screener_ready = success("SCREENER")
-
-          official_ready = (
-              market_ready
-              and sector_ready
-              and screener_ready
-              and success("OFFICIAL_VALIDATION")
-          )
+          checks = {
+              "MARKET_UPDATE": os.getenv("MARKET_UPDATE"),
+              "MARKET_VALIDATION": os.getenv("MARKET_VALIDATION"),
+              "SECTOR_UPDATE": os.getenv("SECTOR_UPDATE"),
+              "SECTOR_VALIDATION": os.getenv("SECTOR_VALIDATION"),
+              "SCREENER": os.getenv("SCREENER"),
+              "OFFICIAL_VALIDATION": os.getenv("OFFICIAL_VALIDATION"),
+          }
 
           print("[PUBLICATION READINESS]", flush=True)
 
-          if not official_ready:
+          failed = []
+
+          for name, outcome in checks.items():
+              print(f"{name}: {outcome}", flush=True)
+
+              if outcome != "success":
+                  failed.append(name)
+
+          if failed:
               raise SystemExit(
-                  "STOP: OFFICIAL PUBLICATION NOT READY"
+                  "STOP: OFFICIAL PUBLICATION NOT READY: "
+                  + ", ".join(failed)
               )
 
           print(
