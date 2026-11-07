@@ -3616,12 +3616,6 @@ def score_market_condition_15(
             internal=internal,
         )
 
-    if cme.get("contract_month_verified") is not True:
-        return stopped(
-            "cme_contract_month_unverified",
-            internal=internal,
-        )
-
     if cme.get("manual_review_required") is True:
         return stopped(
             "cme_manual_review_required",
