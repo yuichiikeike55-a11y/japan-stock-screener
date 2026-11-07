@@ -73,7 +73,7 @@ def get_dates():
                 "STOP: BASE_DATE is not TSE session"
             )
 
-        evaluation_date = next_session(base_date)
+        evaluation_date = base_date + timedelta(days=1)
     else:
         today = now.date()
 
