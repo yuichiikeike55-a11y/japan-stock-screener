@@ -1,19 +1,40 @@
 {
-  "base_date": "2026-11-03",
-  "generated_at_jst": "2026-11-03T11:22:51.029892+09:00",
-  "evaluation_status": "unavailable",
+  "base_date": "2026-11-06",
+  "generated_at": "2026-11-07T11:35:43.230420+09:00",
+  "evaluation_status": "ok",
+  "official_publication_allowed": true,
   "results": [
     {
+      "symbol": "NKD=F",
+      "source": "yfinance",
+      "value": 58370.0,
+      "previous_close": 57195.0,
+      "change": 1175.0,
+      "change_pct": 2.0543753824634914,
+      "as_of": "2026-11-07T07:00:00+09:00",
+      "bar_start_jst": "2026-11-07T06:00:00+09:00",
+      "bar_completed_jst": "2026-11-07T07:00:00+09:00",
+      "previous_bar_completed_jst": "2026-11-06T07:00:00+09:00",
+      "price_basis": "completed_hourly_close",
+      "contract_month_verified": false,
+      "market_data_quality": "reference_only",
+      "age_minutes": 0.0,
+      "as_of_jst": "2026-11-07T07:00:00+09:00",
+      "evaluation_time_jst": "2026-11-07T07:00:00+09:00",
+      "status": "ok",
+      "reason": "within_age_limit",
+      "usable": true,
+      "freshness_verified": true,
+      "contract_month_note": "CME continuous futures data used. Individual contract month not verified; rollover may affect price comparison. Annotation only; no score or rank penalty.",
       "key": "nikkei225_futures_cme",
       "name": "日経225先物（CME）",
-      "status": "unavailable",
-      "usable": false,
-      "reason": "CME daily base date mismatch: expected=2026-11-03, actual=2026-11-02",
-      "change_pct": null,
       "category": "futures",
-      "evaluation_base_date": "2026-11-03",
-      "evaluation_cutoff_jst": "2026-11-03T11:22:20.164590+09:00",
-      "attempts": 3
+      "evaluation_base_date": "2026-11-06",
+      "evaluation_cutoff_jst": "2026-11-07T07:00:00+09:00",
+      "manual_review_required": false
     }
+  ],
+  "quality_notes": [
+    "CME continuous futures data used. Individual contract month not verified; rollover may affect price comparison. Annotation only; no score or rank penalty."
   ]
 }
