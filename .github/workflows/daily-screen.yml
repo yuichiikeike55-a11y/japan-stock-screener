@@ -385,13 +385,13 @@ jobs:
           )
           PY
 
+
       - name: Commit validated results
         if: steps.publication.outcome == 'success'
         shell: bash
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
           OFFICIAL_VALIDATION: ${{ steps.screening_validation.outcome }}
-          PROVISIONAL_VALIDATION: ${{ steps.provisional_validation.outcome }}
           MARKET_UPDATE: ${{ steps.market_update.outcome }}
           MARKET_VALIDATION: ${{ steps.market_validation.outcome }}
         run: |
@@ -400,120 +400,98 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if [[ "$OFFICIAL_VALIDATION" == "success" ]] \
-             && [[ "$MARKET_UPDATE" == "success" ]] \
-             && [[ "$MARKET_VALIDATION" == "success" ]]; then
-
-            git add output/strategy_hits_latest.json
-
-          elif [[ "$PROVISIONAL_VALIDATION" == "success" ]]; then
-
-            git add output/strategy_hits_provisional_latest.json
-
-          else
-            echo "No validated ranking"
+          if [[ "$OFFICIAL_VALIDATION" != "success" ]]; then
+            echo "STOP: official validation failed"
             exit 1
           fi
 
-          git add output/sector_indices_latest.json
-
-          if [[ "$MARKET_UPDATE" == "success" ]] \
-             && [[ "$MARKET_VALIDATION" == "success" ]]; then
-            git add output/market_data.json
+          if [[ "$MARKET_UPDATE" != "success" ]] \
+             || [[ "$MARKET_VALIDATION" != "success" ]]; then
+            echo "STOP: official market validation failed"
+            exit 1
           fi
 
-          # 参考地合いJSONを検証して保存する。
-          # 正式地合いデータとは区別する。
           python - <<'PY'
           import json
-          import math
           import os
           from pathlib import Path
 
-          path = Path(
-              "output/market_data_reference_latest.json"
-          )
           expected = os.environ["BASE_DATE"]
 
-          if not path.is_file():
-              print(
-                  "[REFERENCE MARKET] file not generated; skip",
-                  flush=True,
-              )
-          else:
+          files = [
+              (
+                  "output/market_data.json",
+                  "base_date",
+              ),
+              (
+                  "output/sector_indices_latest.json",
+                  "latest_base_date",
+              ),
+              (
+                  "output/strategy_hits_latest.json",
+                  "base_date",
+              ),
+          ]
+
+          for filename, date_field in files:
+              path = Path(filename)
+
+              if not path.is_file():
+                  raise SystemExit(
+                      f"STOP: missing official file: {filename}"
+                  )
+
               data = json.loads(
                   path.read_text(encoding="utf-8")
               )
 
-              if data.get("base_date") != expected:
+              actual = data.get(date_field)
+
+              if actual != expected:
                   raise SystemExit(
-                      "STOP: reference market base date mismatch"
+                      f"STOP: {filename} base date mismatch: "
+                      f"{actual} != {expected}"
                   )
 
-              if data.get("evaluation_status") != "reference_only":
-                  raise SystemExit(
-                      "STOP: reference market status invalid"
-                  )
-
-              if data.get("official_publication_allowed") is not False:
-                  raise SystemExit(
-                      "STOP: reference market publication flag invalid"
-                  )
-
-              rows = data.get("results")
-
-              if not isinstance(rows, list) or len(rows) != 1:
-                  raise SystemExit(
-                      "STOP: reference market results invalid"
-                  )
-
-              row = rows[0]
-
-              if (
-                  row.get("key") != "nikkei225_futures_cme"
-                  or row.get("status") != "ok"
-                  or row.get("contract_month_verified") is not False
-                  or row.get("usable") is not False
-                  or row.get("reference_usable") is not True
-              ):
-                  raise SystemExit(
-                      "STOP: reference market quality flags invalid"
-                  )
-
-              for field in ("value", "previous_close", "change_pct"):
-                  value = row.get(field)
-                  if (
-                      isinstance(value, bool)
-                      or not isinstance(value, (int, float))
-                      or not math.isfinite(value)
-                  ):
+              if filename == "output/market_data.json":
+                  if data.get("evaluation_status") != "ok":
                       raise SystemExit(
-                          f"STOP: reference market {field} invalid"
+                          "STOP: official market status invalid"
+                      )
+
+                  if data.get(
+                      "official_publication_allowed"
+                  ) is not True:
+                      raise SystemExit(
+                          "STOP: official market publication prohibited"
+                      )
+
+              if filename == "output/strategy_hits_latest.json":
+                  if data.get(
+                      "official_publication_allowed"
+                  ) is not True:
+                      raise SystemExit(
+                          "STOP: official ranking publication prohibited"
                       )
 
               print(
-                  "[REFERENCE MARKET VALIDATED]",
-                  f"base_date={expected}",
-                  f"value={row['value']}",
-                  f"previous_close={row['previous_close']}",
-                  f"change_pct={row['change_pct']:.4f}",
+                  "[OFFICIAL FILE VERIFIED]",
+                  filename,
                   flush=True,
               )
           PY
 
-          if [[ -f output/market_data_reference_latest.json ]]; then
-            git add output/market_data_reference_latest.json
-            echo "[REFERENCE MARKET STAGED]"
-          fi
+          git add \
+            output/strategy_hits_latest.json \
+            output/sector_indices_latest.json \
+            output/market_data.json
 
-          if [[ "${{ steps.reference_diagnostic.outcome }}" == "success" ]]; then
-            git add output/market_reference_diagnostic_latest.json
-            echo "[REFERENCE DIAGNOSTIC STAGED]"
-          fi
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo "[OFFICIAL RESULTS] No changes to commit"
             exit 0
           fi
 
           git commit -m "Publish validated screening for ${BASE_DATE}"
           git push
+
+          echo "[OFFICIAL RESULTS PUBLISHED] ${BASE_DATE}"
