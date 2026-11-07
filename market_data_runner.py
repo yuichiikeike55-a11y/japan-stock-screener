@@ -106,44 +106,19 @@ def get_dates():
     return base_date, cutoff
 
 
+
 def comparison_cutoffs(evaluation_cutoff):
-    price_cutoff = datetime.combine(
+    current_cutoff = datetime.combine(
         evaluation_cutoff.date(),
         PRICE_CUTOFF_TIME,
         tzinfo=JST,
     )
 
-    cme_calendar = xcals.get_calendar("CMES")
-    dates = []
-
-    for offset in range(10):
-        candidate = (
-            price_cutoff.date()
-            - timedelta(days=offset)
-        )
-
-        if cme_calendar.is_session(
-            pd.Timestamp(candidate)
-        ):
-            dates.append(candidate)
-
-        if len(dates) == 2:
-            break
-
-    if len(dates) != 2:
-        raise RuntimeError(
-            "STOP: CME comparison dates unavailable"
-        )
-
-    return (
-        datetime.combine(
-            dates[0], PRICE_CUTOFF_TIME, tzinfo=JST
-        ),
-        datetime.combine(
-            dates[1], PRICE_CUTOFF_TIME, tzinfo=JST
-        ),
+    previous_cutoff = (
+        current_cutoff - timedelta(days=1)
     )
 
+    return current_cutoff, previous_cutoff
 
 def save_json(path, payload):
     path.parent.mkdir(
