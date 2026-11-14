@@ -287,19 +287,6 @@ def download_history(symbol):
 
     return df
 
-    print(
-        "[SECTOR DOWNLOAD]",
-        symbol,
-        "rows=", len(df),
-        "latest=",
-        str(df.index.max().date()) if not df.empty else "none",
-        "flags=", quality_flags,
-        flush=True,
-    )
-
-    return df
-
-
 def calculate_metrics(df):
     x = df.copy()
 
@@ -600,7 +587,7 @@ def main():
         "generated_at": datetime.now(
             timezone.utc
         ).isoformat(),
-        "requested_date": expected,
+        "requested_base_date": expected,
         "evaluation_status": (
             "ok" if complete else "unavailable"
         ),
