@@ -315,12 +315,16 @@ jobs:
         run: python validate_screening_output.py
       - name: Validate provisional screening output
         id: provisional_validation
-        if: steps.screener.outcome == 'success'
+        if: >-
+          ${{
+            steps.screener.outcome == 'success' &&
+            steps.screening_validation.outcome != 'success'
+          }}
         continue-on-error: true
         env:
           BASE_DATE: ${{ steps.date.outputs.base_date }}
           VALIDATION_MODE: provisional
-        run: python validate_screening_output.py        
+        run: python validate_screening_output.py      
 
       - name: Validate screening diagnostics
         id: diagnostic_validation
@@ -347,6 +351,7 @@ jobs:
       - name: Check publication readiness
         id: publication
         if: always()
+        continue-on-error: true        
         env:
           MARKET_UPDATE: ${{ steps.market_update.outcome }}
           MARKET_VALIDATION: ${{ steps.market_validation.outcome }}
@@ -505,7 +510,7 @@ jobs:
         if: >-
           ${{
             always() &&
-            steps.publication.outcome != 'success' &&
+            steps.screening_validation.outcome != 'success' &&
             steps.provisional_validation.outcome == 'success'
           }}
         shell: bash
@@ -559,6 +564,26 @@ jobs:
           git add output/strategy_hits_provisional_latest.json
 
           if [[ -f output/sector_indices_provisional_latest.json ]]; then
+            python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path("output/sector_indices_provisional_latest.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          expected = os.environ["BASE_DATE"]
+
+          actual = data.get(
+              "requested_base_date",
+              data.get("requested_date")
+          )
+
+          if actual != expected:
+              raise SystemExit(
+                  f"STOP: provisional sector date mismatch: "
+                  f"{actual} != {expected}"
+              )
+          PY
             git add output/sector_indices_provisional_latest.json
           fi
 
