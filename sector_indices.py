@@ -132,18 +132,30 @@ def calc_rsi(close, period=14):
     return result
 
 
+
 def download_history(symbol):
+    raw_date = os.getenv("BASE_DATE", "").strip()
+
+    if raw_date:
+        target = pd.Timestamp(raw_date).normalize()
+        kwargs = {
+            "start": (target - pd.Timedelta(days=850)).strftime("%Y-%m-%d"),
+            "end": (target + pd.Timedelta(days=2)).strftime("%Y-%m-%d"),
+        }
+    else:
+        kwargs = {"period": "2y"}
+
     last_error = None
 
     for attempt in range(1, RETRY_COUNT + 1):
         try:
             df = yf.download(
                 symbol,
-                period="2y",
                 interval="1d",
                 auto_adjust=False,
                 progress=False,
                 threads=False,
+                **kwargs,
             )
 
             if df is None or df.empty:
@@ -152,24 +164,14 @@ def download_history(symbol):
             if isinstance(df.columns, pd.MultiIndex):
                 df.columns = df.columns.get_level_values(0)
 
-            required = [
-                "Open", "High", "Low", "Close", "Volume"
-            ]
-
-            missing = [
-                col for col in required
-                if col not in df.columns
-            ]
-
+            required = ["Open", "High", "Low", "Close", "Volume"]
+            missing = [c for c in required if c not in df.columns]
             if missing:
-                raise RuntimeError(
-                    f"missing columns: {missing}"
-                )
+                raise RuntimeError(f"missing columns: {missing}")
 
             df = df[required].copy()
 
             index = pd.to_datetime(df.index)
-
             if index.tz is not None:
                 index = index.tz_convert(
                     "Asia/Tokyo"
@@ -182,23 +184,46 @@ def download_history(symbol):
             if df.empty:
                 raise RuntimeError("no valid dates")
 
+            print(
+                f"[SECTOR RAW] {symbol} "
+                f"rows={len(df)} "
+                f"latest={df.index[-1].date()}",
+                flush=True,
+            )
+
+            if raw_date:
+                target_rows = df.loc[df.index == target]
+                if target_rows.empty:
+                    print(
+                        f"[SECTOR MISSING] {symbol} "
+                        f"target={raw_date} "
+                        f"last_dates={list(df.index[-5:].strftime('%Y-%m-%d'))}",
+                        flush=True,
+                    )
+                else:
+                    print(
+                        f"[SECTOR TARGET] {symbol} "
+                        f"OHLCV={target_rows.iloc[-1].to_dict()}",
+                        flush=True,
+                    )
+
             return df
 
         except Exception as exc:
             last_error = str(exc)
             print(
-                f"{symbol}: attempt "
-                f"{attempt}/{RETRY_COUNT}: "
-                f"{last_error}",
+                f"[SECTOR DOWNLOAD ERROR] {symbol} "
+                f"attempt={attempt}/{RETRY_COUNT} "
+                f"reason={last_error}",
                 flush=True,
             )
-
             if attempt < RETRY_COUNT:
                 time.sleep(RETRY_SECONDS)
 
     raise RuntimeError(
         f"{symbol}: download failed: {last_error}"
     )
+
 
 
 def validate_ohlcv(df):
@@ -485,7 +510,26 @@ def main():
                         f"latest={df.index[-1].date()}"
                     )
 
+
+            raw_target = (
+                df.loc[requested_date].to_dict()
+                if requested_date is not None
+                and requested_date in df.index
+                else None
+            )
+
             df, flags = validate_ohlcv(df)
+
+            if (
+                requested_date is not None
+                and requested_date not in df.index
+            ):
+                raise RuntimeError(
+                    "BASE_DATE bar invalid after quality checks; "
+                    f"raw_ohlcv={raw_target}; "
+                    f"quality_flags={flags}"
+                )
+
 
             if df.empty:
                 raise RuntimeError(
@@ -573,6 +617,27 @@ def main():
 
     atomic_json(STATUS_FILE, status)
 
+    partial_payload = {
+        "generated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+        "publication_status": "provisional",
+        "requested_base_date": expected,
+        "sector_count": 18,
+        "processed_count": len(latest_results),
+        "failure_count": len(failures),
+        "observed_base_dates": sorted(dates),
+        "results": latest_results,
+        "failures": failures,
+    }
+
+    atomic_json(
+        OUTPUT_DIR / "sector_indices_provisional_latest.json",
+        partial_payload,
+    )
+
+
+    
     if not complete:
         # 以前の正常データを今回の結果と誤認させない。
         # screener側でも必ずBASE_DATEを照合する。
