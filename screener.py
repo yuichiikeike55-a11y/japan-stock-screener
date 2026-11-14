@@ -2543,17 +2543,15 @@ def attach_sector_scores_to_hits(
             else "sector_data_unavailable"
         )
 
+
         for stock in strategy_hits:
             stock["sector_evaluation"] = {
-                "evaluation_status":
-                    "stopped",
-
-                "stop_reason":
-                    reason,
-
-                "sector_score":
-                    None,
+                "evaluation_status": "stopped",
+                "stop_reason": reason,
+                "sector_score": None,
+                "sector_data_global_unavailable": True,
             }
+
 
         return strategy_hits
 
@@ -4076,6 +4074,9 @@ def score_final_evaluation_100(stock):
     scores = {}
     market_excluded = False
     market_reason = None
+    sector_excluded = False
+    sector_reason = None
+
 
     for component, (
         section_key, score_key, limit
@@ -4102,6 +4103,28 @@ def score_final_evaluation_100(stock):
             if evaluation.get("sector_count") != 18:
                 return stopped("sector_count_mismatch")
 
+
+        if component == "sector" and status != "ok":
+            if (
+                evaluation.get(
+                    "sector_data_global_unavailable"
+                ) is True
+            ):
+                sector_excluded = True
+                sector_reason = (
+                    reason or "sector_data_unavailable"
+                )
+                scores["sector"] = None
+                continue
+
+            return stopped(
+                "required_evaluation_stopped",
+                component="sector",
+                component_reason=(
+                    reason or "sector_evaluation_invalid"
+                ),
+            )
+        
         if component == "market" and status != "ok":
             market_excluded = True
             market_reason = reason or "market_unavailable"
@@ -4125,7 +4148,13 @@ def score_final_evaluation_100(stock):
 
         scores[component] = float(value)
 
-    max_score = 85 if market_excluded else 100
+
+    max_score = (
+        100
+        - (25 if sector_excluded else 0)
+        - (15 if market_excluded else 0)
+    )
+
     bonus = min(3, hit_count - 1)
 
     base_score = sum(
@@ -4204,10 +4233,17 @@ def score_final_evaluation_100(stock):
             "strategy_negated_rank_cap_C"
         )
 
+
     if market_excluded:
         safety_flags.append(
-            "market_excluded_85_point_scoring"
+            "market_excluded_provisional_scoring"
         )
+
+    if sector_excluded:
+        safety_flags.append(
+            "sector_excluded_provisional_scoring"
+        )
+
 
     return {
         "final_score": final_score,
@@ -4230,22 +4266,41 @@ def score_final_evaluation_100(stock):
             "strategy_negated": strategy_negated,
             "flags": safety_flags,
         },
+
         "evaluation_status": (
-            "provisional" if market_excluded else "ok"
+            "provisional"
+            if sector_excluded or market_excluded
+            else "ok"
         ),
         "publication_status": (
-            "provisional" if market_excluded else "official"
+            "provisional"
+            if sector_excluded or market_excluded
+            else "official"
         ),
+        "coverage": max_score / 100,
+        "coverage_pct": max_score,
+        "sector_excluded": sector_excluded,
+        "sector_exclusion_reason": sector_reason,
         "market_excluded": market_excluded,
         "market_exclusion_reason": market_reason,
-        "missing_components": (
-            ["market"] if market_excluded else []
-        ),
-        "missing_reasons": (
-            {"market": market_reason}
-            if market_excluded else {}
-        ),
+        "missing_components": [
+            key
+            for key, excluded in (
+                ("sector", sector_excluded),
+                ("market", market_excluded),
+            )
+            if excluded
+        ],
+        "missing_reasons": {
+            key: reason
+            for key, excluded, reason in (
+                ("sector", sector_excluded, sector_reason),
+                ("market", market_excluded, market_reason),
+            )
+            if excluded
+        },
         "stop_reason": None,
+
     }
 
 def apply_final_evaluation_to_hits(
