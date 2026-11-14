@@ -5422,6 +5422,7 @@ def main():
         )
 
 
+
     # ========================================================
     # 正式・暫定・診断の公開振り分け
     # ========================================================
@@ -5458,8 +5459,9 @@ def main():
             **extra,
         }
 
-    # 同じ実行で生成していないファイルを
-    # 誤って次の公開処理に渡さない。
+    # 今回の実行で生成したファイルだけを検証対象にする。
+    # リポジトリに保存済みの正式ランキングは
+    # GitHub上では暫定結果で上書きしない。
     for filename in (
         "strategy_hits_latest.json",
         "strategy_hits_provisional_latest.json",
@@ -5469,125 +5471,180 @@ def main():
         if path.exists():
             path.unlink()
 
-    official_rows = []
-    provisional_rows = []
-    incomplete_rows = []
-    invalid_stocks = []
+    final_evaluations = [
+        stock.get("final_evaluation") or {}
+        for stock in strategy_hits
+    ]
 
-    for stock in strategy_hits:
-        final = stock.get("final_evaluation") or {}
-        status = final.get("evaluation_status")
-
-        if (
-            status == "ok"
-            and final.get("max_score") == 100
-            and final.get("final_score") is not None
-            and final.get("final_rank") is not None
-        ):
-            official_rows.append(stock)
-
-        elif (
-            status == "provisional"
-            and final.get("max_score") == 85
-            and final.get("market_excluded") is True
-            and final.get("final_score") is not None
-            and final.get("final_rank") is not None
-        ):
-            provisional_rows.append(stock)
-
-        else:
-            incomplete_rows.append(stock)
-
-            invalid_stocks.append({
-                "code": stock.get("code"),
-                "reason": final.get("stop_reason")
-                    or "final_evaluation_incomplete",
-                "missing_components": final.get(
-                    "missing_components", []
-                ),
-                "missing_reasons": final.get(
-                    "missing_reasons", {}
-                ),
-            })
-
-    if not strategy_hits:
-        save_payload(
-            "strategy_hits_diagnostic_latest.json",
-            build_payload(
-                "diagnostic",
-                [],
-                incomplete_count=0,
-                invalid_stocks=[],
-                warnings=[
-                    "ヒット銘柄0件。処理の正常性を確認してください"
-                ],
-            ),
+    all_official = (
+        bool(final_evaluations)
+        and all(
+            item.get("evaluation_status") == "ok"
+            and item.get("max_score") == 100
+            and item.get("final_score") is not None
+            and item.get("final_rank") is not None
+            for item in final_evaluations
         )
-        return
+    )
 
-    # すべてのヒット銘柄が正式評価済み
-    if len(official_rows) == len(strategy_hits):
+    provisional_scores = {
+        item.get("max_score")
+        for item in final_evaluations
+        if item.get("evaluation_status") == "provisional"
+    }
+
+    all_provisional = (
+        bool(final_evaluations)
+        and all(
+            item.get("evaluation_status") == "provisional"
+            and item.get("max_score") in (60, 75, 85)
+            and item.get("final_score") is not None
+            and item.get("normalized_score") is not None
+            and item.get("final_rank") is not None
+            for item in final_evaluations
+        )
+        and len(provisional_scores) == 1
+    )
+
+    expected_missing_by_score = {
+        60: {"sector", "market"},
+        75: {"sector"},
+        85: {"market"},
+    }
+
+    if all_provisional:
+        provisional_max = next(iter(provisional_scores))
+        expected_missing = expected_missing_by_score[
+            provisional_max
+        ]
+
+        for item in final_evaluations:
+            missing = item.get("missing_components")
+            reasons = item.get("missing_reasons")
+            breakdown = item.get("score_breakdown")
+
+            if (
+                not isinstance(missing, list)
+                or set(missing) != expected_missing
+                or len(missing) != len(expected_missing)
+                or not isinstance(reasons, dict)
+                or set(reasons) != expected_missing
+                or not all(reasons.get(k) for k in expected_missing)
+                or not isinstance(breakdown, dict)
+                or any(
+                    breakdown.get(k) is not None
+                    for k in expected_missing
+                )
+                or item.get("sector_excluded")
+                is not ("sector" in expected_missing)
+                or item.get("market_excluded")
+                is not ("market" in expected_missing)
+            ):
+                all_provisional = False
+                break
+
+    if all_official:
         save_payload(
             "strategy_hits_latest.json",
             build_payload(
                 "official",
-                official_rows,
+                strategy_hits,
                 max_score=100,
+                coverage=1.0,
+                coverage_pct=100,
+                missing_components=[],
                 warnings=[],
             ),
         )
         return
 
-    # 正式と暫定が混在していても、
-    # 必須項目欠損がなければ全銘柄を暫定側へ公開。
-    if not incomplete_rows:
-        provisional_output = []
+    if all_provisional:
+        max_score = next(iter(provisional_scores))
+        missing_components = sorted(
+            expected_missing_by_score[max_score]
+        )
 
-        for stock in strategy_hits:
-            item = dict(stock)
-            final = dict(item["final_evaluation"])
+        provisional_output = sorted(
+            strategy_hits,
+            key=lambda stock: stock[
+                "final_evaluation"
+            ]["normalized_score"],
+            reverse=True,
+        )
 
-            # 正式100点の銘柄を暫定85点に
-            # 勝手に変換しない。
-            # 混在時は採点方式の異なる銘柄を
-            # 同一ランキングにしない。
-            if final.get("max_score") != 85:
-                break
+        save_payload(
+            "strategy_hits_provisional_latest.json",
+            build_payload(
+                "provisional",
+                provisional_output,
+                max_score=max_score,
+                coverage=max_score / 100,
+                coverage_pct=max_score,
+                missing_components=missing_components,
+                warnings=[
+                    "欠損評価項目を除外した暫定ランキング",
+                    f"{max_score}点満点で採点",
+                    "ランクは100点換算",
+                    "正式ランキングではありません",
+                ],
+            ),
+        )
+        return
 
-            provisional_output.append(item)
+    # 正式・暫定のどちらも公開条件を満たさない。
+    # 採点方式の混在、必須評価欠損などは診断へ。
+    invalid_stocks = []
 
-        if len(provisional_output) == len(strategy_hits):
-            save_payload(
-                "strategy_hits_provisional_latest.json",
-                build_payload(
-                    "provisional",
-                    provisional_output,
-                    max_score=85,
-                    warnings=[
-                        "地合い15点を除外",
-                        "85点満点で採点",
-                        "ランクは100点換算",
-                    ],
-                ),
-            )
-            return
+    for stock in strategy_hits:
+        final = stock.get("final_evaluation") or {}
 
-    # 必須項目欠損、採点方式混在などは診断公開。
-    # 有効な個別点数は残すが、
-    # 全銘柄ランキングとしては公開しない。
+        invalid_stocks.append({
+            "code": stock.get("code"),
+            "reason": (
+                final.get("stop_reason")
+                or "ranking_publication_conditions_not_met"
+            ),
+            "missing_components": final.get(
+                "missing_components", []
+            ),
+            "missing_reasons": final.get(
+                "missing_reasons", {}
+            ),
+        })
+
+    # 診断検証では incomplete_count と
+    # incomplete rows の整合性を確認するため、
+    # 混在時も全行を未公開扱いにする。
+    diagnostic_rows = []
+
+    for stock in strategy_hits:
+        item = dict(stock)
+        final = dict(item.get("final_evaluation") or {})
+
+        final.update({
+            "evaluation_status": "stopped",
+            "final_score": None,
+            "final_rank": None,
+            "uncapped_rank": None,
+            "base_score": None,
+        })
+
+        item["final_evaluation"] = final
+        diagnostic_rows.append(item)
+
     save_payload(
         "strategy_hits_diagnostic_latest.json",
         build_payload(
             "diagnostic",
-            strategy_hits,
-            incomplete_count=len(incomplete_rows),
+            diagnostic_rows,
+            incomplete_count=len(diagnostic_rows),
             invalid_stocks=invalid_stocks,
             warnings=[
-                "正式または暫定ランキングの"
-                "全銘柄一括検証が未完了"
+                "正式・暫定ランキングの公開条件が未成立"
             ],
         ),
     )
+
     # 6. Failure table
     failure_rows = []
 
