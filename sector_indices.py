@@ -133,6 +133,51 @@ def calc_rsi(close, period=14):
 
 
 
+def validate_ohlcv(df):
+    x = df.copy()
+    flags = []
+
+    for col in [
+        "Open",
+        "High",
+        "Low",
+        "Close",
+        "Volume",
+    ]:
+        x[col] = pd.to_numeric(
+            x[col],
+            errors="coerce",
+        )
+
+    invalid_price = (
+        (x["Open"] <= 0)
+        | (x["High"] <= 0)
+        | (x["Low"] <= 0)
+        | (x["Close"] <= 0)
+        | (x["High"] < x["Low"])
+        | (x["High"] < x["Open"])
+        | (x["High"] < x["Close"])
+        | (x["Low"] > x["Open"])
+        | (x["Low"] > x["Close"])
+    )
+
+    if invalid_price.any():
+        flags.append("invalid_ohlc")
+        x.loc[invalid_price, "Close"] = np.nan
+
+    invalid_volume = (
+        (x["Volume"] < 0)
+        | (~np.isfinite(x["Volume"]))
+    )
+
+    if invalid_volume.any():
+        flags.append("invalid_volume")
+        x.loc[invalid_volume, "Volume"] = np.nan
+
+    x = x.dropna(subset=["Close"])
+
+    return x, flags
+
 
 def download_history(symbol):
     requested = os.environ.get("BASE_DATE", "").strip()
