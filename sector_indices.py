@@ -222,22 +222,25 @@ def download_history(symbol):
             flush=True,
         )
 
-    df = df.dropna(subset=["Close"])
 
-    df, quality_flags = validate_ohlcv(
-        df,
-        symbol,
-    )
+    df = df.dropna(subset=["Close"])
 
     if target is not None and target not in df.index:
         raise ValueError(
-            f"{symbol}: BASE_DATE bar invalid "
-            f"after quality checks; "
-            f"raw_ohlcv={raw_target.to_dict()}; "
-            f"quality_flags={quality_flags}"
+            f"{symbol}: BASE_DATE Close missing; "
+            f"raw_ohlcv={raw_target.to_dict()}"
         )
 
-    df.attrs["data_quality_flags"] = quality_flags
+    print(
+        "[SECTOR DOWNLOAD]",
+        symbol,
+        "rows=", len(df),
+        "latest=",
+        str(df.index.max().date()) if not df.empty else "none",
+        flush=True,
+    )
+
+    return df
 
     print(
         "[SECTOR DOWNLOAD]",
@@ -527,55 +530,6 @@ def main():
                 "symbol": symbol,
                 "error": str(exc),
             })
-
-    provisional_sector_data = {
-        "generated_at": datetime.now(
-            timezone.utc
-        ).isoformat(),
-        "latest_base_date": (
-            requested_base_date.strftime("%Y-%m-%d")
-            if requested_base_date is not None
-            else (
-                max(
-                    row["base_date"]
-                    for row in latest_results
-                )
-                if latest_results
-                else None
-            )
-        ),
-        "publication_status": "provisional",
-        "sector_count": len(SECTORS),
-        "processed_count": len(latest_results),
-        "failure_count": len(failures),
-        "results": latest_results,
-        "failures": failures,
-    }
-
-    provisional_path = (
-        OUTPUT_DIR
-        / "sector_indices_provisional_latest.json"
-    )
-
-    with open(
-        provisional_path,
-        "w",
-        encoding="utf-8",
-    ) as f:
-        json.dump(
-            provisional_sector_data,
-            f,
-            ensure_ascii=False,
-            indent=2,
-            allow_nan=False,
-        )
-
-    print(
-        "[SECTOR PROVISIONAL SAVED]",
-        provisional_path,
-        flush=True,
-    )
-
     
     dates = {
         item["base_date"]
@@ -601,7 +555,7 @@ def main():
         "generated_at": datetime.now(
             timezone.utc
         ).isoformat(),
-        "requested_base_date": expected,
+        "requested_date": expected,
         "evaluation_status": (
             "ok" if complete else "unavailable"
         ),
