@@ -499,3 +499,76 @@ jobs:
           git push
 
           echo "[OFFICIAL RESULTS PUBLISHED] ${BASE_DATE}"
+
+
+      - name: Publish provisional screening results
+        if: >-
+          ${{
+            always() &&
+            steps.publication.outcome != 'success' &&
+            steps.provisional_validation.outcome == 'success'
+          }}
+        shell: bash
+        env:
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
+        run: |
+          set -euo pipefail
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(
+              "output/strategy_hits_provisional_latest.json"
+          )
+
+          if not path.is_file():
+              raise SystemExit(
+                  "STOP: provisional ranking missing"
+              )
+
+          data = json.loads(
+              path.read_text(encoding="utf-8")
+          )
+
+          expected = os.environ["BASE_DATE"]
+
+          if data.get("base_date") != expected:
+              raise SystemExit(
+                  "STOP: provisional base_date mismatch"
+              )
+
+          if data.get("publication_status") != "provisional":
+              raise SystemExit(
+                  "STOP: provisional status invalid"
+              )
+
+          if not isinstance(data.get("results"), list):
+              raise SystemExit(
+                  "STOP: provisional results invalid"
+              )
+
+          print("[PROVISIONAL FILE VERIFIED]")
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add output/strategy_hits_provisional_latest.json
+
+          if [[ -f output/sector_indices_provisional_latest.json ]]; then
+            git add output/sector_indices_provisional_latest.json
+          fi
+
+          if git diff --cached --quiet; then
+            echo "[PROVISIONAL RESULTS] No changes"
+            exit 0
+          fi
+
+          git commit -m "Publish provisional screening for ${BASE_DATE}"
+          git push
+
+          echo "[PROVISIONAL RESULTS PUBLISHED] ${BASE_DATE}"
+
