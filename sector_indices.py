@@ -133,175 +133,123 @@ def calc_rsi(close, period=14):
 
 
 
+
 def download_history(symbol):
-    raw_date = os.getenv("BASE_DATE", "").strip()
+    requested = os.environ.get("BASE_DATE", "").strip()
 
-    if raw_date:
-        target = pd.Timestamp(raw_date).normalize()
-        kwargs = {
-            "start": (target - pd.Timedelta(days=850)).strftime("%Y-%m-%d"),
-            "end": (target + pd.Timedelta(days=2)).strftime("%Y-%m-%d"),
-        }
+    if requested:
+        target = pd.Timestamp(requested).normalize()
     else:
-        kwargs = {"period": "2y"}
+        target = None
 
-    last_error = None
+    if target is not None:
+        start_date = target - pd.Timedelta(days=850)
+        end_date = target + pd.Timedelta(days=2)
 
-    for attempt in range(1, RETRY_COUNT + 1):
-        try:
-            df = yf.download(
-                symbol,
-                interval="1d",
-                auto_adjust=False,
-                progress=False,
-                threads=False,
-                **kwargs,
-            )
-
-            if df is None or df.empty:
-                raise RuntimeError("empty response")
-
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = df.columns.get_level_values(0)
-
-            required = ["Open", "High", "Low", "Close", "Volume"]
-            missing = [c for c in required if c not in df.columns]
-            if missing:
-                raise RuntimeError(f"missing columns: {missing}")
-
-            df = df[required].copy()
-
-            index = pd.to_datetime(df.index)
-            if index.tz is not None:
-                index = index.tz_convert(
-                    "Asia/Tokyo"
-                ).tz_localize(None)
-
-            df.index = index.normalize()
-            df = df.sort_index()
-            df = df.loc[~df.index.duplicated(keep="last")]
-
-            if df.empty:
-                raise RuntimeError("no valid dates")
-
-            print(
-                f"[SECTOR RAW] {symbol} "
-                f"rows={len(df)} "
-                f"latest={df.index[-1].date()}",
-                flush=True,
-            )
-
-            if raw_date:
-                target_rows = df.loc[df.index == target]
-                if target_rows.empty:
-                    print(
-                        f"[SECTOR MISSING] {symbol} "
-                        f"target={raw_date} "
-                        f"last_dates={list(df.index[-5:].strftime('%Y-%m-%d'))}",
-                        flush=True,
-                    )
-                else:
-                    print(
-                        f"[SECTOR TARGET] {symbol} "
-                        f"OHLCV={target_rows.iloc[-1].to_dict()}",
-                        flush=True,
-                    )
-
-            return df
-
-        except Exception as exc:
-            last_error = str(exc)
-            print(
-                f"[SECTOR DOWNLOAD ERROR] {symbol} "
-                f"attempt={attempt}/{RETRY_COUNT} "
-                f"reason={last_error}",
-                flush=True,
-            )
-            if attempt < RETRY_COUNT:
-                time.sleep(RETRY_SECONDS)
-
-    raise RuntimeError(
-        f"{symbol}: download failed: {last_error}"
-    )
-
-
-
-def validate_ohlcv(df):
-    x = df.copy()
-    flags = []
-
-    price_cols = ["Open", "High", "Low", "Close"]
-
-    for col in price_cols:
-        x[col] = pd.to_numeric(
-            x[col], errors="coerce"
+        df = yf.download(
+            symbol,
+            start=start_date.strftime("%Y-%m-%d"),
+            end=end_date.strftime("%Y-%m-%d"),
+            interval="1d",
+            auto_adjust=False,
+            progress=False,
+            threads=False,
+        )
+    else:
+        df = yf.download(
+            symbol,
+            period="2y",
+            interval="1d",
+            auto_adjust=False,
+            progress=False,
+            threads=False,
         )
 
-    x["Volume"] = pd.to_numeric(
-        x["Volume"], errors="coerce"
-    )
+    if df.empty:
+        return pd.DataFrame()
 
-    invalid_price = pd.Series(False, index=x.index)
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
 
-    for col in price_cols:
-        invalid_price |= (
-            ~np.isfinite(x[col])
-            | (x[col] <= 0)
+    required = [
+        "Open",
+        "High",
+        "Low",
+        "Close",
+        "Volume",
+    ]
+
+    missing = [
+        col for col in required
+        if col not in df.columns
+    ]
+
+    if missing:
+        raise ValueError(
+            f"{symbol}: missing columns {missing}"
         )
 
-    if invalid_price.any():
-        flags.append("invalid_price")
+    df = df[required].copy()
+    df.index = pd.to_datetime(df.index)
 
-    invalid_ohlc = (
-        (x["High"] < x["Low"])
-        | (x["High"] < x["Open"])
-        | (x["High"] < x["Close"])
-        | (x["Low"] > x["Open"])
-        | (x["Low"] > x["Close"])
-    )
+    if df.index.tz is not None:
+        df.index = df.index.tz_localize(None)
 
-    if invalid_ohlc.any():
-        flags.append("ohlc_inconsistency")
+    df.index = df.index.normalize()
+    df = df.sort_index()
 
-    bad_price = invalid_price | invalid_ohlc
+    if target is not None:
+        df = df.loc[df.index <= target].copy()
 
-    x.loc[bad_price, price_cols] = np.nan
-
-    bad_volume = (
-        ~np.isfinite(x["Volume"])
-        | (x["Volume"] < 0)
-    )
-
-    if bad_volume.any():
-        flags.append("invalid_volume")
-        x.loc[bad_volume, "Volume"] = np.nan
-
-    ratio = x["Close"] / x["Close"].shift(1)
-
-    if ((ratio > 1.4) | (ratio < 0.6)).any():
-        flags.append("extreme_daily_price_move_detected")
-
-    median = x["Close"].rolling(
-        21, center=True, min_periods=5
-    ).median()
-
-    for col in price_cols:
-        distance = x[col] / median
-        outlier = (
-            (distance < 0.2)
-            | (distance > 5.0)
-        )
-
-        if outlier.any():
-            flags.append(
-                f"{col.lower()}_extreme_outlier"
+        if target not in df.index:
+            latest = (
+                str(df.index.max().date())
+                if not df.empty
+                else "none"
             )
-            x.loc[outlier, col] = np.nan
+            raise ValueError(
+                f"{symbol}: BASE_DATE bar missing; "
+                f"latest={latest}"
+            )
 
-    # 異常値を除いた後の有効日付だけを使用
-    x = x.dropna(subset=["Close"])
+        raw_target = df.loc[target].copy()
 
-    return x, list(dict.fromkeys(flags))
+        print(
+            "[SECTOR RAW TARGET]",
+            symbol,
+            target.date(),
+            raw_target.to_dict(),
+            flush=True,
+        )
+
+    df = df.dropna(subset=["Close"])
+
+    df, quality_flags = validate_ohlcv(
+        df,
+        symbol,
+    )
+
+    if target is not None and target not in df.index:
+        raise ValueError(
+            f"{symbol}: BASE_DATE bar invalid "
+            f"after quality checks; "
+            f"raw_ohlcv={raw_target.to_dict()}; "
+            f"quality_flags={quality_flags}"
+        )
+
+    df.attrs["data_quality_flags"] = quality_flags
+
+    print(
+        "[SECTOR DOWNLOAD]",
+        symbol,
+        "rows=", len(df),
+        "latest=",
+        str(df.index.max().date()) if not df.empty else "none",
+        "flags=", quality_flags,
+        flush=True,
+    )
+
+    return df
 
 
 def calculate_metrics(df):
@@ -580,6 +528,55 @@ def main():
                 "error": str(exc),
             })
 
+    provisional_sector_data = {
+        "generated_at": datetime.now(
+            timezone.utc
+        ).isoformat(),
+        "latest_base_date": (
+            requested_base_date.strftime("%Y-%m-%d")
+            if requested_base_date is not None
+            else (
+                max(
+                    row["base_date"]
+                    for row in latest_results
+                )
+                if latest_results
+                else None
+            )
+        ),
+        "publication_status": "provisional",
+        "sector_count": len(SECTORS),
+        "processed_count": len(latest_results),
+        "failure_count": len(failures),
+        "results": latest_results,
+        "failures": failures,
+    }
+
+    provisional_path = (
+        OUTPUT_DIR
+        / "sector_indices_provisional_latest.json"
+    )
+
+    with open(
+        provisional_path,
+        "w",
+        encoding="utf-8",
+    ) as f:
+        json.dump(
+            provisional_sector_data,
+            f,
+            ensure_ascii=False,
+            indent=2,
+            allow_nan=False,
+        )
+
+    print(
+        "[SECTOR PROVISIONAL SAVED]",
+        provisional_path,
+        flush=True,
+    )
+
+    
     dates = {
         item["base_date"]
         for item in latest_results
