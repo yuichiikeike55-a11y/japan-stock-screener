@@ -369,6 +369,7 @@ def validate_diagnostic(data, expected):
         flush=True,
     )
 
+
 def validate_provisional(data, expected):
     rows = check_common(data, expected)
 
@@ -381,8 +382,25 @@ def validate_provisional(data, expected):
     if data.get("official_publication_allowed") is not False:
         fail("official publication must be prohibited")
 
-    if data.get("max_score") != 85:
-        fail("provisional max_score must be 85")
+    max_score = data.get("max_score")
+
+    if max_score not in (60, 75, 85):
+        fail("invalid provisional max_score")
+
+    expected_missing = {
+        75: {"sector"},
+        85: {"market"},
+        60: {"sector", "market"},
+    }[max_score]
+
+    if set(data.get("missing_components", [])) != expected_missing:
+        fail("top-level missing_components mismatch")
+
+    if data.get("coverage") != max_score / 100:
+        fail("top-level coverage mismatch")
+
+    if data.get("coverage_pct") != max_score:
+        fail("top-level coverage_pct mismatch")
 
     for row in rows:
         code = str(row["code"])
@@ -394,47 +412,84 @@ def validate_provisional(data, expected):
         if final.get("evaluation_status") != "provisional":
             fail(f"{code}: not provisional")
 
-        if final.get("market_excluded") is not True:
-            fail(f"{code}: market exclusion missing")
+        if final.get("publication_status") != "provisional":
+            fail(f"{code}: publication status mismatch")
 
-        if final.get("max_score") != 85:
-            fail(f"{code}: max_score must be 85")
+        if final.get("max_score") != max_score:
+            fail(f"{code}: max_score mismatch")
+
+        if set(final.get("missing_components", [])) != expected_missing:
+            fail(f"{code}: missing_components mismatch")
+
+        if final.get("coverage") != max_score / 100:
+            fail(f"{code}: coverage mismatch")
+
+        if final.get("coverage_pct") != max_score:
+            fail(f"{code}: coverage_pct mismatch")
 
         breakdown = final.get("score_breakdown")
 
         if not isinstance(breakdown, dict):
-            fail(f"{code}: breakdown missing")
+            fail(f"{code}: score_breakdown missing")
 
-        if breakdown.get("market") is not None:
-            fail(f"{code}: market must be null")
+        missing_reasons = final.get("missing_reasons")
 
-        market = row.get("market_evaluation")
+        if not isinstance(missing_reasons, dict):
+            fail(f"{code}: missing_reasons invalid")
 
-        if not isinstance(market, dict):
-            fail(f"{code}: market evaluation missing")
+        if set(missing_reasons) != expected_missing:
+            fail(f"{code}: missing_reasons mismatch")
 
-        if market.get("evaluation_status") == "ok":
-            fail(f"{code}: usable market cannot be excluded")
+        if (
+            final.get("sector_excluded")
+            is not ("sector" in expected_missing)
+        ):
+            fail(f"{code}: sector exclusion mismatch")
+
+        if (
+            final.get("market_excluded")
+            is not ("market" in expected_missing)
+        ):
+            fail(f"{code}: market exclusion mismatch")
 
         total = 0.0
 
-        for key in (
-            "strategy_fit",
-            "sector",
-            "technical",
-            "volume_supply",
-        ):
-            section_name, score_name = SECTIONS[key]
+        for key, (section_name, score_name) in SECTIONS.items():
             section = row.get(section_name)
 
             if not isinstance(section, dict):
                 fail(f"{code}: {section_name} missing")
 
+            recorded = breakdown.get(key)
+
+            if key in expected_missing:
+                if recorded is not None:
+                    fail(f"{code}: {key} must be null")
+
+                if section.get("evaluation_status") == "ok":
+                    fail(f"{code}: usable {key} excluded")
+
+                if section.get(score_name) is not None:
+                    fail(f"{code}: excluded score not null")
+
+                if not missing_reasons.get(key):
+                    fail(f"{code}: missing reason absent")
+
+                if key == "sector":
+                    if section.get(
+                        "sector_data_global_unavailable"
+                    ) is not True:
+                        fail(
+                            f"{code}: sector exclusion "
+                            "not globally justified"
+                        )
+
+                continue
+
             if section.get("evaluation_status") != "ok":
                 fail(f"{code}: {section_name} not ok")
 
             value = section.get(score_name)
-            recorded = breakdown.get(key)
 
             if not number(value, 0, LIMITS[key]):
                 fail(f"{code}: invalid {score_name}")
@@ -447,16 +502,22 @@ def validate_provisional(data, expected):
 
             total += value
 
-        sector = row["sector_evaluation"]
+        if "sector" not in expected_missing:
+            sector = row["sector_evaluation"]
 
-        check_date(
-            sector.get("sector_base_date"),
-            expected,
-            f"{code} sector",
-        )
+            sector_date = sector.get(
+                "sector_base_date",
+                sector.get("base_date"),
+            )
 
-        if sector.get("sector_count") != 18:
-            fail(f"{code}: sector count != 18")
+            check_date(
+                sector_date,
+                expected,
+                f"{code} sector",
+            )
+
+            if sector.get("sector_count") != 18:
+                fail(f"{code}: sector count != 18")
 
         hits = row.get("hit_count")
 
@@ -475,41 +536,56 @@ def validate_provisional(data, expected):
         ):
             fail(f"{code}: invalid bonus")
 
+        base_score = final.get("base_score")
+
+        if not number(base_score, 0, max_score):
+            fail(f"{code}: invalid base_score")
+
+        if abs(base_score - round(total, 1)) > 0.11:
+            fail(f"{code}: base_score mismatch")
+
         expected_total = round(
-            min(85, total + bonus), 1
+            min(max_score, total + bonus),
+            1,
         )
 
         actual_total = final.get("final_score")
 
-        if not number(actual_total, 0, 85):
+        if not number(actual_total, 0, max_score):
             fail(f"{code}: invalid final_score")
 
         if abs(actual_total - expected_total) > 0.11:
             fail(f"{code}: total mismatch")
 
         expected_normalized = round(
-            actual_total / 85 * 100, 1
+            actual_total / max_score * 100,
+            1,
         )
 
         normalized = final.get("normalized_score")
 
         if not number(normalized, 0, 100):
-            fail(f"{code}: normalized_score invalid")
+            fail(f"{code}: invalid normalized_score")
 
         if abs(normalized - expected_normalized) > 0.11:
-            fail(f"{code}: normalized score mismatch")
+            fail(f"{code}: normalized mismatch")
 
         expected_rank = rank_from_score(normalized)
+
+        if final.get("uncapped_rank") != expected_rank:
+            fail(f"{code}: uncapped_rank mismatch")
 
         safety = final.get("safety")
 
         if not isinstance(safety, dict):
             fail(f"{code}: safety missing")
 
-        metrics = row.get("metrics") or {}
+        metrics = row.get("metrics")
 
         if not isinstance(metrics, dict):
-            fail(f"{code}: metrics invalid")
+            fail(f"{code}: metrics missing")
+
+        sector = row.get("sector_evaluation", {})
 
         if (
             safety.get("data_quality_warning") is True
@@ -522,18 +598,16 @@ def validate_provisional(data, expected):
             expected_rank = cap_rank(expected_rank, "C")
 
         if final.get("final_rank") != expected_rank:
-            fail(
-                f"{code}: rank mismatch "
-                f"{final.get('final_rank')} != {expected_rank}"
-            )
+            fail(f"{code}: final_rank mismatch")
 
     print(
         "PROVISIONAL VALIDATION PASSED:",
         f"base_date={expected}",
         f"stocks={len(rows)}",
-        "max_score=85",
+        f"max_score={max_score}",
         flush=True,
     )
+
 def main():
     mode = os.getenv(
         "VALIDATION_MODE", "official"
