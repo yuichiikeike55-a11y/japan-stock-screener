@@ -9,7 +9,11 @@ on:
         required: false
         type: string
   schedule:
+    # JST 07:00（月〜金）
     - cron: "0 22 * * 0-4"
+
+    # JST 18:30（月〜金）
+    - cron: "30 9 * * 1-5"
 permissions:
   contents: write
 
