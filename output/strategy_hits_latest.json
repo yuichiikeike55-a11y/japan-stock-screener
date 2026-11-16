@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T03:40:23.306576+00:00",
+  "generated_at": "2026-11-16T01:50:43.708736+00:00",
   "base_date": "2026-11-13",
   "strategy_count": 4,
   "unique_stock_count": 11,
@@ -219,7 +219,7 @@
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.48096519116328507,
+            "change_pct": -0.3994456672373081,
             "as_of": "2026-11-14T07:00:00+09:00",
             "evaluation_base_date": "2026-11-13",
             "contract_month_verified": true
@@ -452,7 +452,7 @@
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.48096519116328507,
+            "change_pct": -0.3994456672373081,
             "as_of": "2026-11-14T07:00:00+09:00",
             "evaluation_base_date": "2026-11-13",
             "contract_month_verified": true
@@ -687,7 +687,7 @@
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.48096519116328507,
+            "change_pct": -0.3994456672373081,
             "as_of": "2026-11-14T07:00:00+09:00",
             "evaluation_base_date": "2026-11-13",
             "contract_month_verified": true
@@ -920,7 +920,7 @@
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.48096519116328507,
+            "change_pct": -0.3994456672373081,
             "as_of": "2026-11-14T07:00:00+09:00",
             "evaluation_base_date": "2026-11-13",
             "contract_month_verified": true
@@ -1153,7 +1153,7 @@
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.48096519116328507,
+            "change_pct": -0.3994456672373081,
             "as_of": "2026-11-14T07:00:00+09:00",
             "evaluation_base_date": "2026-11-13",
             "contract_month_verified": true
@@ -1388,7 +1388,7 @@
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.48096519116328507,
+            "change_pct": -0.3994456672373081,
             "as_of": "2026-11-14T07:00:00+09:00",
             "evaluation_base_date": "2026-11-13",
             "contract_month_verified": true
@@ -1627,7 +1627,7 @@
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.48096519116328507,
+            "change_pct": -0.3994456672373081,
             "as_of": "2026-11-14T07:00:00+09:00",
             "evaluation_base_date": "2026-11-13",
             "contract_month_verified": true
@@ -1862,7 +1862,7 @@
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.48096519116328507,
+            "change_pct": -0.3994456672373081,
             "as_of": "2026-11-14T07:00:00+09:00",
             "evaluation_base_date": "2026-11-13",
             "contract_month_verified": true
@@ -2095,7 +2095,7 @@
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.48096519116328507,
+            "change_pct": -0.3994456672373081,
             "as_of": "2026-11-14T07:00:00+09:00",
             "evaluation_base_date": "2026-11-13",
             "contract_month_verified": true
@@ -2328,7 +2328,7 @@
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.48096519116328507,
+            "change_pct": -0.3994456672373081,
             "as_of": "2026-11-14T07:00:00+09:00",
             "evaluation_base_date": "2026-11-13",
             "contract_month_verified": true
@@ -2559,7 +2559,7 @@
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.48096519116328507,
+            "change_pct": -0.3994456672373081,
             "as_of": "2026-11-14T07:00:00+09:00",
             "evaluation_base_date": "2026-11-13",
             "contract_month_verified": true
