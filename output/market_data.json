@@ -1,16 +1,16 @@
 {
   "base_date": "2026-11-13",
-  "generated_at": "2026-11-14T12:38:51.545722+09:00",
+  "generated_at": "2026-11-16T10:48:43.574486+09:00",
   "evaluation_status": "ok",
   "official_publication_allowed": true,
   "results": [
     {
       "symbol": "NKD=F",
       "source": "yfinance",
-      "value": 61040.0,
+      "value": 61090.0,
       "previous_close": 61335.0,
-      "change": -295.0,
-      "change_pct": -0.48096519116328507,
+      "change": -245.0,
+      "change_pct": -0.3994456672373081,
       "as_of": "2026-11-14T07:00:00+09:00",
       "bar_start_jst": "2026-11-14T06:00:00+09:00",
       "bar_completed_jst": "2026-11-14T07:00:00+09:00",
