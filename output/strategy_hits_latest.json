@@ -1,347 +1,56 @@
 {
-  "generated_at": "2026-11-16T01:50:43.708736+00:00",
-  "base_date": "2026-11-13",
+  "generated_at": "2026-11-18T03:37:22.591985+00:00",
+  "base_date": "2026-11-17",
   "strategy_count": 4,
-  "unique_stock_count": 11,
+  "unique_stock_count": 8,
   "publication_status": "official",
   "evaluation_status": "official",
   "official_publication_allowed": true,
   "results": [
     {
-      "code": "9843",
-      "name": "ニトリホールディングス",
-      "base_date": "2026-11-13",
+      "code": "3064",
+      "name": "ＭｏｎｏｔａＲＯ",
+      "base_date": "2026-11-17",
       "metrics": {
-        "code": "9843",
-        "name": "ニトリホールディングス",
+        "code": "3064",
+        "name": "ＭｏｎｏｔａＲＯ",
         "market": "プライム（内国株式）",
         "sector17": "小売",
-        "base_date": "2026-11-13",
-        "history_days": 402,
+        "base_date": "2026-11-17",
+        "history_days": 400,
         "high52_available": true,
-        "open": 3479.0,
-        "high": 3489.0,
-        "low": 3319.0,
-        "close": 3365.0,
-        "previous_open": 3418.0,
-        "previous_high": 3475.0,
-        "previous_low": 3391.0,
-        "previous_close": 3426.0,
-        "ma5": 3408.2,
-        "ma25": 3330.68,
-        "ma75": 3096.78,
-        "ma25_previous": 3321.08,
-        "ma25_slope": 9.599999999999909,
+        "open": 2460.0,
+        "high": 2462.0,
+        "low": 2398.5,
+        "close": 2421.0,
+        "previous_open": 2432.5,
+        "previous_high": 2454.0,
+        "previous_low": 2406.0,
+        "previous_close": 2421.0,
+        "ma5": 2417.6,
+        "ma25": 2313.4,
+        "ma75": 2066.56,
+        "ma25_previous": 2306.56,
+        "ma25_slope": 6.8400000000001455,
         "ma25_direction": "up",
-        "rci9": -5.000000000000004,
-        "rci27": 83.04334554334554,
-        "rsi14": 50.33407572383074,
-        "high52": 3546.0,
-        "high20": 3546.0,
-        "low20": 3221.0,
-        "ma5_gap_pct": -1.2675312481661871,
-        "ma25_gap_pct": 1.0304202144907348,
-        "high52_gap_pct": -5.104342921601801,
-        "high20_gap_pct": -5.104342921601801,
-        "touched_ma25": true,
-        "recovered_ma25": true,
-        "avg_turnover_5d": 8201360140.0,
-        "volume": 4188200.0,
-        "previous_volume": 1879700.0,
-        "volume_ratio_prev": 2.2281215087513964,
-        "volume_20d_ago": 3285900.0,
-        "volume_ratio_20d": 1.2745975227487143
-      },
-      "strategy_hits": [
-        {
-          "strategy": "reacceleration_pullback",
-          "strategy_score_raw": 100,
-          "base_grade_raw": "S",
-          "condition_flags": {
-            "touched_ma25": true,
-            "recovered_ma25": true,
-            "ma25_up": true,
-            "near_ma25": true,
-            "above_ma25": true,
-            "above_ma75": true,
-            "volume_ok": true,
-            "momentum_ok": true,
-            "overheated": false
-          },
-          "grade_reasons": [
-            "25MA回復",
-            "25MA上向き",
-            "25MA近辺 1.03%",
-            "終値25MA以上",
-            "終値75MA以上",
-            "前日比出来高 2.23倍",
-            "RSI 50.3"
-          ],
-          "strategy_fit_evaluation": {
-            "strategy": "reacceleration_pullback",
-            "strategy_fit_score": 35.0,
-            "strategy_score_raw": 100.0,
-            "base_grade_raw": "S",
-            "condition_flags": {
-              "touched_ma25": true,
-              "recovered_ma25": true,
-              "ma25_up": true,
-              "near_ma25": true,
-              "above_ma25": true,
-              "above_ma75": true,
-              "volume_ok": true,
-              "momentum_ok": true,
-              "overheated": false
-            },
-            "grade_reasons": [
-              "25MA回復",
-              "25MA上向き",
-              "25MA近辺 1.03%",
-              "終値25MA以上",
-              "終値75MA以上",
-              "前日比出来高 2.23倍",
-              "RSI 50.3"
-            ],
-            "evaluation_status": "ok",
-            "stop_reason": null
-          }
-        },
-        {
-          "strategy": "initial_breakout_pullback",
-          "strategy_score_raw": 80,
-          "base_grade_raw": "A",
-          "condition_flags": {
-            "ma25_up": true,
-            "above_ma25": true,
-            "ma25_above_ma75": true,
-            "near_high20": false,
-            "near_high52": true,
-            "volume_ok": true,
-            "overheated": false
-          },
-          "grade_reasons": [
-            "52週高値接近 -5.10%",
-            "25MA上向き",
-            "終値25MA以上",
-            "25MA > 75MA",
-            "前日比出来高 2.23倍"
-          ],
-          "strategy_fit_evaluation": {
-            "strategy": "initial_breakout_pullback",
-            "strategy_fit_score": 28.0,
-            "strategy_score_raw": 80.0,
-            "base_grade_raw": "A",
-            "condition_flags": {
-              "ma25_up": true,
-              "above_ma25": true,
-              "ma25_above_ma75": true,
-              "near_high20": false,
-              "near_high52": true,
-              "volume_ok": true,
-              "overheated": false
-            },
-            "grade_reasons": [
-              "52週高値接近 -5.10%",
-              "25MA上向き",
-              "終値25MA以上",
-              "25MA > 75MA",
-              "前日比出来高 2.23倍"
-            ],
-            "evaluation_status": "ok",
-            "stop_reason": null
-          }
-        }
-      ],
-      "hit_count": 2,
-      "hit_strategies": [
-        "reacceleration_pullback",
-        "initial_breakout_pullback"
-      ],
-      "primary_strategy_raw": "reacceleration_pullback",
-      "secondary_strategies_raw": [
-        "initial_breakout_pullback"
-      ],
-      "primary_strategy": "reacceleration_pullback",
-      "secondary_strategies": [
-        "initial_breakout_pullback"
-      ],
-      "strategy_fit_evaluation": {
-        "evaluation_status": "ok",
-        "stop_reason": null,
-        "strategy_fit_score": 35.0,
-        "primary_strategy": "reacceleration_pullback",
-        "secondary_strategies": [
-          "initial_breakout_pullback"
-        ],
-        "evaluated_strategy_count": 2,
-        "hit_count": 2
-      },
-      "technical_evaluation": {
-        "technical_score": 13,
-        "technical_score_breakdown": {
-          "medium_term_trend": 6,
-          "momentum": 4,
-          "high_position": 3
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "market_evaluation": {
-        "market_score": 7,
-        "market_condition": "neutral",
-        "market_internal_score": 5,
-        "market_internal": {
-          "above_ma25_ratio": 50.49,
-          "ma25_up_ratio": 48.46,
-          "advancing_ratio": 56.59,
-          "sample_count": 1525,
-          "valid_counts": {
-            "above_ma25": 1525,
-            "ma25_direction": 1525,
-            "advancing": 1525
-          },
-          "coverage": {
-            "above_ma25": 1.0,
-            "ma25_direction": 1.0,
-            "advancing": 1.0
-          },
-          "base_date": "2026-11-13"
-        },
-        "market_score_breakdown": {
-          "above_ma25": 2,
-          "ma25_up": 1,
-          "advancing": 2,
-          "internal": 5,
-          "futures": 2,
-          "cme_futures": 2
-        },
-        "futures": {
-          "cme": {
-            "usable": true,
-            "status": "ok",
-            "change_pct": -0.3994456672373081,
-            "as_of": "2026-11-14T07:00:00+09:00",
-            "evaluation_base_date": "2026-11-13",
-            "contract_month_verified": true
-          }
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "volume_supply_evaluation": {
-        "volume_supply_score": 8,
-        "supply_condition": "strong",
-        "volume_supply_breakdown": {
-          "volume_ratio_20d": 2,
-          "volume_ratio_prev": 3,
-          "avg_turnover_5d": 3
-        },
-        "volume_supply_metrics": {
-          "volume_ratio_20d": 1.275,
-          "volume_ratio_prev": 2.228,
-          "avg_turnover_5d": 8201360140.0
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "sector_evaluation": {
-        "sector_score": 20,
-        "sector_score_breakdown": {
-          "medium_term_trend": 8,
-          "momentum": 6,
-          "high_position": 4,
-          "volume_flow": 0,
-          "relative_rank": 2
-        },
-        "relative_rank": 6,
-        "sector_count": 18,
-        "sector": "小売",
-        "sector_base_date": "2026-11-13",
-        "data_quality_status": "ok",
-        "data_quality_flags": [],
-        "evaluation_status": "ok",
-        "sector17": "小売",
-        "normalized_sector": "小売",
-        "sector_rank_score": 8.515779419667242,
-        "semiconductor_override": false
-      },
-      "final_evaluation": {
-        "final_score": 84.0,
-        "max_score": 100,
-        "normalized_score": 84.0,
-        "final_rank": "A",
-        "uncapped_rank": "A",
-        "base_score": 83.0,
-        "multi_strategy_bonus": 1,
-        "score_breakdown": {
-          "strategy_fit": 35.0,
-          "sector": 20.0,
-          "technical": 13.0,
-          "market": 7.0,
-          "volume_supply": 8.0
-        },
-        "safety": {
-          "data_quality_warning": false,
-          "strategy_negated": false,
-          "flags": []
-        },
-        "evaluation_status": "ok",
-        "publication_status": "official",
-        "coverage": 1.0,
-        "coverage_pct": 100,
-        "sector_excluded": false,
-        "sector_exclusion_reason": null,
-        "market_excluded": false,
-        "market_exclusion_reason": null,
-        "missing_components": [],
-        "missing_reasons": {},
-        "stop_reason": null
-      }
-    },
-    {
-      "code": "8020",
-      "name": "兼松",
-      "base_date": "2026-11-13",
-      "metrics": {
-        "code": "8020",
-        "name": "兼松",
-        "market": "プライム（内国株式）",
-        "sector17": "商社・卸売",
-        "base_date": "2026-11-13",
-        "history_days": 402,
-        "high52_available": true,
-        "open": 2470.0,
-        "high": 2514.0,
-        "low": 2446.0,
-        "close": 2494.0,
-        "previous_open": 2441.0,
-        "previous_high": 2487.0,
-        "previous_low": 2436.0,
-        "previous_close": 2457.5,
-        "ma5": 2400.8,
-        "ma25": 2327.18,
-        "ma75": 2256.0933333333332,
-        "ma25_previous": 2318.46,
-        "ma25_slope": 8.7199999999998,
-        "ma25_direction": "up",
-        "rci9": 88.33333333333333,
-        "rci27": 28.388278388278387,
-        "rsi14": 62.821403752605974,
-        "high52": 2514.0,
-        "high20": 2514.0,
-        "low20": 2131.5,
-        "ma5_gap_pct": 3.8820393202265935,
-        "ma25_gap_pct": 7.168332488247575,
-        "high52_gap_pct": -0.7955449482895838,
-        "high20_gap_pct": -0.7955449482895838,
+        "rci9": 84.58333333333333,
+        "rci27": 46.41330891330892,
+        "rsi14": 64.84801247077164,
+        "high52": 2537.5,
+        "high20": 2462.0,
+        "low20": 2139.5,
+        "ma5_gap_pct": 0.1406353408338834,
+        "ma25_gap_pct": 4.6511627906976605,
+        "high52_gap_pct": -4.591133004926107,
+        "high20_gap_pct": -1.6653127538586499,
         "touched_ma25": false,
         "recovered_ma25": false,
-        "avg_turnover_5d": 1869461130.0,
-        "volume": 833000.0,
-        "previous_volume": 621100.0,
-        "volume_ratio_prev": 1.341168893897923,
-        "volume_20d_ago": 811500.0,
-        "volume_ratio_20d": 1.026494146642021
+        "avg_turnover_5d": 3939343170.0,
+        "volume": 2134800.0,
+        "previous_volume": 1252700.0,
+        "volume_ratio_prev": 1.7041590165243075,
+        "volume_20d_ago": 2914600.0,
+        "volume_ratio_20d": 0.7324504220133123
       },
       "strategy_hits": [
         {
@@ -358,12 +67,12 @@
             "overheated": false
           },
           "grade_reasons": [
-            "20日高値接近 -0.80%",
-            "52週高値接近 -0.80%",
+            "20日高値接近 -1.67%",
+            "52週高値接近 -4.59%",
             "25MA上向き",
             "終値25MA以上",
             "25MA > 75MA",
-            "前日比出来高 1.34倍"
+            "前日比出来高 1.70倍"
           ],
           "strategy_fit_evaluation": {
             "strategy": "initial_breakout_pullback",
@@ -380,12 +89,12 @@
               "overheated": false
             },
             "grade_reasons": [
-              "20日高値接近 -0.80%",
-              "52週高値接近 -0.80%",
+              "20日高値接近 -1.67%",
+              "52週高値接近 -4.59%",
               "25MA上向き",
               "終値25MA以上",
               "25MA > 75MA",
-              "前日比出来高 1.34倍"
+              "前日比出来高 1.70倍"
             ],
             "evaluation_status": "ok",
             "stop_reason": null
@@ -412,9 +121,9 @@
       "technical_evaluation": {
         "technical_score": 14,
         "technical_score_breakdown": {
-          "medium_term_trend": 5,
+          "medium_term_trend": 6,
           "momentum": 5,
-          "high_position": 4
+          "high_position": 3
         },
         "evaluation_status": "ok",
         "stop_reason": null
@@ -422,11 +131,11 @@
       "market_evaluation": {
         "market_score": 7,
         "market_condition": "neutral",
-        "market_internal_score": 5,
+        "market_internal_score": 2,
         "market_internal": {
-          "above_ma25_ratio": 50.49,
-          "ma25_up_ratio": 48.46,
-          "advancing_ratio": 56.59,
+          "above_ma25_ratio": 42.69,
+          "ma25_up_ratio": 43.87,
+          "advancing_ratio": 16.07,
           "sample_count": 1525,
           "valid_counts": {
             "above_ma25": 1525,
@@ -438,23 +147,23 @@
             "ma25_direction": 1.0,
             "advancing": 1.0
           },
-          "base_date": "2026-11-13"
+          "base_date": "2026-11-17"
         },
         "market_score_breakdown": {
-          "above_ma25": 2,
+          "above_ma25": 1,
           "ma25_up": 1,
-          "advancing": 2,
-          "internal": 5,
-          "futures": 2,
-          "cme_futures": 2
+          "advancing": 0,
+          "internal": 2,
+          "futures": 5,
+          "cme_futures": 5
         },
         "futures": {
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.3994456672373081,
-            "as_of": "2026-11-14T07:00:00+09:00",
-            "evaluation_base_date": "2026-11-13",
+            "change_pct": 0.7288135593220391,
+            "as_of": "2026-11-18T07:00:00+09:00",
+            "evaluation_base_date": "2026-11-17",
             "contract_month_verified": true
           }
         },
@@ -462,65 +171,61 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": 4,
-        "supply_condition": "neutral",
+        "volume_supply_score": 5,
+        "supply_condition": "positive",
         "volume_supply_breakdown": {
-          "volume_ratio_20d": 1,
-          "volume_ratio_prev": 2,
-          "avg_turnover_5d": 1
+          "volume_ratio_20d": 0,
+          "volume_ratio_prev": 3,
+          "avg_turnover_5d": 2
         },
         "volume_supply_metrics": {
-          "volume_ratio_20d": 1.026,
-          "volume_ratio_prev": 1.341,
-          "avg_turnover_5d": 1869461130.0
+          "volume_ratio_20d": 0.732,
+          "volume_ratio_prev": 1.704,
+          "avg_turnover_5d": 3939343170.0
         },
         "evaluation_status": "ok",
         "stop_reason": null
       },
       "sector_evaluation": {
-        "sector_score": 18,
+        "sector_score": 23,
         "sector_score_breakdown": {
           "medium_term_trend": 8,
           "momentum": 6,
-          "high_position": 3,
-          "volume_flow": 0,
-          "relative_rank": 1
+          "high_position": 4,
+          "volume_flow": 2,
+          "relative_rank": 3
         },
-        "relative_rank": 7,
+        "relative_rank": 1,
         "sector_count": 18,
-        "sector": "商社・卸売",
-        "sector_base_date": "2026-11-13",
-        "data_quality_status": "warning",
-        "data_quality_flags": [
-          "invalid_low52_extreme_outlier"
-        ],
+        "sector": "小売",
+        "sector_base_date": "2026-11-17",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
         "evaluation_status": "ok",
-        "sector17": "商社・卸売",
-        "normalized_sector": "商社・卸売",
-        "sector_rank_score": 7.696274368857146,
+        "sector17": "小売",
+        "normalized_sector": "小売",
+        "sector_rank_score": 10.247911163271414,
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 78.0,
+        "final_score": 84.0,
         "max_score": 100,
-        "normalized_score": 78.0,
-        "final_rank": "B",
-        "uncapped_rank": "B",
-        "base_score": 78.0,
+        "normalized_score": 84.0,
+        "final_rank": "A",
+        "uncapped_rank": "A",
+        "base_score": 84.0,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
           "strategy_fit": 35.0,
-          "sector": 18.0,
+          "sector": 23.0,
           "technical": 14.0,
           "market": 7.0,
-          "volume_supply": 4.0
+          "volume_supply": 5.0
         },
         "safety": {
-          "data_quality_warning": true,
+          "data_quality_warning": false,
           "strategy_negated": false,
-          "flags": [
-            "data_quality_warning_rank_cap_B"
-          ]
+          "flags": []
         },
         "evaluation_status": "ok",
         "publication_status": "official",
@@ -536,91 +241,332 @@
       }
     },
     {
-      "code": "8795",
-      "name": "Ｔ＆Ｄホールディングス",
-      "base_date": "2026-11-13",
+      "code": "4324",
+      "name": "電通グループ",
+      "base_date": "2026-11-17",
       "metrics": {
-        "code": "8795",
-        "name": "Ｔ＆Ｄホールディングス",
+        "code": "4324",
+        "name": "電通グループ",
         "market": "プライム（内国株式）",
-        "sector17": "金融（除く銀行）",
-        "base_date": "2026-11-13",
-        "history_days": 402,
+        "sector17": "情報通信・サービスその他",
+        "base_date": "2026-11-17",
+        "history_days": 400,
         "high52_available": true,
-        "open": 5039.0,
-        "high": 5059.0,
-        "low": 4917.0,
-        "close": 4934.0,
-        "previous_open": 4989.0,
-        "previous_high": 5018.0,
-        "previous_low": 4971.0,
-        "previous_close": 5010.0,
-        "ma5": 4916.2,
-        "ma25": 4828.6,
-        "ma75": 4882.28,
-        "ma25_previous": 4825.64,
-        "ma25_slope": 2.9600000000000364,
+        "open": 3711.0,
+        "high": 3885.0,
+        "low": 3711.0,
+        "close": 3862.0,
+        "previous_open": 3986.0,
+        "previous_high": 4045.0,
+        "previous_low": 3959.0,
+        "previous_close": 3986.0,
+        "ma5": 3909.6,
+        "ma25": 3824.04,
+        "ma75": 3681.3333333333335,
+        "ma25_previous": 3813.4,
+        "ma25_slope": 10.639999999999873,
         "ma25_direction": "up",
-        "rci9": 40.0,
-        "rci27": 40.552503052503056,
-        "rsi14": 54.514824797843666,
-        "high52": 5176.0,
-        "high20": 5059.0,
-        "low20": 4578.0,
-        "ma5_gap_pct": 0.3620682641064299,
-        "ma25_gap_pct": 2.1828273205483972,
-        "high52_gap_pct": -4.6754250386398795,
-        "high20_gap_pct": -2.4708440403241716,
+        "rci9": -22.916666666666675,
+        "rci27": 79.45665445665446,
+        "rsi14": 54.44702242846095,
+        "high52": 4110.0,
+        "high20": 4110.0,
+        "low20": 3580.0,
+        "ma5_gap_pct": -1.2175158583998313,
+        "ma25_gap_pct": 0.9926674407171543,
+        "high52_gap_pct": -6.034063260340627,
+        "high20_gap_pct": -6.034063260340627,
+        "touched_ma25": true,
+        "recovered_ma25": true,
+        "avg_turnover_5d": 6913346960.0,
+        "volume": 3381000.0,
+        "previous_volume": 1602200.0,
+        "volume_ratio_prev": 2.1102234427661966,
+        "volume_20d_ago": 1031700.0,
+        "volume_ratio_20d": 3.2771154405350393
+      },
+      "strategy_hits": [
+        {
+          "strategy": "reacceleration_pullback",
+          "strategy_score_raw": 100,
+          "base_grade_raw": "S",
+          "condition_flags": {
+            "touched_ma25": true,
+            "recovered_ma25": true,
+            "ma25_up": true,
+            "near_ma25": true,
+            "above_ma25": true,
+            "above_ma75": true,
+            "volume_ok": true,
+            "momentum_ok": true,
+            "overheated": false
+          },
+          "grade_reasons": [
+            "25MA回復",
+            "25MA上向き",
+            "25MA近辺 0.99%",
+            "終値25MA以上",
+            "終値75MA以上",
+            "前日比出来高 2.11倍",
+            "RSI 54.4"
+          ],
+          "strategy_fit_evaluation": {
+            "strategy": "reacceleration_pullback",
+            "strategy_fit_score": 35.0,
+            "strategy_score_raw": 100.0,
+            "base_grade_raw": "S",
+            "condition_flags": {
+              "touched_ma25": true,
+              "recovered_ma25": true,
+              "ma25_up": true,
+              "near_ma25": true,
+              "above_ma25": true,
+              "above_ma75": true,
+              "volume_ok": true,
+              "momentum_ok": true,
+              "overheated": false
+            },
+            "grade_reasons": [
+              "25MA回復",
+              "25MA上向き",
+              "25MA近辺 0.99%",
+              "終値25MA以上",
+              "終値75MA以上",
+              "前日比出来高 2.11倍",
+              "RSI 54.4"
+            ],
+            "evaluation_status": "ok",
+            "stop_reason": null
+          }
+        }
+      ],
+      "hit_count": 1,
+      "hit_strategies": [
+        "reacceleration_pullback"
+      ],
+      "primary_strategy_raw": "reacceleration_pullback",
+      "secondary_strategies_raw": [],
+      "primary_strategy": "reacceleration_pullback",
+      "secondary_strategies": [],
+      "strategy_fit_evaluation": {
+        "evaluation_status": "ok",
+        "stop_reason": null,
+        "strategy_fit_score": 35.0,
+        "primary_strategy": "reacceleration_pullback",
+        "secondary_strategies": [],
+        "evaluated_strategy_count": 1,
+        "hit_count": 1
+      },
+      "technical_evaluation": {
+        "technical_score": 13,
+        "technical_score_breakdown": {
+          "medium_term_trend": 6,
+          "momentum": 4,
+          "high_position": 3
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "market_evaluation": {
+        "market_score": 7,
+        "market_condition": "neutral",
+        "market_internal_score": 2,
+        "market_internal": {
+          "above_ma25_ratio": 42.69,
+          "ma25_up_ratio": 43.87,
+          "advancing_ratio": 16.07,
+          "sample_count": 1525,
+          "valid_counts": {
+            "above_ma25": 1525,
+            "ma25_direction": 1525,
+            "advancing": 1525
+          },
+          "coverage": {
+            "above_ma25": 1.0,
+            "ma25_direction": 1.0,
+            "advancing": 1.0
+          },
+          "base_date": "2026-11-17"
+        },
+        "market_score_breakdown": {
+          "above_ma25": 1,
+          "ma25_up": 1,
+          "advancing": 0,
+          "internal": 2,
+          "futures": 5,
+          "cme_futures": 5
+        },
+        "futures": {
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 0.7288135593220391,
+            "as_of": "2026-11-18T07:00:00+09:00",
+            "evaluation_base_date": "2026-11-17",
+            "contract_month_verified": true
+          }
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "volume_supply_evaluation": {
+        "volume_supply_score": 10,
+        "supply_condition": "very_strong",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 4,
+          "volume_ratio_prev": 3,
+          "avg_turnover_5d": 3
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 3.277,
+          "volume_ratio_prev": 2.11,
+          "avg_turnover_5d": 6913346960.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "sector_evaluation": {
+        "sector_score": 6,
+        "sector_score_breakdown": {
+          "medium_term_trend": 2,
+          "momentum": 1,
+          "high_position": 3,
+          "volume_flow": 0,
+          "relative_rank": 0
+        },
+        "relative_rank": 10,
+        "sector_count": 18,
+        "sector": "情報通信・サービスその他",
+        "sector_base_date": "2026-11-17",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "情報通信・サービスその他",
+        "normalized_sector": "情報通信・サービスその他",
+        "sector_rank_score": -2.88479298629842,
+        "semiconductor_override": false
+      },
+      "final_evaluation": {
+        "final_score": 71.0,
+        "max_score": 100,
+        "normalized_score": 71.0,
+        "final_rank": "B",
+        "uncapped_rank": "B",
+        "base_score": 71.0,
+        "multi_strategy_bonus": 0,
+        "score_breakdown": {
+          "strategy_fit": 35.0,
+          "sector": 6.0,
+          "technical": 13.0,
+          "market": 7.0,
+          "volume_supply": 10.0
+        },
+        "safety": {
+          "data_quality_warning": false,
+          "strategy_negated": false,
+          "flags": []
+        },
+        "evaluation_status": "ok",
+        "publication_status": "official",
+        "coverage": 1.0,
+        "coverage_pct": 100,
+        "sector_excluded": false,
+        "sector_exclusion_reason": null,
+        "market_excluded": false,
+        "market_exclusion_reason": null,
+        "missing_components": [],
+        "missing_reasons": {},
+        "stop_reason": null
+      }
+    },
+    {
+      "code": "6460",
+      "name": "セガサミーホールディングス",
+      "base_date": "2026-11-17",
+      "metrics": {
+        "code": "6460",
+        "name": "セガサミーホールディングス",
+        "market": "プライム（内国株式）",
+        "sector17": "機械",
+        "base_date": "2026-11-17",
+        "history_days": 400,
+        "high52_available": true,
+        "open": 3434.0,
+        "high": 3484.0,
+        "low": 3404.0,
+        "close": 3441.0,
+        "previous_open": 3468.0,
+        "previous_high": 3474.0,
+        "previous_low": 3368.0,
+        "previous_close": 3409.0,
+        "ma5": 3398.4,
+        "ma25": 3358.48,
+        "ma75": 3144.9133333333334,
+        "ma25_previous": 3350.4,
+        "ma25_slope": 8.079999999999927,
+        "ma25_direction": "up",
+        "rci9": 18.333333333333336,
+        "rci27": 48.840048840048844,
+        "rsi14": 56.71476137624861,
+        "high52": 3510.0,
+        "high20": 3510.0,
+        "low20": 3161.0,
+        "ma5_gap_pct": 1.2535310734463234,
+        "ma25_gap_pct": 2.457063909863977,
+        "high52_gap_pct": -1.96581196581197,
+        "high20_gap_pct": -1.96581196581197,
         "touched_ma25": false,
         "recovered_ma25": false,
-        "avg_turnover_5d": 6936261640.0,
-        "volume": 1885100.0,
-        "previous_volume": 1175900.0,
-        "volume_ratio_prev": 1.6031125095671401,
-        "volume_20d_ago": 1703200.0,
-        "volume_ratio_20d": 1.1067989666510099
+        "avg_turnover_5d": 2752221180.0,
+        "volume": 1301800.0,
+        "previous_volume": 879100.0,
+        "volume_ratio_prev": 1.480832669775907,
+        "volume_20d_ago": 720100.0,
+        "volume_ratio_20d": 1.8078044716011665
       },
       "strategy_hits": [
         {
           "strategy": "initial_breakout_pullback",
-          "strategy_score_raw": 85,
-          "base_grade_raw": "A",
+          "strategy_score_raw": 100,
+          "base_grade_raw": "S",
           "condition_flags": {
             "ma25_up": true,
             "above_ma25": true,
-            "ma25_above_ma75": false,
+            "ma25_above_ma75": true,
             "near_high20": true,
             "near_high52": true,
             "volume_ok": true,
             "overheated": false
           },
           "grade_reasons": [
-            "20日高値接近 -2.47%",
-            "52週高値接近 -4.68%",
+            "20日高値接近 -1.97%",
+            "52週高値接近 -1.97%",
             "25MA上向き",
             "終値25MA以上",
-            "前日比出来高 1.60倍"
+            "25MA > 75MA",
+            "前日比出来高 1.48倍"
           ],
           "strategy_fit_evaluation": {
             "strategy": "initial_breakout_pullback",
-            "strategy_fit_score": 29.8,
-            "strategy_score_raw": 85.0,
-            "base_grade_raw": "A",
+            "strategy_fit_score": 35.0,
+            "strategy_score_raw": 100.0,
+            "base_grade_raw": "S",
             "condition_flags": {
               "ma25_up": true,
               "above_ma25": true,
-              "ma25_above_ma75": false,
+              "ma25_above_ma75": true,
               "near_high20": true,
               "near_high52": true,
               "volume_ok": true,
               "overheated": false
             },
             "grade_reasons": [
-              "20日高値接近 -2.47%",
-              "52週高値接近 -4.68%",
+              "20日高値接近 -1.97%",
+              "52週高値接近 -1.97%",
               "25MA上向き",
               "終値25MA以上",
-              "前日比出来高 1.60倍"
+              "25MA > 75MA",
+              "前日比出来高 1.48倍"
             ],
             "evaluation_status": "ok",
             "stop_reason": null
@@ -638,18 +584,18 @@
       "strategy_fit_evaluation": {
         "evaluation_status": "ok",
         "stop_reason": null,
-        "strategy_fit_score": 29.8,
+        "strategy_fit_score": 35.0,
         "primary_strategy": "initial_breakout_pullback",
         "secondary_strategies": [],
         "evaluated_strategy_count": 1,
         "hit_count": 1
       },
       "technical_evaluation": {
-        "technical_score": 11,
+        "technical_score": 15,
         "technical_score_breakdown": {
-          "medium_term_trend": 4,
-          "momentum": 4,
-          "high_position": 3
+          "medium_term_trend": 6,
+          "momentum": 5,
+          "high_position": 4
         },
         "evaluation_status": "ok",
         "stop_reason": null
@@ -657,11 +603,11 @@
       "market_evaluation": {
         "market_score": 7,
         "market_condition": "neutral",
-        "market_internal_score": 5,
+        "market_internal_score": 2,
         "market_internal": {
-          "above_ma25_ratio": 50.49,
-          "ma25_up_ratio": 48.46,
-          "advancing_ratio": 56.59,
+          "above_ma25_ratio": 42.69,
+          "ma25_up_ratio": 43.87,
+          "advancing_ratio": 16.07,
           "sample_count": 1525,
           "valid_counts": {
             "above_ma25": 1525,
@@ -673,23 +619,23 @@
             "ma25_direction": 1.0,
             "advancing": 1.0
           },
-          "base_date": "2026-11-13"
+          "base_date": "2026-11-17"
         },
         "market_score_breakdown": {
-          "above_ma25": 2,
+          "above_ma25": 1,
           "ma25_up": 1,
-          "advancing": 2,
-          "internal": 5,
-          "futures": 2,
-          "cme_futures": 2
+          "advancing": 0,
+          "internal": 2,
+          "futures": 5,
+          "cme_futures": 5
         },
         "futures": {
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.3994456672373081,
-            "as_of": "2026-11-14T07:00:00+09:00",
-            "evaluation_base_date": "2026-11-13",
+            "change_pct": 0.7288135593220391,
+            "as_of": "2026-11-18T07:00:00+09:00",
+            "evaluation_base_date": "2026-11-17",
             "contract_month_verified": true
           }
         },
@@ -700,50 +646,281 @@
         "volume_supply_score": 7,
         "supply_condition": "strong",
         "volume_supply_breakdown": {
-          "volume_ratio_20d": 1,
-          "volume_ratio_prev": 3,
-          "avg_turnover_5d": 3
+          "volume_ratio_20d": 3,
+          "volume_ratio_prev": 2,
+          "avg_turnover_5d": 2
         },
         "volume_supply_metrics": {
-          "volume_ratio_20d": 1.107,
-          "volume_ratio_prev": 1.603,
-          "avg_turnover_5d": 6936261640.0
+          "volume_ratio_20d": 1.808,
+          "volume_ratio_prev": 1.481,
+          "avg_turnover_5d": 2752221180.0
         },
         "evaluation_status": "ok",
         "stop_reason": null
       },
       "sector_evaluation": {
-        "sector_score": 19,
+        "sector_score": 2,
         "sector_score_breakdown": {
-          "medium_term_trend": 8,
-          "momentum": 6,
-          "high_position": 4,
-          "volume_flow": 0,
-          "relative_rank": 1
+          "medium_term_trend": 0,
+          "momentum": 0,
+          "high_position": 0,
+          "volume_flow": 2,
+          "relative_rank": 0
         },
-        "relative_rank": 8,
+        "relative_rank": 15,
         "sector_count": 18,
-        "sector": "金融（除く銀行）",
-        "sector_base_date": "2026-11-13",
+        "sector": "機械",
+        "sector_base_date": "2026-11-17",
         "data_quality_status": "ok",
         "data_quality_flags": [],
         "evaluation_status": "ok",
-        "sector17": "金融（除く銀行）",
-        "normalized_sector": "金融（除く銀行）",
-        "sector_rank_score": 6.513285162985158,
+        "sector17": "機械",
+        "normalized_sector": "機械",
+        "sector_rank_score": -9.857786331847723,
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 73.8,
+        "final_score": 66.0,
         "max_score": 100,
-        "normalized_score": 73.8,
-        "final_rank": "B",
-        "uncapped_rank": "B",
-        "base_score": 73.8,
+        "normalized_score": 66.0,
+        "final_rank": "C",
+        "uncapped_rank": "C",
+        "base_score": 66.0,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
-          "strategy_fit": 29.8,
-          "sector": 19.0,
+          "strategy_fit": 35.0,
+          "sector": 2.0,
+          "technical": 15.0,
+          "market": 7.0,
+          "volume_supply": 7.0
+        },
+        "safety": {
+          "data_quality_warning": false,
+          "strategy_negated": false,
+          "flags": []
+        },
+        "evaluation_status": "ok",
+        "publication_status": "official",
+        "coverage": 1.0,
+        "coverage_pct": 100,
+        "sector_excluded": false,
+        "sector_exclusion_reason": null,
+        "market_excluded": false,
+        "market_exclusion_reason": null,
+        "missing_components": [],
+        "missing_reasons": {},
+        "stop_reason": null
+      }
+    },
+    {
+      "code": "2801",
+      "name": "キッコーマン",
+      "base_date": "2026-11-17",
+      "metrics": {
+        "code": "2801",
+        "name": "キッコーマン",
+        "market": "プライム（内国株式）",
+        "sector17": "食品",
+        "base_date": "2026-11-17",
+        "history_days": 400,
+        "high52_available": true,
+        "open": 1809.0,
+        "high": 1838.5,
+        "low": 1782.0,
+        "close": 1812.0,
+        "previous_open": 1755.0,
+        "previous_high": 1803.0,
+        "previous_low": 1732.5,
+        "previous_close": 1801.5,
+        "ma5": 1749.9,
+        "ma25": 1795.78,
+        "ma75": 1752.7266666666667,
+        "ma25_previous": 1793.5,
+        "ma25_slope": 2.2799999999999727,
+        "ma25_direction": "up",
+        "rci9": -18.333333333333336,
+        "rci27": -14.34676434676434,
+        "rsi14": 49.58859023587493,
+        "high52": 1954.0,
+        "high20": 1954.0,
+        "low20": 1619.5,
+        "ma5_gap_pct": 3.548774215669459,
+        "ma25_gap_pct": 0.9032286805733536,
+        "high52_gap_pct": -7.267144319344931,
+        "high20_gap_pct": -7.267144319344931,
+        "touched_ma25": true,
+        "recovered_ma25": true,
+        "avg_turnover_5d": 9443347720.0,
+        "volume": 4555900.0,
+        "previous_volume": 4233000.0,
+        "volume_ratio_prev": 1.07628159697614,
+        "volume_20d_ago": 2610900.0,
+        "volume_ratio_20d": 1.7449538473323376
+      },
+      "strategy_hits": [
+        {
+          "strategy": "25MA_pullback",
+          "strategy_score_raw": 100,
+          "base_grade_raw": "S",
+          "condition_flags": {
+            "touched_ma25": true,
+            "recovered_ma25": true,
+            "ma25_up": true,
+            "near_ma25": true,
+            "strong_near_ma25": true,
+            "volume_expansion": true,
+            "overheated": false
+          },
+          "grade_reasons": [
+            "25MAタッチ",
+            "25MA回復",
+            "25MA上向き",
+            "25MA乖離良好 0.90%",
+            "出来高増加"
+          ],
+          "strategy_fit_evaluation": {
+            "strategy": "25MA_pullback",
+            "strategy_fit_score": 35.0,
+            "strategy_score_raw": 100.0,
+            "base_grade_raw": "S",
+            "condition_flags": {
+              "touched_ma25": true,
+              "recovered_ma25": true,
+              "ma25_up": true,
+              "near_ma25": true,
+              "strong_near_ma25": true,
+              "volume_expansion": true,
+              "overheated": false
+            },
+            "grade_reasons": [
+              "25MAタッチ",
+              "25MA回復",
+              "25MA上向き",
+              "25MA乖離良好 0.90%",
+              "出来高増加"
+            ],
+            "evaluation_status": "ok",
+            "stop_reason": null
+          }
+        }
+      ],
+      "hit_count": 1,
+      "hit_strategies": [
+        "25MA_pullback"
+      ],
+      "primary_strategy_raw": "25MA_pullback",
+      "secondary_strategies_raw": [],
+      "primary_strategy": "25MA_pullback",
+      "secondary_strategies": [],
+      "strategy_fit_evaluation": {
+        "evaluation_status": "ok",
+        "stop_reason": null,
+        "strategy_fit_score": 35.0,
+        "primary_strategy": "25MA_pullback",
+        "secondary_strategies": [],
+        "evaluated_strategy_count": 1,
+        "hit_count": 1
+      },
+      "technical_evaluation": {
+        "technical_score": 11,
+        "technical_score_breakdown": {
+          "medium_term_trend": 6,
+          "momentum": 3,
+          "high_position": 2
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "market_evaluation": {
+        "market_score": 7,
+        "market_condition": "neutral",
+        "market_internal_score": 2,
+        "market_internal": {
+          "above_ma25_ratio": 42.69,
+          "ma25_up_ratio": 43.87,
+          "advancing_ratio": 16.07,
+          "sample_count": 1525,
+          "valid_counts": {
+            "above_ma25": 1525,
+            "ma25_direction": 1525,
+            "advancing": 1525
+          },
+          "coverage": {
+            "above_ma25": 1.0,
+            "ma25_direction": 1.0,
+            "advancing": 1.0
+          },
+          "base_date": "2026-11-17"
+        },
+        "market_score_breakdown": {
+          "above_ma25": 1,
+          "ma25_up": 1,
+          "advancing": 0,
+          "internal": 2,
+          "futures": 5,
+          "cme_futures": 5
+        },
+        "futures": {
+          "cme": {
+            "usable": true,
+            "status": "ok",
+            "change_pct": 0.7288135593220391,
+            "as_of": "2026-11-18T07:00:00+09:00",
+            "evaluation_base_date": "2026-11-17",
+            "contract_month_verified": true
+          }
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "volume_supply_evaluation": {
+        "volume_supply_score": 7,
+        "supply_condition": "strong",
+        "volume_supply_breakdown": {
+          "volume_ratio_20d": 3,
+          "volume_ratio_prev": 1,
+          "avg_turnover_5d": 3
+        },
+        "volume_supply_metrics": {
+          "volume_ratio_20d": 1.745,
+          "volume_ratio_prev": 1.076,
+          "avg_turnover_5d": 9443347720.0
+        },
+        "evaluation_status": "ok",
+        "stop_reason": null
+      },
+      "sector_evaluation": {
+        "sector_score": 5,
+        "sector_score_breakdown": {
+          "medium_term_trend": 0,
+          "momentum": 3,
+          "high_position": 1,
+          "volume_flow": 0,
+          "relative_rank": 1
+        },
+        "relative_rank": 9,
+        "sector_count": 18,
+        "sector": "食品",
+        "sector_base_date": "2026-11-17",
+        "data_quality_status": "ok",
+        "data_quality_flags": [],
+        "evaluation_status": "ok",
+        "sector17": "食品",
+        "normalized_sector": "食品",
+        "sector_rank_score": -2.575029459555247,
+        "semiconductor_override": false
+      },
+      "final_evaluation": {
+        "final_score": 65.0,
+        "max_score": 100,
+        "normalized_score": 65.0,
+        "final_rank": "C",
+        "uncapped_rank": "C",
+        "base_score": 65.0,
+        "multi_strategy_bonus": 0,
+        "score_breakdown": {
+          "strategy_fit": 35.0,
+          "sector": 5.0,
           "technical": 11.0,
           "market": 7.0,
           "volume_supply": 7.0
@@ -767,354 +944,173 @@
       }
     },
     {
-      "code": "2502",
-      "name": "アサヒグループホールディングス",
-      "base_date": "2026-11-13",
+      "code": "8001",
+      "name": "伊藤忠商事",
+      "base_date": "2026-11-17",
       "metrics": {
-        "code": "2502",
-        "name": "アサヒグループホールディングス",
+        "code": "8001",
+        "name": "伊藤忠商事",
         "market": "プライム（内国株式）",
-        "sector17": "食品",
-        "base_date": "2026-11-13",
-        "history_days": 402,
+        "sector17": "商社・卸売",
+        "base_date": "2026-11-17",
+        "history_days": 400,
         "high52_available": true,
-        "open": 1750.0,
-        "high": 1820.0,
-        "low": 1736.0,
-        "close": 1805.0,
-        "previous_open": 1703.5,
-        "previous_high": 1749.5,
-        "previous_low": 1703.5,
-        "previous_close": 1748.5,
-        "ma5": 1752.3,
-        "ma25": 1673.4,
-        "ma75": 1655.9666666666667,
-        "ma25_previous": 1664.28,
-        "ma25_slope": 9.120000000000118,
+        "open": 2376.5,
+        "high": 2377.5,
+        "low": 2327.0,
+        "close": 2334.0,
+        "previous_open": 2419.5,
+        "previous_high": 2430.5,
+        "previous_low": 2396.0,
+        "previous_close": 2396.0,
+        "ma5": 2385.8,
+        "ma25": 2320.6,
+        "ma75": 2203.7733333333335,
+        "ma25_previous": 2313.44,
+        "ma25_slope": 7.1599999999998545,
         "ma25_direction": "up",
-        "rci9": 63.33333333333333,
-        "rci27": 86.14163614163614,
-        "rsi14": 60.57287278854254,
-        "high52": 1835.5,
-        "high20": 1820.0,
-        "low20": 1594.5,
-        "ma5_gap_pct": 3.0074758888318343,
-        "ma25_gap_pct": 7.86422851679216,
-        "high52_gap_pct": -1.6616725687823464,
-        "high20_gap_pct": -0.8241758241758212,
+        "rci9": 28.333333333333332,
+        "rci27": 75.32051282051282,
+        "rsi14": 47.55725190839695,
+        "high52": 2435.5,
+        "high20": 2435.5,
+        "low20": 2184.0,
+        "ma5_gap_pct": -2.1711794785816196,
+        "ma25_gap_pct": 0.577436869775072,
+        "high52_gap_pct": -4.167522069390273,
+        "high20_gap_pct": -4.167522069390273,
         "touched_ma25": false,
         "recovered_ma25": false,
-        "avg_turnover_5d": 13212773890.0,
-        "volume": 10890500.0,
-        "previous_volume": 6291500.0,
-        "volume_ratio_prev": 1.730986251291425,
-        "volume_20d_ago": 7851200.0,
-        "volume_ratio_20d": 1.387112798043611
+        "avg_turnover_5d": 34386283480.0,
+        "volume": 14128100.0,
+        "previous_volume": 11700400.0,
+        "volume_ratio_prev": 1.2074886328672525,
+        "volume_20d_ago": 15946400.0,
+        "volume_ratio_20d": 0.8859742637836753
       },
       "strategy_hits": [
         {
-          "strategy": "initial_breakout_pullback",
-          "strategy_score_raw": 100,
-          "base_grade_raw": "S",
+          "strategy": "reacceleration_pullback",
+          "strategy_score_raw": 70,
+          "base_grade_raw": "B",
           "condition_flags": {
+            "touched_ma25": false,
+            "recovered_ma25": false,
             "ma25_up": true,
+            "near_ma25": true,
             "above_ma25": true,
-            "ma25_above_ma75": true,
-            "near_high20": true,
-            "near_high52": true,
+            "above_ma75": true,
             "volume_ok": true,
+            "momentum_ok": false,
             "overheated": false
           },
           "grade_reasons": [
-            "20日高値接近 -0.82%",
-            "52週高値接近 -1.66%",
             "25MA上向き",
+            "25MA近辺 0.58%",
             "終値25MA以上",
-            "25MA > 75MA",
-            "前日比出来高 1.73倍"
+            "終値75MA以上",
+            "前日比出来高 1.21倍"
           ],
           "strategy_fit_evaluation": {
-            "strategy": "initial_breakout_pullback",
-            "strategy_fit_score": 35.0,
-            "strategy_score_raw": 100.0,
-            "base_grade_raw": "S",
+            "strategy": "reacceleration_pullback",
+            "strategy_fit_score": 24.5,
+            "strategy_score_raw": 70.0,
+            "base_grade_raw": "B",
             "condition_flags": {
+              "touched_ma25": false,
+              "recovered_ma25": false,
               "ma25_up": true,
+              "near_ma25": true,
               "above_ma25": true,
-              "ma25_above_ma75": true,
-              "near_high20": true,
-              "near_high52": true,
+              "above_ma75": true,
               "volume_ok": true,
+              "momentum_ok": false,
               "overheated": false
             },
             "grade_reasons": [
-              "20日高値接近 -0.82%",
-              "52週高値接近 -1.66%",
+              "25MA上向き",
+              "25MA近辺 0.58%",
+              "終値25MA以上",
+              "終値75MA以上",
+              "前日比出来高 1.21倍"
+            ],
+            "evaluation_status": "ok",
+            "stop_reason": null
+          }
+        },
+        {
+          "strategy": "volume_initial_catch",
+          "strategy_score_raw": 70,
+          "base_grade_raw": "B",
+          "condition_flags": {
+            "price_up": false,
+            "ma25_up": true,
+            "above_ma25": true,
+            "above_ma75": true,
+            "volume_ok": true,
+            "strong_volume": false,
+            "overheated": false
+          },
+          "grade_reasons": [
+            "出来高増加",
+            "25MA上向き",
+            "終値25MA以上",
+            "終値75MA以上"
+          ],
+          "strategy_fit_evaluation": {
+            "strategy": "volume_initial_catch",
+            "strategy_fit_score": 24.5,
+            "strategy_score_raw": 70.0,
+            "base_grade_raw": "B",
+            "condition_flags": {
+              "price_up": false,
+              "ma25_up": true,
+              "above_ma25": true,
+              "above_ma75": true,
+              "volume_ok": true,
+              "strong_volume": false,
+              "overheated": false
+            },
+            "grade_reasons": [
+              "出来高増加",
               "25MA上向き",
               "終値25MA以上",
-              "25MA > 75MA",
-              "前日比出来高 1.73倍"
+              "終値75MA以上"
             ],
             "evaluation_status": "ok",
             "stop_reason": null
           }
         }
       ],
-      "hit_count": 1,
+      "hit_count": 2,
       "hit_strategies": [
-        "initial_breakout_pullback"
+        "reacceleration_pullback",
+        "volume_initial_catch"
       ],
-      "primary_strategy_raw": "initial_breakout_pullback",
-      "secondary_strategies_raw": [],
-      "primary_strategy": "initial_breakout_pullback",
-      "secondary_strategies": [],
+      "primary_strategy_raw": "reacceleration_pullback",
+      "secondary_strategies_raw": [
+        "volume_initial_catch"
+      ],
+      "primary_strategy": "reacceleration_pullback",
+      "secondary_strategies": [
+        "volume_initial_catch"
+      ],
       "strategy_fit_evaluation": {
         "evaluation_status": "ok",
         "stop_reason": null,
-        "strategy_fit_score": 35.0,
-        "primary_strategy": "initial_breakout_pullback",
-        "secondary_strategies": [],
-        "evaluated_strategy_count": 1,
-        "hit_count": 1
+        "strategy_fit_score": 24.5,
+        "primary_strategy": "reacceleration_pullback",
+        "secondary_strategies": [
+          "volume_initial_catch"
+        ],
+        "evaluated_strategy_count": 2,
+        "hit_count": 2
       },
       "technical_evaluation": {
-        "technical_score": 14,
-        "technical_score_breakdown": {
-          "medium_term_trend": 5,
-          "momentum": 5,
-          "high_position": 4
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "market_evaluation": {
-        "market_score": 7,
-        "market_condition": "neutral",
-        "market_internal_score": 5,
-        "market_internal": {
-          "above_ma25_ratio": 50.49,
-          "ma25_up_ratio": 48.46,
-          "advancing_ratio": 56.59,
-          "sample_count": 1525,
-          "valid_counts": {
-            "above_ma25": 1525,
-            "ma25_direction": 1525,
-            "advancing": 1525
-          },
-          "coverage": {
-            "above_ma25": 1.0,
-            "ma25_direction": 1.0,
-            "advancing": 1.0
-          },
-          "base_date": "2026-11-13"
-        },
-        "market_score_breakdown": {
-          "above_ma25": 2,
-          "ma25_up": 1,
-          "advancing": 2,
-          "internal": 5,
-          "futures": 2,
-          "cme_futures": 2
-        },
-        "futures": {
-          "cme": {
-            "usable": true,
-            "status": "ok",
-            "change_pct": -0.3994456672373081,
-            "as_of": "2026-11-14T07:00:00+09:00",
-            "evaluation_base_date": "2026-11-13",
-            "contract_month_verified": true
-          }
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "volume_supply_evaluation": {
-        "volume_supply_score": 8,
-        "supply_condition": "strong",
-        "volume_supply_breakdown": {
-          "volume_ratio_20d": 2,
-          "volume_ratio_prev": 3,
-          "avg_turnover_5d": 3
-        },
-        "volume_supply_metrics": {
-          "volume_ratio_20d": 1.387,
-          "volume_ratio_prev": 1.731,
-          "avg_turnover_5d": 13212773890.0
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "sector_evaluation": {
-        "sector_score": 3,
-        "sector_score_breakdown": {
-          "medium_term_trend": 0,
-          "momentum": 2,
-          "high_position": 1,
-          "volume_flow": 0,
-          "relative_rank": 0
-        },
-        "relative_rank": 15,
-        "sector_count": 18,
-        "sector": "食品",
-        "sector_base_date": "2026-11-13",
-        "data_quality_status": "ok",
-        "data_quality_flags": [],
-        "evaluation_status": "ok",
-        "sector17": "食品",
-        "normalized_sector": "食品",
-        "sector_rank_score": -3.9344265421292395,
-        "semiconductor_override": false
-      },
-      "final_evaluation": {
-        "final_score": 67.0,
-        "max_score": 100,
-        "normalized_score": 67.0,
-        "final_rank": "C",
-        "uncapped_rank": "C",
-        "base_score": 67.0,
-        "multi_strategy_bonus": 0,
-        "score_breakdown": {
-          "strategy_fit": 35.0,
-          "sector": 3.0,
-          "technical": 14.0,
-          "market": 7.0,
-          "volume_supply": 8.0
-        },
-        "safety": {
-          "data_quality_warning": false,
-          "strategy_negated": false,
-          "flags": []
-        },
-        "evaluation_status": "ok",
-        "publication_status": "official",
-        "coverage": 1.0,
-        "coverage_pct": 100,
-        "sector_excluded": false,
-        "sector_exclusion_reason": null,
-        "market_excluded": false,
-        "market_exclusion_reason": null,
-        "missing_components": [],
-        "missing_reasons": {},
-        "stop_reason": null
-      }
-    },
-    {
-      "code": "2269",
-      "name": "明治ホールディングス",
-      "base_date": "2026-11-13",
-      "metrics": {
-        "code": "2269",
-        "name": "明治ホールディングス",
-        "market": "プライム（内国株式）",
-        "sector17": "食品",
-        "base_date": "2026-11-13",
-        "history_days": 402,
-        "high52_available": true,
-        "open": 4450.0,
-        "high": 4455.0,
-        "low": 4352.0,
-        "close": 4428.0,
-        "previous_open": 4224.0,
-        "previous_high": 4308.0,
-        "previous_low": 4203.0,
-        "previous_close": 4281.0,
-        "ma5": 4312.6,
-        "ma25": 4303.64,
-        "ma75": 4237.653333333334,
-        "ma25_previous": 4293.16,
-        "ma25_slope": 10.480000000000473,
-        "ma25_direction": "up",
-        "rci9": 16.249999999999996,
-        "rci27": 31.898656898656895,
-        "rsi14": 50.78740157480315,
-        "high52": 4608.0,
-        "high20": 4534.0,
-        "low20": 4174.0,
-        "ma5_gap_pct": 2.675879979594664,
-        "ma25_gap_pct": 2.8896469035514016,
-        "high52_gap_pct": -3.90625,
-        "high20_gap_pct": -2.3378914865460954,
-        "touched_ma25": false,
-        "recovered_ma25": false,
-        "avg_turnover_5d": 5933380160.0,
-        "volume": 2083000.0,
-        "previous_volume": 1545800.0,
-        "volume_ratio_prev": 1.3475223185405616,
-        "volume_20d_ago": 1081600.0,
-        "volume_ratio_20d": 1.9258505917159763
-      },
-      "strategy_hits": [
-        {
-          "strategy": "initial_breakout_pullback",
-          "strategy_score_raw": 100,
-          "base_grade_raw": "S",
-          "condition_flags": {
-            "ma25_up": true,
-            "above_ma25": true,
-            "ma25_above_ma75": true,
-            "near_high20": true,
-            "near_high52": true,
-            "volume_ok": true,
-            "overheated": false
-          },
-          "grade_reasons": [
-            "20日高値接近 -2.34%",
-            "52週高値接近 -3.91%",
-            "25MA上向き",
-            "終値25MA以上",
-            "25MA > 75MA",
-            "前日比出来高 1.35倍"
-          ],
-          "strategy_fit_evaluation": {
-            "strategy": "initial_breakout_pullback",
-            "strategy_fit_score": 35.0,
-            "strategy_score_raw": 100.0,
-            "base_grade_raw": "S",
-            "condition_flags": {
-              "ma25_up": true,
-              "above_ma25": true,
-              "ma25_above_ma75": true,
-              "near_high20": true,
-              "near_high52": true,
-              "volume_ok": true,
-              "overheated": false
-            },
-            "grade_reasons": [
-              "20日高値接近 -2.34%",
-              "52週高値接近 -3.91%",
-              "25MA上向き",
-              "終値25MA以上",
-              "25MA > 75MA",
-              "前日比出来高 1.35倍"
-            ],
-            "evaluation_status": "ok",
-            "stop_reason": null
-          }
-        }
-      ],
-      "hit_count": 1,
-      "hit_strategies": [
-        "initial_breakout_pullback"
-      ],
-      "primary_strategy_raw": "initial_breakout_pullback",
-      "secondary_strategies_raw": [],
-      "primary_strategy": "initial_breakout_pullback",
-      "secondary_strategies": [],
-      "strategy_fit_evaluation": {
-        "evaluation_status": "ok",
-        "stop_reason": null,
-        "strategy_fit_score": 35.0,
-        "primary_strategy": "initial_breakout_pullback",
-        "secondary_strategies": [],
-        "evaluated_strategy_count": 1,
-        "hit_count": 1
-      },
-      "technical_evaluation": {
-        "technical_score": 13,
+        "technical_score": 12,
         "technical_score_breakdown": {
           "medium_term_trend": 6,
-          "momentum": 4,
+          "momentum": 3,
           "high_position": 3
         },
         "evaluation_status": "ok",
@@ -1123,11 +1119,11 @@
       "market_evaluation": {
         "market_score": 7,
         "market_condition": "neutral",
-        "market_internal_score": 5,
+        "market_internal_score": 2,
         "market_internal": {
-          "above_ma25_ratio": 50.49,
-          "ma25_up_ratio": 48.46,
-          "advancing_ratio": 56.59,
+          "above_ma25_ratio": 42.69,
+          "ma25_up_ratio": 43.87,
+          "advancing_ratio": 16.07,
           "sample_count": 1525,
           "valid_counts": {
             "above_ma25": 1525,
@@ -1139,23 +1135,23 @@
             "ma25_direction": 1.0,
             "advancing": 1.0
           },
-          "base_date": "2026-11-13"
+          "base_date": "2026-11-17"
         },
         "market_score_breakdown": {
-          "above_ma25": 2,
+          "above_ma25": 1,
           "ma25_up": 1,
-          "advancing": 2,
-          "internal": 5,
-          "futures": 2,
-          "cme_futures": 2
+          "advancing": 0,
+          "internal": 2,
+          "futures": 5,
+          "cme_futures": 5
         },
         "futures": {
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.3994456672373081,
-            "as_of": "2026-11-14T07:00:00+09:00",
-            "evaluation_base_date": "2026-11-13",
+            "change_pct": 0.7288135593220391,
+            "as_of": "2026-11-18T07:00:00+09:00",
+            "evaluation_base_date": "2026-11-17",
             "contract_month_verified": true
           }
         },
@@ -1163,269 +1159,34 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": 8,
-        "supply_condition": "strong",
+        "volume_supply_score": 5,
+        "supply_condition": "positive",
         "volume_supply_breakdown": {
-          "volume_ratio_20d": 3,
+          "volume_ratio_20d": 0,
           "volume_ratio_prev": 2,
           "avg_turnover_5d": 3
         },
         "volume_supply_metrics": {
-          "volume_ratio_20d": 1.926,
-          "volume_ratio_prev": 1.348,
-          "avg_turnover_5d": 5933380160.0
+          "volume_ratio_20d": 0.886,
+          "volume_ratio_prev": 1.207,
+          "avg_turnover_5d": 34386283480.0
         },
         "evaluation_status": "ok",
         "stop_reason": null
       },
       "sector_evaluation": {
-        "sector_score": 3,
+        "sector_score": 9,
         "sector_score_breakdown": {
-          "medium_term_trend": 0,
-          "momentum": 2,
-          "high_position": 1,
-          "volume_flow": 0,
-          "relative_rank": 0
-        },
-        "relative_rank": 15,
-        "sector_count": 18,
-        "sector": "食品",
-        "sector_base_date": "2026-11-13",
-        "data_quality_status": "ok",
-        "data_quality_flags": [],
-        "evaluation_status": "ok",
-        "sector17": "食品",
-        "normalized_sector": "食品",
-        "sector_rank_score": -3.9344265421292395,
-        "semiconductor_override": false
-      },
-      "final_evaluation": {
-        "final_score": 66.0,
-        "max_score": 100,
-        "normalized_score": 66.0,
-        "final_rank": "C",
-        "uncapped_rank": "C",
-        "base_score": 66.0,
-        "multi_strategy_bonus": 0,
-        "score_breakdown": {
-          "strategy_fit": 35.0,
-          "sector": 3.0,
-          "technical": 13.0,
-          "market": 7.0,
-          "volume_supply": 8.0
-        },
-        "safety": {
-          "data_quality_warning": false,
-          "strategy_negated": false,
-          "flags": []
-        },
-        "evaluation_status": "ok",
-        "publication_status": "official",
-        "coverage": 1.0,
-        "coverage_pct": 100,
-        "sector_excluded": false,
-        "sector_exclusion_reason": null,
-        "market_excluded": false,
-        "market_exclusion_reason": null,
-        "missing_components": [],
-        "missing_reasons": {},
-        "stop_reason": null
-      }
-    },
-    {
-      "code": "9962",
-      "name": "ミスミグループ本社",
-      "base_date": "2026-11-13",
-      "metrics": {
-        "code": "9962",
-        "name": "ミスミグループ本社",
-        "market": "プライム（内国株式）",
-        "sector17": "商社・卸売",
-        "base_date": "2026-11-13",
-        "history_days": 402,
-        "high52_available": true,
-        "open": 4226.0,
-        "high": 4253.0,
-        "low": 3946.0,
-        "close": 3966.0,
-        "previous_open": 4299.0,
-        "previous_high": 4349.0,
-        "previous_low": 4175.0,
-        "previous_close": 4182.0,
-        "ma5": 4104.8,
-        "ma25": 3924.36,
-        "ma75": 3799.826666666667,
-        "ma25_previous": 3931.2,
-        "ma25_slope": -6.839999999999691,
-        "ma25_direction": "down",
-        "rci9": 28.333333333333332,
-        "rci27": 0.30525030525030417,
-        "rsi14": 60.0,
-        "high52": 4349.0,
-        "high20": 4349.0,
-        "low20": 3477.0,
-        "ma5_gap_pct": -3.3814071331124573,
-        "ma25_gap_pct": 1.0610647341222412,
-        "high52_gap_pct": -8.806622212002758,
-        "high20_gap_pct": -8.806622212002758,
-        "touched_ma25": false,
-        "recovered_ma25": false,
-        "avg_turnover_5d": 7594820480.0,
-        "volume": 2095500.0,
-        "previous_volume": 1707500.0,
-        "volume_ratio_prev": 1.2272327964860907,
-        "volume_20d_ago": 1694600.0,
-        "volume_ratio_20d": 1.236575002950549
-      },
-      "strategy_hits": [
-        {
-          "strategy": "reacceleration_pullback",
-          "strategy_score_raw": 60,
-          "base_grade_raw": "C",
-          "condition_flags": {
-            "touched_ma25": false,
-            "recovered_ma25": false,
-            "ma25_up": false,
-            "near_ma25": true,
-            "above_ma25": true,
-            "above_ma75": true,
-            "volume_ok": true,
-            "momentum_ok": true,
-            "overheated": false
-          },
-          "grade_reasons": [
-            "25MA近辺 1.06%",
-            "終値25MA以上",
-            "終値75MA以上",
-            "前日比出来高 1.23倍",
-            "RSI 60.0"
-          ],
-          "strategy_fit_evaluation": {
-            "strategy": "reacceleration_pullback",
-            "strategy_fit_score": 21.0,
-            "strategy_score_raw": 60.0,
-            "base_grade_raw": "C",
-            "condition_flags": {
-              "touched_ma25": false,
-              "recovered_ma25": false,
-              "ma25_up": false,
-              "near_ma25": true,
-              "above_ma25": true,
-              "above_ma75": true,
-              "volume_ok": true,
-              "momentum_ok": true,
-              "overheated": false
-            },
-            "grade_reasons": [
-              "25MA近辺 1.06%",
-              "終値25MA以上",
-              "終値75MA以上",
-              "前日比出来高 1.23倍",
-              "RSI 60.0"
-            ],
-            "evaluation_status": "ok",
-            "stop_reason": null
-          }
-        }
-      ],
-      "hit_count": 1,
-      "hit_strategies": [
-        "reacceleration_pullback"
-      ],
-      "primary_strategy_raw": "reacceleration_pullback",
-      "secondary_strategies_raw": [],
-      "primary_strategy": "reacceleration_pullback",
-      "secondary_strategies": [],
-      "strategy_fit_evaluation": {
-        "evaluation_status": "ok",
-        "stop_reason": null,
-        "strategy_fit_score": 21.0,
-        "primary_strategy": "reacceleration_pullback",
-        "secondary_strategies": [],
-        "evaluated_strategy_count": 1,
-        "hit_count": 1
-      },
-      "technical_evaluation": {
-        "technical_score": 13,
-        "technical_score_breakdown": {
           "medium_term_trend": 6,
-          "momentum": 5,
-          "high_position": 2
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "market_evaluation": {
-        "market_score": 7,
-        "market_condition": "neutral",
-        "market_internal_score": 5,
-        "market_internal": {
-          "above_ma25_ratio": 50.49,
-          "ma25_up_ratio": 48.46,
-          "advancing_ratio": 56.59,
-          "sample_count": 1525,
-          "valid_counts": {
-            "above_ma25": 1525,
-            "ma25_direction": 1525,
-            "advancing": 1525
-          },
-          "coverage": {
-            "above_ma25": 1.0,
-            "ma25_direction": 1.0,
-            "advancing": 1.0
-          },
-          "base_date": "2026-11-13"
-        },
-        "market_score_breakdown": {
-          "above_ma25": 2,
-          "ma25_up": 1,
-          "advancing": 2,
-          "internal": 5,
-          "futures": 2,
-          "cme_futures": 2
-        },
-        "futures": {
-          "cme": {
-            "usable": true,
-            "status": "ok",
-            "change_pct": -0.3994456672373081,
-            "as_of": "2026-11-14T07:00:00+09:00",
-            "evaluation_base_date": "2026-11-13",
-            "contract_month_verified": true
-          }
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "volume_supply_evaluation": {
-        "volume_supply_score": 7,
-        "supply_condition": "strong",
-        "volume_supply_breakdown": {
-          "volume_ratio_20d": 2,
-          "volume_ratio_prev": 2,
-          "avg_turnover_5d": 3
-        },
-        "volume_supply_metrics": {
-          "volume_ratio_20d": 1.237,
-          "volume_ratio_prev": 1.227,
-          "avg_turnover_5d": 7594820480.0
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "sector_evaluation": {
-        "sector_score": 18,
-        "sector_score_breakdown": {
-          "medium_term_trend": 8,
-          "momentum": 6,
-          "high_position": 3,
+          "momentum": 1,
+          "high_position": 1,
           "volume_flow": 0,
           "relative_rank": 1
         },
-        "relative_rank": 7,
+        "relative_rank": 8,
         "sector_count": 18,
         "sector": "商社・卸売",
-        "sector_base_date": "2026-11-13",
+        "sector_base_date": "2026-11-17",
         "data_quality_status": "warning",
         "data_quality_flags": [
           "invalid_low52_extreme_outlier"
@@ -1433,23 +1194,23 @@
         "evaluation_status": "ok",
         "sector17": "商社・卸売",
         "normalized_sector": "商社・卸売",
-        "sector_rank_score": 7.696274368857146,
+        "sector_rank_score": 0.6301993403417283,
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 66.0,
+        "final_score": 58.5,
         "max_score": 100,
-        "normalized_score": 66.0,
-        "final_rank": "C",
-        "uncapped_rank": "C",
-        "base_score": 66.0,
-        "multi_strategy_bonus": 0,
+        "normalized_score": 58.5,
+        "final_rank": "D",
+        "uncapped_rank": "D",
+        "base_score": 57.5,
+        "multi_strategy_bonus": 1,
         "score_breakdown": {
-          "strategy_fit": 21.0,
-          "sector": 18.0,
-          "technical": 13.0,
+          "strategy_fit": 24.5,
+          "sector": 9.0,
+          "technical": 12.0,
           "market": 7.0,
-          "volume_supply": 7.0
+          "volume_supply": 5.0
         },
         "safety": {
           "data_quality_warning": true,
@@ -1472,95 +1233,93 @@
       }
     },
     {
-      "code": "7181",
-      "name": "かんぽ生命保険",
-      "base_date": "2026-11-13",
+      "code": "8697",
+      "name": "日本取引所グループ",
+      "base_date": "2026-11-17",
       "metrics": {
-        "code": "7181",
-        "name": "かんぽ生命保険",
+        "code": "8697",
+        "name": "日本取引所グループ",
         "market": "プライム（内国株式）",
         "sector17": "金融（除く銀行）",
-        "base_date": "2026-11-13",
-        "history_days": 402,
+        "base_date": "2026-11-17",
+        "history_days": 400,
         "high52_available": true,
-        "open": 1786.0,
-        "high": 1801.0,
-        "low": 1777.5,
-        "close": 1788.0,
-        "previous_open": 1768.5,
-        "previous_high": 1791.0,
-        "previous_low": 1761.5,
-        "previous_close": 1791.0,
-        "ma5": 1762.5,
-        "ma25": 1721.84,
-        "ma75": 1724.8266666666666,
-        "ma25_previous": 1718.5,
-        "ma25_slope": 3.339999999999918,
-        "ma25_direction": "up",
-        "rci9": 36.66666666666667,
-        "rci27": 58.97435897435898,
-        "rsi14": 59.719438877755515,
-        "high52": 1844.0,
-        "high20": 1822.0,
-        "low20": 1636.5,
-        "ma5_gap_pct": 1.4468085106382977,
-        "ma25_gap_pct": 3.8424011522557366,
-        "high52_gap_pct": -3.0368763557483747,
-        "high20_gap_pct": -1.866081229418226,
-        "touched_ma25": false,
+        "open": 2170.5,
+        "high": 2184.0,
+        "low": 2144.0,
+        "close": 2166.5,
+        "previous_open": 2228.0,
+        "previous_high": 2230.0,
+        "previous_low": 2195.0,
+        "previous_close": 2195.0,
+        "ma5": 2190.8,
+        "ma25": 2168.82,
+        "ma75": 2219.76,
+        "ma25_previous": 2172.96,
+        "ma25_slope": -4.139999999999873,
+        "ma25_direction": "down",
+        "rci9": 48.33333333333333,
+        "rci27": -52.2130647130647,
+        "rsi14": 58.73192436040044,
+        "high52": 2363.5,
+        "high20": 2260.0,
+        "low20": 2024.5,
+        "ma5_gap_pct": -1.109183859777263,
+        "ma25_gap_pct": -0.10697061074687042,
+        "high52_gap_pct": -8.335096255553209,
+        "high20_gap_pct": -4.137168141592918,
+        "touched_ma25": true,
         "recovered_ma25": false,
-        "avg_turnover_5d": 3702567100.0,
-        "volume": 2835500.0,
-        "previous_volume": 2293800.0,
-        "volume_ratio_prev": 1.2361583398727003,
-        "volume_20d_ago": 2529300.0,
-        "volume_ratio_20d": 1.1210611631676748
+        "avg_turnover_5d": 6491609800.0,
+        "volume": 3037200.0,
+        "previous_volume": 2138400.0,
+        "volume_ratio_prev": 1.420314253647587,
+        "volume_20d_ago": 4221200.0,
+        "volume_ratio_20d": 0.7195110395148299
       },
       "strategy_hits": [
         {
           "strategy": "reacceleration_pullback",
-          "strategy_score_raw": 65,
-          "base_grade_raw": "B",
+          "strategy_score_raw": 52,
+          "base_grade_raw": "C",
           "condition_flags": {
-            "touched_ma25": false,
+            "touched_ma25": true,
             "recovered_ma25": false,
-            "ma25_up": true,
-            "near_ma25": false,
-            "above_ma25": true,
-            "above_ma75": true,
+            "ma25_up": false,
+            "near_ma25": true,
+            "above_ma25": false,
+            "above_ma75": false,
             "volume_ok": true,
             "momentum_ok": true,
             "overheated": false
           },
           "grade_reasons": [
-            "25MA上向き",
-            "終値25MA以上",
-            "終値75MA以上",
-            "前日比出来高 1.24倍",
-            "RSI 59.7"
+            "25MAタッチ",
+            "25MA近辺 -0.11%",
+            "前日比出来高 1.42倍",
+            "RSI 58.7"
           ],
           "strategy_fit_evaluation": {
             "strategy": "reacceleration_pullback",
-            "strategy_fit_score": 22.8,
-            "strategy_score_raw": 65.0,
-            "base_grade_raw": "B",
+            "strategy_fit_score": 18.2,
+            "strategy_score_raw": 52.0,
+            "base_grade_raw": "C",
             "condition_flags": {
-              "touched_ma25": false,
+              "touched_ma25": true,
               "recovered_ma25": false,
-              "ma25_up": true,
-              "near_ma25": false,
-              "above_ma25": true,
-              "above_ma75": true,
+              "ma25_up": false,
+              "near_ma25": true,
+              "above_ma25": false,
+              "above_ma75": false,
               "volume_ok": true,
               "momentum_ok": true,
               "overheated": false
             },
             "grade_reasons": [
-              "25MA上向き",
-              "終値25MA以上",
-              "終値75MA以上",
-              "前日比出来高 1.24倍",
-              "RSI 59.7"
+              "25MAタッチ",
+              "25MA近辺 -0.11%",
+              "前日比出来高 1.42倍",
+              "RSI 58.7"
             ],
             "evaluation_status": "ok",
             "stop_reason": null
@@ -1578,18 +1337,18 @@
       "strategy_fit_evaluation": {
         "evaluation_status": "ok",
         "stop_reason": null,
-        "strategy_fit_score": 22.8,
+        "strategy_fit_score": 18.2,
         "primary_strategy": "reacceleration_pullback",
         "secondary_strategies": [],
         "evaluated_strategy_count": 1,
         "hit_count": 1
       },
       "technical_evaluation": {
-        "technical_score": 12,
+        "technical_score": 8,
         "technical_score_breakdown": {
-          "medium_term_trend": 4,
+          "medium_term_trend": 1,
           "momentum": 5,
-          "high_position": 3
+          "high_position": 2
         },
         "evaluation_status": "ok",
         "stop_reason": null
@@ -1597,11 +1356,11 @@
       "market_evaluation": {
         "market_score": 7,
         "market_condition": "neutral",
-        "market_internal_score": 5,
+        "market_internal_score": 2,
         "market_internal": {
-          "above_ma25_ratio": 50.49,
-          "ma25_up_ratio": 48.46,
-          "advancing_ratio": 56.59,
+          "above_ma25_ratio": 42.69,
+          "ma25_up_ratio": 43.87,
+          "advancing_ratio": 16.07,
           "sample_count": 1525,
           "valid_counts": {
             "above_ma25": 1525,
@@ -1613,23 +1372,23 @@
             "ma25_direction": 1.0,
             "advancing": 1.0
           },
-          "base_date": "2026-11-13"
+          "base_date": "2026-11-17"
         },
         "market_score_breakdown": {
-          "above_ma25": 2,
+          "above_ma25": 1,
           "ma25_up": 1,
-          "advancing": 2,
-          "internal": 5,
-          "futures": 2,
-          "cme_futures": 2
+          "advancing": 0,
+          "internal": 2,
+          "futures": 5,
+          "cme_futures": 5
         },
         "futures": {
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.3994456672373081,
-            "as_of": "2026-11-14T07:00:00+09:00",
-            "evaluation_base_date": "2026-11-13",
+            "change_pct": 0.7288135593220391,
+            "as_of": "2026-11-18T07:00:00+09:00",
+            "evaluation_base_date": "2026-11-17",
             "contract_month_verified": true
           }
         },
@@ -1640,51 +1399,51 @@
         "volume_supply_score": 5,
         "supply_condition": "positive",
         "volume_supply_breakdown": {
-          "volume_ratio_20d": 1,
+          "volume_ratio_20d": 0,
           "volume_ratio_prev": 2,
-          "avg_turnover_5d": 2
+          "avg_turnover_5d": 3
         },
         "volume_supply_metrics": {
-          "volume_ratio_20d": 1.121,
-          "volume_ratio_prev": 1.236,
-          "avg_turnover_5d": 3702567100.0
+          "volume_ratio_20d": 0.72,
+          "volume_ratio_prev": 1.42,
+          "avg_turnover_5d": 6491609800.0
         },
         "evaluation_status": "ok",
         "stop_reason": null
       },
       "sector_evaluation": {
-        "sector_score": 19,
+        "sector_score": 15,
         "sector_score_breakdown": {
           "medium_term_trend": 8,
-          "momentum": 6,
-          "high_position": 4,
+          "momentum": 2,
+          "high_position": 3,
           "volume_flow": 0,
-          "relative_rank": 1
+          "relative_rank": 2
         },
-        "relative_rank": 8,
+        "relative_rank": 6,
         "sector_count": 18,
         "sector": "金融（除く銀行）",
-        "sector_base_date": "2026-11-13",
+        "sector_base_date": "2026-11-17",
         "data_quality_status": "ok",
         "data_quality_flags": [],
         "evaluation_status": "ok",
         "sector17": "金融（除く銀行）",
         "normalized_sector": "金融（除く銀行）",
-        "sector_rank_score": 6.513285162985158,
+        "sector_rank_score": 2.7774716941605835,
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 65.8,
+        "final_score": 53.2,
         "max_score": 100,
-        "normalized_score": 65.8,
-        "final_rank": "C",
-        "uncapped_rank": "C",
-        "base_score": 65.8,
+        "normalized_score": 53.2,
+        "final_rank": "D",
+        "uncapped_rank": "D",
+        "base_score": 53.2,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
-          "strategy_fit": 22.8,
-          "sector": 19.0,
-          "technical": 12.0,
+          "strategy_fit": 18.2,
+          "sector": 15.0,
+          "technical": 8.0,
           "market": 7.0,
           "volume_supply": 5.0
         },
@@ -1707,95 +1466,85 @@
       }
     },
     {
-      "code": "8750",
-      "name": "第一ライフグループ",
-      "base_date": "2026-11-13",
+      "code": "9433",
+      "name": "ＫＤＤＩ",
+      "base_date": "2026-11-17",
       "metrics": {
-        "code": "8750",
-        "name": "第一ライフグループ",
+        "code": "9433",
+        "name": "ＫＤＤＩ",
         "market": "プライム（内国株式）",
-        "sector17": "金融（除く銀行）",
-        "base_date": "2026-11-13",
-        "history_days": 402,
+        "sector17": "情報通信・サービスその他",
+        "base_date": "2026-11-17",
+        "history_days": 400,
         "high52_available": true,
-        "open": 1872.0,
-        "high": 1882.5,
-        "low": 1796.0,
-        "close": 1811.0,
-        "previous_open": 1845.0,
-        "previous_high": 1861.0,
-        "previous_low": 1837.0,
-        "previous_close": 1861.0,
-        "ma5": 1814.6,
-        "ma25": 1810.2,
-        "ma75": 1847.0933333333332,
-        "ma25_previous": 1811.26,
-        "ma25_slope": -1.0599999999999454,
-        "ma25_direction": "down",
-        "rci9": 52.08333333333333,
-        "rci27": -19.444444444444443,
-        "rsi14": 49.183673469387756,
-        "high52": 1959.0,
-        "high20": 1882.5,
-        "low20": 1698.0,
-        "ma5_gap_pct": -0.19839082993496904,
-        "ma25_gap_pct": 0.04419401171140702,
-        "high52_gap_pct": -7.554874936191935,
-        "high20_gap_pct": -3.798140770252323,
-        "touched_ma25": true,
-        "recovered_ma25": true,
-        "avg_turnover_5d": 15857335910.0,
-        "volume": 10554600.0,
-        "previous_volume": 7656900.0,
-        "volume_ratio_prev": 1.3784429730047407,
-        "volume_20d_ago": 9074800.0,
-        "volume_ratio_20d": 1.1630669546436285
+        "open": 2971.5,
+        "high": 3016.0,
+        "low": 2954.5,
+        "close": 2954.5,
+        "previous_open": 2888.0,
+        "previous_high": 2967.0,
+        "previous_low": 2869.0,
+        "previous_close": 2958.5,
+        "ma5": 2880.6,
+        "ma25": 2869.78,
+        "ma75": 2918.9266666666667,
+        "ma25_previous": 2867.32,
+        "ma25_slope": 2.4600000000000364,
+        "ma25_direction": "up",
+        "rci9": 51.66666666666666,
+        "rci27": -28.83089133089134,
+        "rsi14": 58.373590982286636,
+        "high52": 3121.0,
+        "high20": 3016.0,
+        "low20": 2741.0,
+        "ma5_gap_pct": 2.565437756023048,
+        "ma25_gap_pct": 2.9521426729574918,
+        "high52_gap_pct": -5.334828580583151,
+        "high20_gap_pct": -2.0391246684350106,
+        "touched_ma25": false,
+        "recovered_ma25": false,
+        "avg_turnover_5d": 23590633090.0,
+        "volume": 10029600.0,
+        "previous_volume": 9142500.0,
+        "volume_ratio_prev": 1.0970303527481542,
+        "volume_20d_ago": 7960900.0,
+        "volume_ratio_20d": 1.259857553794169
       },
       "strategy_hits": [
         {
-          "strategy": "reacceleration_pullback",
-          "strategy_score_raw": 70,
-          "base_grade_raw": "B",
+          "strategy": "25MA_pullback",
+          "strategy_score_raw": 32,
+          "base_grade_raw": "E",
           "condition_flags": {
-            "touched_ma25": true,
-            "recovered_ma25": true,
-            "ma25_up": false,
+            "touched_ma25": false,
+            "recovered_ma25": false,
+            "ma25_up": true,
             "near_ma25": true,
-            "above_ma25": true,
-            "above_ma75": false,
-            "volume_ok": true,
-            "momentum_ok": true,
+            "strong_near_ma25": false,
+            "volume_expansion": false,
             "overheated": false
           },
           "grade_reasons": [
-            "25MA回復",
-            "25MA近辺 0.04%",
-            "終値25MA以上",
-            "前日比出来高 1.38倍",
-            "RSI 49.2"
+            "25MA上向き",
+            "25MA乖離許容 2.95%"
           ],
           "strategy_fit_evaluation": {
-            "strategy": "reacceleration_pullback",
-            "strategy_fit_score": 24.5,
-            "strategy_score_raw": 70.0,
-            "base_grade_raw": "B",
+            "strategy": "25MA_pullback",
+            "strategy_fit_score": 11.2,
+            "strategy_score_raw": 32.0,
+            "base_grade_raw": "E",
             "condition_flags": {
-              "touched_ma25": true,
-              "recovered_ma25": true,
-              "ma25_up": false,
+              "touched_ma25": false,
+              "recovered_ma25": false,
+              "ma25_up": true,
               "near_ma25": true,
-              "above_ma25": true,
-              "above_ma75": false,
-              "volume_ok": true,
-              "momentum_ok": true,
+              "strong_near_ma25": false,
+              "volume_expansion": false,
               "overheated": false
             },
             "grade_reasons": [
-              "25MA回復",
-              "25MA近辺 0.04%",
-              "終値25MA以上",
-              "前日比出来高 1.38倍",
-              "RSI 49.2"
+              "25MA上向き",
+              "25MA乖離許容 2.95%"
             ],
             "evaluation_status": "ok",
             "stop_reason": null
@@ -1804,27 +1553,27 @@
       ],
       "hit_count": 1,
       "hit_strategies": [
-        "reacceleration_pullback"
+        "25MA_pullback"
       ],
-      "primary_strategy_raw": "reacceleration_pullback",
+      "primary_strategy_raw": "25MA_pullback",
       "secondary_strategies_raw": [],
-      "primary_strategy": "reacceleration_pullback",
+      "primary_strategy": "25MA_pullback",
       "secondary_strategies": [],
       "strategy_fit_evaluation": {
         "evaluation_status": "ok",
         "stop_reason": null,
-        "strategy_fit_score": 24.5,
-        "primary_strategy": "reacceleration_pullback",
+        "strategy_fit_score": 11.2,
+        "primary_strategy": "25MA_pullback",
         "secondary_strategies": [],
         "evaluated_strategy_count": 1,
         "hit_count": 1
       },
       "technical_evaluation": {
-        "technical_score": 9,
+        "technical_score": 12,
         "technical_score_breakdown": {
           "medium_term_trend": 4,
-          "momentum": 3,
-          "high_position": 2
+          "momentum": 5,
+          "high_position": 3
         },
         "evaluation_status": "ok",
         "stop_reason": null
@@ -1832,11 +1581,11 @@
       "market_evaluation": {
         "market_score": 7,
         "market_condition": "neutral",
-        "market_internal_score": 5,
+        "market_internal_score": 2,
         "market_internal": {
-          "above_ma25_ratio": 50.49,
-          "ma25_up_ratio": 48.46,
-          "advancing_ratio": 56.59,
+          "above_ma25_ratio": 42.69,
+          "ma25_up_ratio": 43.87,
+          "advancing_ratio": 16.07,
           "sample_count": 1525,
           "valid_counts": {
             "above_ma25": 1525,
@@ -1848,23 +1597,23 @@
             "ma25_direction": 1.0,
             "advancing": 1.0
           },
-          "base_date": "2026-11-13"
+          "base_date": "2026-11-17"
         },
         "market_score_breakdown": {
-          "above_ma25": 2,
+          "above_ma25": 1,
           "ma25_up": 1,
-          "advancing": 2,
-          "internal": 5,
-          "futures": 2,
-          "cme_futures": 2
+          "advancing": 0,
+          "internal": 2,
+          "futures": 5,
+          "cme_futures": 5
         },
         "futures": {
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.3994456672373081,
-            "as_of": "2026-11-14T07:00:00+09:00",
-            "evaluation_base_date": "2026-11-13",
+            "change_pct": 0.7288135593220391,
+            "as_of": "2026-11-18T07:00:00+09:00",
+            "evaluation_base_date": "2026-11-17",
             "contract_month_verified": true
           }
         },
@@ -1875,51 +1624,51 @@
         "volume_supply_score": 6,
         "supply_condition": "positive",
         "volume_supply_breakdown": {
-          "volume_ratio_20d": 1,
-          "volume_ratio_prev": 2,
+          "volume_ratio_20d": 2,
+          "volume_ratio_prev": 1,
           "avg_turnover_5d": 3
         },
         "volume_supply_metrics": {
-          "volume_ratio_20d": 1.163,
-          "volume_ratio_prev": 1.378,
-          "avg_turnover_5d": 15857335910.0
+          "volume_ratio_20d": 1.26,
+          "volume_ratio_prev": 1.097,
+          "avg_turnover_5d": 23590633090.0
         },
         "evaluation_status": "ok",
         "stop_reason": null
       },
       "sector_evaluation": {
-        "sector_score": 19,
+        "sector_score": 6,
         "sector_score_breakdown": {
-          "medium_term_trend": 8,
-          "momentum": 6,
-          "high_position": 4,
+          "medium_term_trend": 2,
+          "momentum": 1,
+          "high_position": 3,
           "volume_flow": 0,
-          "relative_rank": 1
+          "relative_rank": 0
         },
-        "relative_rank": 8,
+        "relative_rank": 10,
         "sector_count": 18,
-        "sector": "金融（除く銀行）",
-        "sector_base_date": "2026-11-13",
+        "sector": "情報通信・サービスその他",
+        "sector_base_date": "2026-11-17",
         "data_quality_status": "ok",
         "data_quality_flags": [],
         "evaluation_status": "ok",
-        "sector17": "金融（除く銀行）",
-        "normalized_sector": "金融（除く銀行）",
-        "sector_rank_score": 6.513285162985158,
+        "sector17": "情報通信・サービスその他",
+        "normalized_sector": "情報通信・サービスその他",
+        "sector_rank_score": -2.88479298629842,
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 65.5,
+        "final_score": 42.2,
         "max_score": 100,
-        "normalized_score": 65.5,
-        "final_rank": "C",
-        "uncapped_rank": "C",
-        "base_score": 65.5,
+        "normalized_score": 42.2,
+        "final_rank": "E",
+        "uncapped_rank": "E",
+        "base_score": 42.2,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
-          "strategy_fit": 24.5,
-          "sector": 19.0,
-          "technical": 9.0,
+          "strategy_fit": 11.2,
+          "sector": 6.0,
+          "technical": 12.0,
           "market": 7.0,
           "volume_supply": 6.0
         },
@@ -1942,557 +1691,85 @@
       }
     },
     {
-      "code": "6592",
-      "name": "マブチモーター",
-      "base_date": "2026-11-13",
+      "code": "2432",
+      "name": "ディー・エヌ・エー",
+      "base_date": "2026-11-17",
       "metrics": {
-        "code": "6592",
-        "name": "マブチモーター",
+        "code": "2432",
+        "name": "ディー・エヌ・エー",
         "market": "プライム（内国株式）",
-        "sector17": "電機・精密",
-        "base_date": "2026-11-13",
-        "history_days": 402,
+        "sector17": "情報通信・サービスその他",
+        "base_date": "2026-11-17",
+        "history_days": 400,
         "high52_available": true,
-        "open": 1815.0,
-        "high": 1832.0,
-        "low": 1802.5,
-        "close": 1827.5,
-        "previous_open": 1796.0,
-        "previous_high": 1804.0,
-        "previous_low": 1783.0,
-        "previous_close": 1801.5,
-        "ma5": 1800.2,
-        "ma25": 1760.26,
-        "ma75": 1728.9266666666667,
-        "ma25_previous": 1758.58,
-        "ma25_slope": 1.6800000000000637,
+        "open": 2607.5,
+        "high": 2677.5,
+        "low": 2592.5,
+        "close": 2659.0,
+        "previous_open": 2609.5,
+        "previous_high": 2649.0,
+        "previous_low": 2592.0,
+        "previous_close": 2634.5,
+        "ma5": 2603.6,
+        "ma25": 2582.16,
+        "ma75": 2541.22,
+        "ma25_previous": 2576.08,
+        "ma25_slope": 6.079999999999927,
         "ma25_direction": "up",
-        "rci9": 66.66666666666667,
-        "rci27": 14.163614163614168,
-        "rsi14": 64.66666666666666,
-        "high52": 1907.0,
-        "high20": 1832.0,
-        "low20": 1658.0,
-        "ma5_gap_pct": 1.5164981668703392,
-        "ma25_gap_pct": 3.8198902434867676,
-        "high52_gap_pct": -4.168851599370738,
-        "high20_gap_pct": -0.2456331877729312,
+        "rci9": -39.99999999999999,
+        "rci27": 76.14468864468864,
+        "rsi14": 56.39771801140995,
+        "high52": 2885.0,
+        "high20": 2714.0,
+        "low20": 2478.5,
+        "ma5_gap_pct": 2.1278230142879107,
+        "ma25_gap_pct": 2.9758032035195336,
+        "high52_gap_pct": -7.833622183708844,
+        "high20_gap_pct": -2.026529108327191,
         "touched_ma25": false,
         "recovered_ma25": false,
-        "avg_turnover_5d": 1874958270.0,
-        "volume": 926700.0,
-        "previous_volume": 674600.0,
-        "volume_ratio_prev": 1.3737029350726357,
-        "volume_20d_ago": 1596100.0,
-        "volume_ratio_20d": 0.5806027191278742
+        "avg_turnover_5d": 3255620220.0,
+        "volume": 858100.0,
+        "previous_volume": 988100.0,
+        "volume_ratio_prev": 0.8684343689909928,
+        "volume_20d_ago": 702100.0,
+        "volume_ratio_20d": 1.2221905711437118
       },
       "strategy_hits": [
         {
-          "strategy": "initial_breakout_pullback",
-          "strategy_score_raw": 100,
-          "base_grade_raw": "S",
-          "condition_flags": {
-            "ma25_up": true,
-            "above_ma25": true,
-            "ma25_above_ma75": true,
-            "near_high20": true,
-            "near_high52": true,
-            "volume_ok": true,
-            "overheated": false
-          },
-          "grade_reasons": [
-            "20日高値接近 -0.25%",
-            "52週高値接近 -4.17%",
-            "25MA上向き",
-            "終値25MA以上",
-            "25MA > 75MA",
-            "前日比出来高 1.37倍"
-          ],
-          "strategy_fit_evaluation": {
-            "strategy": "initial_breakout_pullback",
-            "strategy_fit_score": 35.0,
-            "strategy_score_raw": 100.0,
-            "base_grade_raw": "S",
-            "condition_flags": {
-              "ma25_up": true,
-              "above_ma25": true,
-              "ma25_above_ma75": true,
-              "near_high20": true,
-              "near_high52": true,
-              "volume_ok": true,
-              "overheated": false
-            },
-            "grade_reasons": [
-              "20日高値接近 -0.25%",
-              "52週高値接近 -4.17%",
-              "25MA上向き",
-              "終値25MA以上",
-              "25MA > 75MA",
-              "前日比出来高 1.37倍"
-            ],
-            "evaluation_status": "ok",
-            "stop_reason": null
-          }
-        }
-      ],
-      "hit_count": 1,
-      "hit_strategies": [
-        "initial_breakout_pullback"
-      ],
-      "primary_strategy_raw": "initial_breakout_pullback",
-      "secondary_strategies_raw": [],
-      "primary_strategy": "initial_breakout_pullback",
-      "secondary_strategies": [],
-      "strategy_fit_evaluation": {
-        "evaluation_status": "ok",
-        "stop_reason": null,
-        "strategy_fit_score": 35.0,
-        "primary_strategy": "initial_breakout_pullback",
-        "secondary_strategies": [],
-        "evaluated_strategy_count": 1,
-        "hit_count": 1
-      },
-      "technical_evaluation": {
-        "technical_score": 14,
-        "technical_score_breakdown": {
-          "medium_term_trend": 6,
-          "momentum": 5,
-          "high_position": 3
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "market_evaluation": {
-        "market_score": 7,
-        "market_condition": "neutral",
-        "market_internal_score": 5,
-        "market_internal": {
-          "above_ma25_ratio": 50.49,
-          "ma25_up_ratio": 48.46,
-          "advancing_ratio": 56.59,
-          "sample_count": 1525,
-          "valid_counts": {
-            "above_ma25": 1525,
-            "ma25_direction": 1525,
-            "advancing": 1525
-          },
-          "coverage": {
-            "above_ma25": 1.0,
-            "ma25_direction": 1.0,
-            "advancing": 1.0
-          },
-          "base_date": "2026-11-13"
-        },
-        "market_score_breakdown": {
-          "above_ma25": 2,
-          "ma25_up": 1,
-          "advancing": 2,
-          "internal": 5,
-          "futures": 2,
-          "cme_futures": 2
-        },
-        "futures": {
-          "cme": {
-            "usable": true,
-            "status": "ok",
-            "change_pct": -0.3994456672373081,
-            "as_of": "2026-11-14T07:00:00+09:00",
-            "evaluation_base_date": "2026-11-13",
-            "contract_month_verified": true
-          }
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "volume_supply_evaluation": {
-        "volume_supply_score": 3,
-        "supply_condition": "neutral",
-        "volume_supply_breakdown": {
-          "volume_ratio_20d": 0,
-          "volume_ratio_prev": 2,
-          "avg_turnover_5d": 1
-        },
-        "volume_supply_metrics": {
-          "volume_ratio_20d": 0.581,
-          "volume_ratio_prev": 1.374,
-          "avg_turnover_5d": 1874958270.0
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "sector_evaluation": {
-        "sector_score": 2,
-        "sector_score_breakdown": {
-          "medium_term_trend": 0,
-          "momentum": 2,
-          "high_position": 0,
-          "volume_flow": 0,
-          "relative_rank": 0
-        },
-        "relative_rank": 16,
-        "sector_count": 18,
-        "sector": "電機・精密",
-        "sector_base_date": "2026-11-13",
-        "data_quality_status": "ok",
-        "data_quality_flags": [],
-        "evaluation_status": "ok",
-        "sector17": "電機・精密",
-        "normalized_sector": "電機・精密",
-        "sector_rank_score": -5.367903354274263,
-        "semiconductor_override": false
-      },
-      "final_evaluation": {
-        "final_score": 61.0,
-        "max_score": 100,
-        "normalized_score": 61.0,
-        "final_rank": "C",
-        "uncapped_rank": "C",
-        "base_score": 61.0,
-        "multi_strategy_bonus": 0,
-        "score_breakdown": {
-          "strategy_fit": 35.0,
-          "sector": 2.0,
-          "technical": 14.0,
-          "market": 7.0,
-          "volume_supply": 3.0
-        },
-        "safety": {
-          "data_quality_warning": false,
-          "strategy_negated": false,
-          "flags": []
-        },
-        "evaluation_status": "ok",
-        "publication_status": "official",
-        "coverage": 1.0,
-        "coverage_pct": 100,
-        "sector_excluded": false,
-        "sector_exclusion_reason": null,
-        "market_excluded": false,
-        "market_exclusion_reason": null,
-        "missing_components": [],
-        "missing_reasons": {},
-        "stop_reason": null
-      }
-    },
-    {
-      "code": "8697",
-      "name": "日本取引所グループ",
-      "base_date": "2026-11-13",
-      "metrics": {
-        "code": "8697",
-        "name": "日本取引所グループ",
-        "market": "プライム（内国株式）",
-        "sector17": "金融（除く銀行）",
-        "base_date": "2026-11-13",
-        "history_days": 402,
-        "high52_available": true,
-        "open": 2228.0,
-        "high": 2237.0,
-        "low": 2198.5,
-        "close": 2216.5,
-        "previous_open": 2171.0,
-        "previous_high": 2204.0,
-        "previous_low": 2168.0,
-        "previous_close": 2197.0,
-        "ma5": 2172.0,
-        "ma25": 2175.22,
-        "ma75": 2221.7466666666664,
-        "ma25_previous": 2177.8,
-        "ma25_slope": -2.580000000000382,
-        "ma25_direction": "down",
-        "rci9": 75.0,
-        "rci27": -67.35347985347985,
-        "rsi14": 49.81132075471698,
-        "high52": 2363.5,
-        "high20": 2260.0,
-        "low20": 2024.5,
-        "ma5_gap_pct": 2.048802946592998,
-        "ma25_gap_pct": 1.897739079265559,
-        "high52_gap_pct": -6.219589591707209,
-        "high20_gap_pct": -1.9247787610619516,
-        "touched_ma25": false,
-        "recovered_ma25": false,
-        "avg_turnover_5d": 6563219910.0,
-        "volume": 3360200.0,
-        "previous_volume": 2474300.0,
-        "volume_ratio_prev": 1.3580406579638686,
-        "volume_20d_ago": 4956300.0,
-        "volume_ratio_20d": 0.677965417751145
-      },
-      "strategy_hits": [
-        {
-          "strategy": "reacceleration_pullback",
-          "strategy_score_raw": 50,
-          "base_grade_raw": "C",
+          "strategy": "25MA_pullback",
+          "strategy_score_raw": 32,
+          "base_grade_raw": "E",
           "condition_flags": {
             "touched_ma25": false,
             "recovered_ma25": false,
-            "ma25_up": false,
+            "ma25_up": true,
             "near_ma25": true,
-            "above_ma25": true,
-            "above_ma75": false,
-            "volume_ok": true,
-            "momentum_ok": true,
+            "strong_near_ma25": false,
+            "volume_expansion": false,
             "overheated": false
           },
           "grade_reasons": [
-            "25MA近辺 1.90%",
-            "終値25MA以上",
-            "前日比出来高 1.36倍",
-            "RSI 49.8"
+            "25MA上向き",
+            "25MA乖離許容 2.98%"
           ],
           "strategy_fit_evaluation": {
-            "strategy": "reacceleration_pullback",
-            "strategy_fit_score": 17.5,
-            "strategy_score_raw": 50.0,
-            "base_grade_raw": "C",
+            "strategy": "25MA_pullback",
+            "strategy_fit_score": 11.2,
+            "strategy_score_raw": 32.0,
+            "base_grade_raw": "E",
             "condition_flags": {
               "touched_ma25": false,
               "recovered_ma25": false,
-              "ma25_up": false,
-              "near_ma25": true,
-              "above_ma25": true,
-              "above_ma75": false,
-              "volume_ok": true,
-              "momentum_ok": true,
-              "overheated": false
-            },
-            "grade_reasons": [
-              "25MA近辺 1.90%",
-              "終値25MA以上",
-              "前日比出来高 1.36倍",
-              "RSI 49.8"
-            ],
-            "evaluation_status": "ok",
-            "stop_reason": null
-          }
-        }
-      ],
-      "hit_count": 1,
-      "hit_strategies": [
-        "reacceleration_pullback"
-      ],
-      "primary_strategy_raw": "reacceleration_pullback",
-      "secondary_strategies_raw": [],
-      "primary_strategy": "reacceleration_pullback",
-      "secondary_strategies": [],
-      "strategy_fit_evaluation": {
-        "evaluation_status": "ok",
-        "stop_reason": null,
-        "strategy_fit_score": 17.5,
-        "primary_strategy": "reacceleration_pullback",
-        "secondary_strategies": [],
-        "evaluated_strategy_count": 1,
-        "hit_count": 1
-      },
-      "technical_evaluation": {
-        "technical_score": 10,
-        "technical_score_breakdown": {
-          "medium_term_trend": 4,
-          "momentum": 3,
-          "high_position": 3
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "market_evaluation": {
-        "market_score": 7,
-        "market_condition": "neutral",
-        "market_internal_score": 5,
-        "market_internal": {
-          "above_ma25_ratio": 50.49,
-          "ma25_up_ratio": 48.46,
-          "advancing_ratio": 56.59,
-          "sample_count": 1525,
-          "valid_counts": {
-            "above_ma25": 1525,
-            "ma25_direction": 1525,
-            "advancing": 1525
-          },
-          "coverage": {
-            "above_ma25": 1.0,
-            "ma25_direction": 1.0,
-            "advancing": 1.0
-          },
-          "base_date": "2026-11-13"
-        },
-        "market_score_breakdown": {
-          "above_ma25": 2,
-          "ma25_up": 1,
-          "advancing": 2,
-          "internal": 5,
-          "futures": 2,
-          "cme_futures": 2
-        },
-        "futures": {
-          "cme": {
-            "usable": true,
-            "status": "ok",
-            "change_pct": -0.3994456672373081,
-            "as_of": "2026-11-14T07:00:00+09:00",
-            "evaluation_base_date": "2026-11-13",
-            "contract_month_verified": true
-          }
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "volume_supply_evaluation": {
-        "volume_supply_score": 5,
-        "supply_condition": "positive",
-        "volume_supply_breakdown": {
-          "volume_ratio_20d": 0,
-          "volume_ratio_prev": 2,
-          "avg_turnover_5d": 3
-        },
-        "volume_supply_metrics": {
-          "volume_ratio_20d": 0.678,
-          "volume_ratio_prev": 1.358,
-          "avg_turnover_5d": 6563219910.0
-        },
-        "evaluation_status": "ok",
-        "stop_reason": null
-      },
-      "sector_evaluation": {
-        "sector_score": 19,
-        "sector_score_breakdown": {
-          "medium_term_trend": 8,
-          "momentum": 6,
-          "high_position": 4,
-          "volume_flow": 0,
-          "relative_rank": 1
-        },
-        "relative_rank": 8,
-        "sector_count": 18,
-        "sector": "金融（除く銀行）",
-        "sector_base_date": "2026-11-13",
-        "data_quality_status": "ok",
-        "data_quality_flags": [],
-        "evaluation_status": "ok",
-        "sector17": "金融（除く銀行）",
-        "normalized_sector": "金融（除く銀行）",
-        "sector_rank_score": 6.513285162985158,
-        "semiconductor_override": false
-      },
-      "final_evaluation": {
-        "final_score": 58.5,
-        "max_score": 100,
-        "normalized_score": 58.5,
-        "final_rank": "D",
-        "uncapped_rank": "D",
-        "base_score": 58.5,
-        "multi_strategy_bonus": 0,
-        "score_breakdown": {
-          "strategy_fit": 17.5,
-          "sector": 19.0,
-          "technical": 10.0,
-          "market": 7.0,
-          "volume_supply": 5.0
-        },
-        "safety": {
-          "data_quality_warning": false,
-          "strategy_negated": false,
-          "flags": []
-        },
-        "evaluation_status": "ok",
-        "publication_status": "official",
-        "coverage": 1.0,
-        "coverage_pct": 100,
-        "sector_excluded": false,
-        "sector_exclusion_reason": null,
-        "market_excluded": false,
-        "market_exclusion_reason": null,
-        "missing_components": [],
-        "missing_reasons": {},
-        "stop_reason": null
-      }
-    },
-    {
-      "code": "2810",
-      "name": "ハウス食品グループ本社",
-      "base_date": "2026-11-13",
-      "metrics": {
-        "code": "2810",
-        "name": "ハウス食品グループ本社",
-        "market": "プライム（内国株式）",
-        "sector17": "食品",
-        "base_date": "2026-11-13",
-        "history_days": 402,
-        "high52_available": true,
-        "open": 4483.0,
-        "high": 4519.0,
-        "low": 4414.0,
-        "close": 4505.0,
-        "previous_open": 4408.0,
-        "previous_high": 4447.0,
-        "previous_low": 4385.0,
-        "previous_close": 4445.0,
-        "ma5": 4449.4,
-        "ma25": 4399.96,
-        "ma75": 4056.4533333333334,
-        "ma25_previous": 4381.0,
-        "ma25_slope": 18.960000000000036,
-        "ma25_direction": "up",
-        "rci9": -63.33333333333333,
-        "rci27": 82.29548229548229,
-        "rsi14": 52.22312045270816,
-        "high52": 4760.0,
-        "high20": 4760.0,
-        "low20": 4261.0,
-        "ma5_gap_pct": 1.2496066885422819,
-        "ma25_gap_pct": 2.3872944299493604,
-        "high52_gap_pct": -5.35714285714286,
-        "high20_gap_pct": -5.35714285714286,
-        "touched_ma25": false,
-        "recovered_ma25": false,
-        "avg_turnover_5d": 1516794860.0,
-        "volume": 273100.0,
-        "previous_volume": 209600.0,
-        "volume_ratio_prev": 1.3029580152671756,
-        "volume_20d_ago": 373100.0,
-        "volume_ratio_20d": 0.7319753417314393
-      },
-      "strategy_hits": [
-        {
-          "strategy": "initial_breakout_pullback",
-          "strategy_score_raw": 80,
-          "base_grade_raw": "A",
-          "condition_flags": {
-            "ma25_up": true,
-            "above_ma25": true,
-            "ma25_above_ma75": true,
-            "near_high20": false,
-            "near_high52": true,
-            "volume_ok": true,
-            "overheated": false
-          },
-          "grade_reasons": [
-            "52週高値接近 -5.36%",
-            "25MA上向き",
-            "終値25MA以上",
-            "25MA > 75MA",
-            "前日比出来高 1.30倍"
-          ],
-          "strategy_fit_evaluation": {
-            "strategy": "initial_breakout_pullback",
-            "strategy_fit_score": 28.0,
-            "strategy_score_raw": 80.0,
-            "base_grade_raw": "A",
-            "condition_flags": {
               "ma25_up": true,
-              "above_ma25": true,
-              "ma25_above_ma75": true,
-              "near_high20": false,
-              "near_high52": true,
-              "volume_ok": true,
+              "near_ma25": true,
+              "strong_near_ma25": false,
+              "volume_expansion": false,
               "overheated": false
             },
             "grade_reasons": [
-              "52週高値接近 -5.36%",
               "25MA上向き",
-              "終値25MA以上",
-              "25MA > 75MA",
-              "前日比出来高 1.30倍"
+              "25MA乖離許容 2.98%"
             ],
             "evaluation_status": "ok",
             "stop_reason": null
@@ -2501,17 +1778,17 @@
       ],
       "hit_count": 1,
       "hit_strategies": [
-        "initial_breakout_pullback"
+        "25MA_pullback"
       ],
-      "primary_strategy_raw": "initial_breakout_pullback",
+      "primary_strategy_raw": "25MA_pullback",
       "secondary_strategies_raw": [],
-      "primary_strategy": "initial_breakout_pullback",
+      "primary_strategy": "25MA_pullback",
       "secondary_strategies": [],
       "strategy_fit_evaluation": {
         "evaluation_status": "ok",
         "stop_reason": null,
-        "strategy_fit_score": 28.0,
-        "primary_strategy": "initial_breakout_pullback",
+        "strategy_fit_score": 11.2,
+        "primary_strategy": "25MA_pullback",
         "secondary_strategies": [],
         "evaluated_strategy_count": 1,
         "hit_count": 1
@@ -2520,8 +1797,8 @@
         "technical_score": 13,
         "technical_score_breakdown": {
           "medium_term_trend": 6,
-          "momentum": 4,
-          "high_position": 3
+          "momentum": 5,
+          "high_position": 2
         },
         "evaluation_status": "ok",
         "stop_reason": null
@@ -2529,11 +1806,11 @@
       "market_evaluation": {
         "market_score": 7,
         "market_condition": "neutral",
-        "market_internal_score": 5,
+        "market_internal_score": 2,
         "market_internal": {
-          "above_ma25_ratio": 50.49,
-          "ma25_up_ratio": 48.46,
-          "advancing_ratio": 56.59,
+          "above_ma25_ratio": 42.69,
+          "ma25_up_ratio": 43.87,
+          "advancing_ratio": 16.07,
           "sample_count": 1525,
           "valid_counts": {
             "above_ma25": 1525,
@@ -2545,23 +1822,23 @@
             "ma25_direction": 1.0,
             "advancing": 1.0
           },
-          "base_date": "2026-11-13"
+          "base_date": "2026-11-17"
         },
         "market_score_breakdown": {
-          "above_ma25": 2,
+          "above_ma25": 1,
           "ma25_up": 1,
-          "advancing": 2,
-          "internal": 5,
-          "futures": 2,
-          "cme_futures": 2
+          "advancing": 0,
+          "internal": 2,
+          "futures": 5,
+          "cme_futures": 5
         },
         "futures": {
           "cme": {
             "usable": true,
             "status": "ok",
-            "change_pct": -0.3994456672373081,
-            "as_of": "2026-11-14T07:00:00+09:00",
-            "evaluation_base_date": "2026-11-13",
+            "change_pct": 0.7288135593220391,
+            "as_of": "2026-11-18T07:00:00+09:00",
+            "evaluation_base_date": "2026-11-17",
             "contract_month_verified": true
           }
         },
@@ -2569,56 +1846,56 @@
         "stop_reason": null
       },
       "volume_supply_evaluation": {
-        "volume_supply_score": 3,
+        "volume_supply_score": 4,
         "supply_condition": "neutral",
         "volume_supply_breakdown": {
-          "volume_ratio_20d": 0,
-          "volume_ratio_prev": 2,
-          "avg_turnover_5d": 1
+          "volume_ratio_20d": 2,
+          "volume_ratio_prev": 0,
+          "avg_turnover_5d": 2
         },
         "volume_supply_metrics": {
-          "volume_ratio_20d": 0.732,
-          "volume_ratio_prev": 1.303,
-          "avg_turnover_5d": 1516794860.0
+          "volume_ratio_20d": 1.222,
+          "volume_ratio_prev": 0.868,
+          "avg_turnover_5d": 3255620220.0
         },
         "evaluation_status": "ok",
         "stop_reason": null
       },
       "sector_evaluation": {
-        "sector_score": 3,
+        "sector_score": 6,
         "sector_score_breakdown": {
-          "medium_term_trend": 0,
-          "momentum": 2,
-          "high_position": 1,
+          "medium_term_trend": 2,
+          "momentum": 1,
+          "high_position": 3,
           "volume_flow": 0,
           "relative_rank": 0
         },
-        "relative_rank": 15,
+        "relative_rank": 10,
         "sector_count": 18,
-        "sector": "食品",
-        "sector_base_date": "2026-11-13",
+        "sector": "情報通信・サービスその他",
+        "sector_base_date": "2026-11-17",
         "data_quality_status": "ok",
         "data_quality_flags": [],
         "evaluation_status": "ok",
-        "sector17": "食品",
-        "normalized_sector": "食品",
-        "sector_rank_score": -3.9344265421292395,
+        "sector17": "情報通信・サービスその他",
+        "normalized_sector": "情報通信・サービスその他",
+        "sector_rank_score": -2.88479298629842,
         "semiconductor_override": false
       },
       "final_evaluation": {
-        "final_score": 54.0,
+        "final_score": 41.2,
         "max_score": 100,
-        "normalized_score": 54.0,
-        "final_rank": "D",
-        "uncapped_rank": "D",
-        "base_score": 54.0,
+        "normalized_score": 41.2,
+        "final_rank": "E",
+        "uncapped_rank": "E",
+        "base_score": 41.2,
         "multi_strategy_bonus": 0,
         "score_breakdown": {
-          "strategy_fit": 28.0,
-          "sector": 3.0,
+          "strategy_fit": 11.2,
+          "sector": 6.0,
           "technical": 13.0,
           "market": 7.0,
-          "volume_supply": 3.0
+          "volume_supply": 4.0
         },
         "safety": {
           "data_quality_warning": false,
