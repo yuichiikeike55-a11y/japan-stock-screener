@@ -137,7 +137,7 @@ jobs:
         id: market_update
         continue-on-error: true
         env:
-          BASE_DATE: ${{ steps.date.outputs.expected_latest_trading_date }}
+          BASE_DATE: ${{ steps.date.outputs.base_date }}
         run: python market_data_runner.py
 
       - name: Validate CME market data
